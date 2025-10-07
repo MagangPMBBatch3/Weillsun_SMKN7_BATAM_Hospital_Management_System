@@ -1,0 +1,90 @@
+enum Metode {
+    cash
+    transfer
+}
+
+type PembayaranPasien {
+    id: ID!
+    pasien_id: ID!
+    total_biaya: Float!
+    metode_bayar: Metode!
+    tanggal_bayar: Date!
+    biaya_lab: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+}
+
+input CreatePembayaranPasienInput {
+    pasien_id: ID!
+    total_biaya: Float!
+    metode_bayar: Metode!
+    tanggal_bayar: Date!
+    biaya_lab: Float!
+}
+input UpdatePembayaranPasienInput {
+    pasien_id: ID
+    tenaga_medis_id: ID
+    total_biaya: Float
+    metode_bayar: Metode
+    tanggal_bayar: Date
+    biaya_lab: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type PembayaranPasienPaginator {
+    data: [PembayaranPasien!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allPembayaranPasien: [PembayaranPasien!]!
+        @all(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+
+    allPembayaranPasienPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): PembayaranPasienPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@all"
+        )
+
+    PembayaranPasien(id: ID! @eq(key: "id")): PembayaranPasien
+        @find(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+}
+
+extend type Mutation {
+    createPembayaranPasien(
+        input: CreatePembayaranPasienInput! @spread
+    ): PembayaranPasien
+        @create(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+
+    updatePembayaranPasien(
+        id: ID! @eq(key: "id")
+        input: UpdatePembayaranPasienInput! @spread
+    ): PembayaranPasien
+        @update(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+
+    deletePembayaranPasien(id: ID! @eq(key: "id")): PembayaranPasien
+        @delete(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+
+    restorePembayaranPasien(id: ID!): PembayaranPasien
+        @field(
+            resolver: "App\\GraphQL\\PembayaranPasien\\Mutations\\PembayaranPasienMutation@restore"
+        )
+
+    forceDeletePembayaranPasien(id: ID!): PembayaranPasien
+        @field(
+            resolver: "App\\GraphQL\\PembayaranPasien\\Mutations\\PembayaranPasienMutation@forceDelete"
+        )
+}

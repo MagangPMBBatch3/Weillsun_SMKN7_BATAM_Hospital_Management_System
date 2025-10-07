@@ -1,0 +1,79 @@
+type Supplier {
+    id: ID!
+    nama_supplier: String!
+    alamat: String!
+    telepon: String!
+    email: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+}
+
+input CreateSupplierInput {
+    nama_supplier: String!
+    alamat: String!
+    telepon: String!
+    email: String!
+}
+input UpdateSupplierInput {
+    nama_supplier: String
+    alamat: String
+    telepon: String
+    email: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type SupplierPaginator {
+    data: [Supplier!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allSupplier: [Supplier!]!
+        @all(model: "App\\Models\\Supplier\\Supplier")
+
+    allSupplierPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): SupplierPaginator
+        @field(
+            resolver: "App\\GraphQL\\Supplier\\Queries\\SupplierQuery@all"
+        )
+
+    Supplier(id: ID! @eq(key: "id")): Supplier
+        @find(model: "App\\Models\\Supplier\\Supplier")
+}
+
+extend type Mutation {
+    createSupplier(
+        input: CreateSupplierInput! @spread
+    ): Supplier
+        @create(model: "App\\Models\\Supplier\\Supplier")
+
+    updateSupplier(
+        id: ID! @eq(key: "id")
+        input: UpdateSupplierInput! @spread
+    ): Supplier
+        @update(model: "App\\Models\\Supplier\\Supplier")
+
+    deleteSupplier(id: ID! @eq(key: "id")): Supplier
+        @delete(model: "App\\Models\\Supplier\\Supplier")
+
+    restoreSupplier(id: ID!): Supplier
+        @field(
+            resolver: "App\\GraphQL\\Supplier\\Mutations\\SupplierMutation@restore"
+        )
+
+    forceDeleteSupplier(id: ID!): Supplier
+        @field(
+            resolver: "App\\GraphQL\\Supplier\\Mutations\\SupplierMutation@forceDelete"
+        )
+}

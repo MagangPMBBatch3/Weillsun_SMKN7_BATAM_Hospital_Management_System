@@ -1,0 +1,79 @@
+type Kunjungan {
+    id: ID!
+    pasien_id: ID!
+    poli_id: ID!
+    tanggal_kunjungan: Date!
+    keluhan: String
+    biaya_konsultasi: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+    poli: Poli @belongsTo
+}
+
+input CreateKunjunganInput {
+    pasien_id: ID!
+    poli_id: ID!
+    tanggal_kunjungan: Date!
+    keluhan: String!
+    biaya_konsultasi: Float!
+}
+input UpdateKunjunganInput {
+    pasien_id: ID
+    poli_id: ID
+    tanggal_kunjungan: Date
+    keluhan: String
+    biaya_konsultasi: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type KunjunganPaginator {
+    data: [Kunjungan!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allKunjungan: [Kunjungan!]! @all(model: "App\\Models\\Kunjungan\\Kunjungan")
+
+    allKunjunganPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): KunjunganPaginator
+        @field(resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@all")
+
+    Kunjungan(id: ID! @eq(key: "id")): Kunjungan
+        @find(model: "App\\Models\\Kunjungan\\Kunjungan")
+}
+
+extend type Mutation {
+    createKunjungan(input: CreateKunjunganInput! @spread): Kunjungan
+        @create(model: "App\\Models\\Kunjungan\\Kunjungan")
+
+    updateKunjungan(
+        id: ID! @eq(key: "id")
+        input: UpdateKunjunganInput! @spread
+    ): Kunjungan @update(model: "App\\Models\\Kunjungan\\Kunjungan")
+
+    deleteKunjungan(id: ID! @eq(key: "id")): Kunjungan
+        @delete(model: "App\\Models\\Kunjungan\\Kunjungan")
+
+    restoreKunjungan(id: ID!): Kunjungan
+        @field(
+            resolver: "App\\GraphQL\\Kunjungan\\Mutations\\KunjunganMutation@restore"
+        )
+
+    forceDeleteKunjungan(id: ID!): Kunjungan
+        @field(
+            resolver: "App\\GraphQL\\Kunjungan\\Mutations\\KunjunganMutation@forceDelete"
+        )
+}

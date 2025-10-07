@@ -1,0 +1,79 @@
+enum Gender{
+    L
+    P
+}
+
+type Pasien {
+    id: ID!
+    nama: String!
+    tanggal_lahir: Date!
+    jenis_kelamin: Gender!
+    alamat: String!
+    telepon: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+}
+
+input CreatePasienInput {
+    nama: String!
+    tanggal_lahir: Date!
+    jenis_kelamin: Gender!
+    alamat: String!
+    telepon: String!
+}
+input UpdatePasienInput {
+    nama: String
+    tanggal_lahir: Date
+    jenis_kelamin: Gender
+    alamat: String
+    telepon: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type PasienPaginator {
+    data: [Pasien!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allPasien: [Pasien!]!
+    @all(model: "App\\Models\\Pasien\\Pasien")
+
+    allPasienPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): PasienPaginator
+     @field(resolver: "App\\GraphQL\\Pasien\\Queries\\PasienQuery@all")
+
+     pasien(id: ID! @eq(key: "id")): Pasien
+     @find(model: "App\\Models\\Pasien\\Pasien")
+}
+
+extend type Mutation {
+    createPasien(input: CreatePasienInput! @spread): Pasien
+    @create(model: "App\\Models\\Pasien\\Pasien")
+
+    updatePasien(
+        id: ID! @eq(key: "id"),
+        input: UpdatePasienInput! @spread
+        ): Pasien
+    @update(model: "App\\Models\\Pasien\\Pasien")
+
+    deletePasien(id: ID! @eq(key: "id")): Pasien
+    @delete(model: "App\\Models\\Pasien\\Pasien")
+
+    restorePasien(id: ID!): Pasien
+    @field(resolver: "App\\GraphQL\\Pasien\\Mutations\\PasienMutation@restore")
+
+    forceDeletePasien(id: ID!): Pasien
+    @field(resolver: "App\\GraphQL\\Pasien\\Mutations\\PasienMutation@forceDelete")
+}

@@ -1,0 +1,76 @@
+type TenagaMedis {
+    id: ID!
+    profile_id: ID!
+    spesialisasi: String!
+    no_str: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+}
+
+input CreateTenagaMedisInput {
+    profile_id: ID!
+    spesialisasi: String!
+    no_str: String!
+}
+input UpdateTenagaMedisInput {
+    profile_id: ID
+    spesialisasi: String
+    no_str: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type TenagaMedisPaginator {
+    data: [TenagaMedis!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allTenagaMedis: [TenagaMedis!]!
+        @all(model: "App\\Models\\TenagaMedis\\TenagaMedis")
+
+    allTenagaMedisPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): TenagaMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\TenagaMedis\\Queries\\TenagaMedisQuery@all"
+        )
+
+    TenagaMedis(id: ID! @eq(key: "id")): TenagaMedis
+        @find(model: "App\\Models\\TenagaMedis\\TenagaMedis")
+}
+
+extend type Mutation {
+    createTenagaMedis(
+        input: CreateTenagaMedisInput! @spread
+    ): TenagaMedis
+        @create(model: "App\\Models\\TenagaMedis\\TenagaMedis")
+
+    updateTenagaMedis(
+        id: ID! @eq(key: "id")
+        input: UpdateTenagaMedisInput! @spread
+    ): TenagaMedis
+        @update(model: "App\\Models\\TenagaMedis\\TenagaMedis")
+
+    deleteTenagaMedis(id: ID! @eq(key: "id")): TenagaMedis
+        @delete(model: "App\\Models\\TenagaMedis\\TenagaMedis")
+
+    restoreTenagaMedis(id: ID!): TenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\TenagaMedis\\Mutations\\TenagaMedisMutation@restore"
+        )
+
+    forceDeleteTenagaMedis(id: ID!): TenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\TenagaMedis\\Mutations\\TenagaMedisMutation@forceDelete"
+        )
+}

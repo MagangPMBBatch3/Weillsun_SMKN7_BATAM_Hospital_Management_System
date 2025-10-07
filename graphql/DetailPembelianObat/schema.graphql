@@ -1,0 +1,88 @@
+type DetailPembelianObat {
+    id: ID!
+    pembelian_id: ID!
+    obat_id: Tipe!
+    harga_beli: ID!
+    jumlah: Int!
+    harga_satuan: Float!
+    subtotal: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pembelianObat: PembelianObat @belongsTo
+    obat: Obat @belongsTo
+}
+
+input CreateDetailPembelianObatInput {
+    pembelian_id: ID!
+    obat_id: Tipe!
+    jumlah: Int!
+    harga_satuan: Float!
+    harga_beli: ID!
+    subtotal: Float!
+}
+input UpdateDetailPembelianObatInput {
+    pembelian_id: ID!
+    obat_id: Tipe
+    jumlah: Int
+    harga_satuan: Float
+    harga_beli: ID
+    subtotal: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type DetailPembelianObatPaginator {
+    data: [DetailPembelianObat!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allDetailPembelianObat: [DetailPembelianObat!]!
+        @all(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
+
+    allDetailPembelianObatPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): DetailPembelianObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\DetailPembelianObat\\Queries\\DetailPembelianObatQuery@all"
+        )
+
+    DetailPembelianObat(id: ID! @eq(key: "id")): DetailPembelianObat
+        @find(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
+}
+
+extend type Mutation {
+    createDetailPembelianObat(
+        input: CreateDetailPembelianObatInput! @spread
+    ): DetailPembelianObat
+        @create(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
+
+    updateDetailPembelianObat(
+        id: ID! @eq(key: "id")
+        input: UpdateDetailPembelianObatInput! @spread
+    ): DetailPembelianObat
+        @update(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
+
+    deleteDetailPembelianObat(id: ID! @eq(key: "id")): DetailPembelianObat
+        @delete(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
+
+    restoreDetailPembelianObat(id: ID!): DetailPembelianObat
+        @field(
+            resolver: "App\\GraphQL\\DetailPembelianObat\\Mutations\\DetailPembelianObatMutation@restore"
+        )
+
+    forceDeleteDetailPembelianObat(id: ID!): DetailPembelianObat
+        @field(
+            resolver: "App\\GraphQL\\DetailPembelianObat\\Mutations\\DetailPembelianObatMutation@forceDelete"
+        )
+}

@@ -1,0 +1,25 @@
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+#import JadwalTenagaMedis/schema.graphql
+#import Kunjungan/schema.graphql
+#import LabPemeriksaan/schema.graphql
+#import LogAktivitas/schema.graphql
+#import Obat/schema.graphql
+#import Pasien/schema.graphql
+#import PembayaranPasien/schema.graphql
+#import Poli/schema.graphql
+#import Radiologi/schema.graphql
+#import RawatInap/schema.graphql
+#import RekamMedis/schema.graphql
+#import ResepObat/schema.graphql
+#import Ruangan/schema.graphql
+#import TenagaMedis/schema.graphql
+#import UsersProfile/schema.graphql
+#import User/schema.graphql
+#import KunjunganUlang/schema.graphql 
+#import DetailPembayaranPasien/schema.graphql
+#import Supplier/schema.graphql
+#import PembelianObat/schema.graphql
+#import DetailPembelianObat/schema.graphql
+#import PembayaranSupplier/schema.graphql

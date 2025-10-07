@@ -1,0 +1,70 @@
+type Ruangan {
+    id: ID!
+    nama_ruangan: String!
+    kapasitas: Int!
+    tarif_per_hari: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+}
+
+input CreateRuanganInput {
+    nama_ruangan: String!
+    kapasitas: Int!
+    tarif_per_hari: Float!
+}
+input UpdateRuanganInput {
+    nama_ruangan: String
+    kapasitas: Int
+    tarif_per_hari: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type RuanganPaginator {
+    data: [Ruangan!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allRuangan: [Ruangan!]! @all(model: "App\\Models\\Ruangan\\Ruangan")
+
+    allRuanganPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): RuanganPaginator
+        @field(resolver: "App\\GraphQL\\Ruangan\\Queries\\RuanganQuery@all")
+
+    Ruangan(id: ID! @eq(key: "id")): Ruangan
+        @find(model: "App\\Models\\Ruangan\\Ruangan")
+}
+
+extend type Mutation {
+    createRuangan(input: CreateRuanganInput! @spread): Ruangan
+        @create(model: "App\\Models\\Ruangan\\Ruangan")
+
+    updateRuangan(
+        id: ID! @eq(key: "id")
+        input: UpdateRuanganInput! @spread
+    ): Ruangan @update(model: "App\\Models\\Ruangan\\Ruangan")
+
+    deleteRuangan(id: ID! @eq(key: "id")): Ruangan
+        @delete(model: "App\\Models\\Ruangan\\Ruangan")
+
+    restoreRuangan(id: ID!): Ruangan
+        @field(
+            resolver: "App\\GraphQL\\Ruangan\\Mutations\\RuanganMutation@restore"
+        )
+
+    forceDeleteRuangan(id: ID!): Ruangan
+        @field(
+            resolver: "App\\GraphQL\\Ruangan\\Mutations\\RuanganMutation@forceDelete"
+        )
+}

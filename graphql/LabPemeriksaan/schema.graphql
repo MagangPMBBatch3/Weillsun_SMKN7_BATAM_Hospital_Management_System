@@ -1,0 +1,88 @@
+type LabPemeriksaan {
+    id: ID!
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    jenis_pemeriksaan: String!
+    hasil: String
+    tanggal: Date!
+    biaya_lab: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+    tenagaMedis: TenagaMedis @belongsTo
+}
+
+input CreateLabPemeriksaanInput {
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    jenis_pemeriksaan: String!
+    hasil: String!
+    tanggal: Date!
+    biaya_lab: Float!
+}
+input UpdateLabPemeriksaanInput {
+    pasien_id: ID
+    tenaga_medis_id: ID
+    jenis_pemeriksaan: String
+    hasil: String
+    tanggal: Date
+    biaya_lab: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type LabPemeriksaanPaginator {
+    data: [LabPemeriksaan!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allLabPemeriksaan: [LabPemeriksaan!]!
+        @all(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
+
+    allLabPemeriksaanPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): LabPemeriksaanPaginator
+        @field(
+            resolver: "App\\GraphQL\\LabPemeriksaan\\Queries\\LabPemeriksaanQuery@all"
+        )
+
+    LabPemeriksaan(id: ID! @eq(key: "id")): LabPemeriksaan
+        @find(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
+}
+
+extend type Mutation {
+    createLabPemeriksaan(
+        input: CreateLabPemeriksaanInput! @spread
+    ): LabPemeriksaan
+        @create(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
+
+    updateLabPemeriksaan(
+        id: ID! @eq(key: "id")
+        input: UpdateLabPemeriksaanInput! @spread
+    ): LabPemeriksaan
+        @update(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
+
+    deleteLabPemeriksaan(id: ID! @eq(key: "id")): LabPemeriksaan
+        @delete(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
+
+    restoreLabPemeriksaan(id: ID!): LabPemeriksaan
+        @field(
+            resolver: "App\\GraphQL\\LabPemeriksaan\\Mutations\\LabPemeriksaanMutation@restore"
+        )
+
+    forceDeleteLabPemeriksaan(id: ID!): LabPemeriksaan
+        @field(
+            resolver: "App\\GraphQL\\LabPemeriksaan\\Mutations\\LabPemeriksaanMutation@forceDelete"
+        )
+}

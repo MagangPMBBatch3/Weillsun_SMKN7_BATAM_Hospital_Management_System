@@ -1,0 +1,83 @@
+type Obat {
+    id: ID!
+    nama_obat: String!
+    jenis_obat: String!
+    stok: Int!
+    harga: Float
+    markup_persen: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+}
+
+input CreateObatInput {
+    nama_obat: String!
+    jenis_obat: String!
+    stok: Int!
+    harga: Float!
+    markup_persen: Float!
+}
+input UpdateObatInput {
+    nama_obat: String
+    jenis_obat: String
+    stok: Int
+    harga: Float
+    markup_persen: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type ObatPaginator {
+    data: [Obat!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allObat: [Obat!]!
+        @all(model: "App\\Models\\Obat\\Obat")
+
+    allObatPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): ObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\Obat\\Queries\\ObatQuery@all"
+        )
+
+    Obat(id: ID! @eq(key: "id")): Obat
+        @find(model: "App\\Models\\Obat\\Obat")
+}
+
+extend type Mutation {
+    createObat(
+        input: CreateObatInput! @spread
+    ): Obat
+        @create(model: "App\\Models\\Obat\\Obat")
+
+    updateObat(
+        id: ID! @eq(key: "id")
+        input: UpdateObatInput! @spread
+    ): Obat
+        @update(model: "App\\Models\\Obat\\Obat")
+
+    deleteObat(id: ID! @eq(key: "id")): Obat
+        @delete(model: "App\\Models\\Obat\\Obat")
+
+    restoreObat(id: ID!): Obat
+        @field(
+            resolver: "App\\GraphQL\\Obat\\Mutations\\ObatMutation@restore"
+        )
+
+    forceDeleteObat(id: ID!): Obat
+        @field(
+            resolver: "App\\GraphQL\\Obat\\Mutations\\ObatMutation@forceDelete"
+        )
+}

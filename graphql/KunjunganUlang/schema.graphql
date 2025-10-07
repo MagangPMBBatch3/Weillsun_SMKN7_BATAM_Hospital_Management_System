@@ -1,0 +1,81 @@
+type KunjunganUlang {
+    id: ID!
+    kunjungan_id: ID!
+    tanggal_ulang: Date!
+    jam_ulang: String!
+    catatan: String
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    kunjungan: Kunjungan @belongsTo
+}
+
+input CreateKunjunganUlangInput {
+    kunjungan_id: ID!
+    tanggal_ulang: Date!
+    jam_ulang: String!
+    catatan: String!
+}
+input UpdateKunjunganUlangInput {
+    kunjungan_id: ID
+    tanggal_ulang: Date
+    jam_ulang: String
+    catatan: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type KunjunganUlangPaginator {
+    data: [KunjunganUlang!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allKunjunganUlang: [KunjunganUlang!]!
+        @all(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
+
+    allKunjunganUlangPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): KunjunganUlangPaginator
+        @field(
+            resolver: "App\\GraphQL\\KunjunganUlang\\Queries\\KunjunganUlangQuery@all"
+        )
+
+    KunjunganUlang(id: ID! @eq(key: "id")): KunjunganUlang
+        @find(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
+}
+
+extend type Mutation {
+    createKunjunganUlang(
+        input: CreateKunjunganUlangInput! @spread
+    ): KunjunganUlang
+        @create(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
+
+    updateKunjunganUlang(
+        id: ID! @eq(key: "id")
+        input: UpdateKunjunganUlangInput! @spread
+    ): KunjunganUlang
+        @update(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
+
+    deleteKunjunganUlang(id: ID! @eq(key: "id")): KunjunganUlang
+        @delete(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
+
+    restoreKunjunganUlang(id: ID!): KunjunganUlang
+        @field(
+            resolver: "App\\GraphQL\\KunjunganUlang\\Mutations\\KunjunganUlangMutation@restore"
+        )
+
+    forceDeleteKunjunganUlang(id: ID!): KunjunganUlang
+        @field(
+            resolver: "App\\GraphQL\\KunjunganUlang\\Mutations\\KunjunganUlangMutation@forceDelete"
+        )
+}

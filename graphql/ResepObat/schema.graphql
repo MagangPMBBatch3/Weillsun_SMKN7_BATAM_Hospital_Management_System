@@ -1,0 +1,87 @@
+type ResepObat {
+    id: ID!
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    obat_id: ID!
+    jumlah: Int!
+    aturan_pakai: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+    tenagaMedis: TenagaMedis @belongsTo
+    obat: Obat @belongsTo
+}
+
+input CreateResepObatInput {
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    obat_id: ID!
+    jumlah: Int!
+    aturan_pakai: String!
+}
+input UpdateResepObatInput {
+    pasien_id: ID
+    tenaga_medis_id: ID
+    tenaga_medis_id: ID
+    obat_id: ID
+    jumlah: Int
+    aturan_pakai: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type ResepObatPaginator {
+    data: [ResepObat!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allResepObat: [ResepObat!]!
+        @all(model: "App\\Models\\ResepObat\\ResepObat")
+
+    allResepObatPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): ResepObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\ResepObat\\Queries\\ResepObatQuery@all"
+        )
+
+    ResepObat(id: ID! @eq(key: "id")): ResepObat
+        @find(model: "App\\Models\\ResepObat\\ResepObat")
+}
+
+extend type Mutation {
+    createResepObat(
+        input: CreateResepObatInput! @spread
+    ): ResepObat
+        @create(model: "App\\Models\\ResepObat\\ResepObat")
+
+    updateResepObat(
+        id: ID! @eq(key: "id")
+        input: UpdateResepObatInput! @spread
+    ): ResepObat
+        @update(model: "App\\Models\\ResepObat\\ResepObat")
+
+    deleteResepObat(id: ID! @eq(key: "id")): ResepObat
+        @delete(model: "App\\Models\\ResepObat\\ResepObat")
+
+    restoreResepObat(id: ID!): ResepObat
+        @field(
+            resolver: "App\\GraphQL\\ResepObat\\Mutations\\ResepObatMutation@restore"
+        )
+
+    forceDeleteResepObat(id: ID!): ResepObat
+        @field(
+            resolver: "App\\GraphQL\\ResepObat\\Mutations\\ResepObatMutation@forceDelete"
+        )
+}

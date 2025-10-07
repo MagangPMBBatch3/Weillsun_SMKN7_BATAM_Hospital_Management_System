@@ -1,0 +1,108 @@
+enum Tipe {
+    konsultasi
+    obat
+    lab
+    radiologi
+    rawat_inap
+    lainnya
+}
+
+type DetailPembayaranPasien {
+    id: ID!
+    pembayaran_id: ID!
+    tipe_biaya: Tipe!
+    referensi_id: ID!
+    jumlah: Int!
+    harga_satuan: Float!
+    subtotal: Float!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pembayaranPasien: PembayaranPasien @belongsTo
+}
+
+input CreateDetailPembayaranPasienInput {
+    pembayaran_id: ID!
+    tipe_biaya: Tipe!
+    referensi_id: ID!
+    jumlah: Int!
+    harga_satuan: Float!
+    subtotal: Float!
+}
+input UpdateDetailPembayaranPasienInput {
+    pembayaran_id: ID!
+    tipe_biaya: Tipe
+    referensi_id: ID
+    jumlah: Int
+    harga_satuan: Float
+    subtotal: Float
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type DetailPembayaranPasienPaginator {
+    data: [DetailPembayaranPasien!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allDetailPembayaranPasien: [DetailPembayaranPasien!]!
+        @all(
+            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        )
+
+    allDetailPembayaranPasienPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): DetailPembayaranPasienPaginator
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@all"
+        )
+
+    DetailPembayaranPasien(id: ID! @eq(key: "id")): DetailPembayaranPasien
+        @find(
+            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        )
+}
+
+extend type Mutation {
+    createDetailPembayaranPasien(
+        input: CreateDetailPembayaranPasienInput! @spread
+    ): DetailPembayaranPasien
+        @create(
+            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        )
+
+    updateDetailPembayaranPasien(
+        id: ID! @eq(key: "id")
+        input: UpdateDetailPembayaranPasienInput! @spread
+    ): DetailPembayaranPasien
+        @update(
+            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        )
+
+    deleteDetailPembayaranPasien(
+        id: ID! @eq(key: "id")
+    ): DetailPembayaranPasien
+        @delete(
+            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        )
+
+    restoreDetailPembayaranPasien(id: ID!): DetailPembayaranPasien
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@restore"
+        )
+
+    forceDeleteDetailPembayaranPasien(id: ID!): DetailPembayaranPasien
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@forceDelete"
+        )
+}

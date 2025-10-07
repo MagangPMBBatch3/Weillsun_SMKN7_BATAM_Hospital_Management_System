@@ -1,0 +1,81 @@
+type JadwalTenagaMedis {
+    id: ID!
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    jam_mulai: String
+    jam_selesai: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    tenagaMedis: TenagaMedis @belongsTo
+}
+
+input CreateJadwalTenagaMedisInput {
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    jam_mulai: String!
+    jam_selesai: String!
+}
+input UpdateJadwalTenagaMedisInput {
+    tenaga_medis_id: ID
+    tanggal: Date
+    jam_mulai: String
+    jam_selesai: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type JadwalTenagaMedisPaginator {
+    data: [JadwalTenagaMedis!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allJadwalTenagaMedis: [JadwalTenagaMedis!]!
+        @all(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+
+    allJadwalTenagaMedisPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): JadwalTenagaMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all"
+        )
+
+    JadwalTenagaMedis(id: ID! @eq(key: "id")): JadwalTenagaMedis
+        @find(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+}
+
+extend type Mutation {
+    createJadwalTenagaMedis(
+        input: CreateJadwalTenagaMedisInput! @spread
+    ): JadwalTenagaMedis
+        @create(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+
+    updateJadwalTenagaMedis(
+        id: ID! @eq(key: "id")
+        input: UpdateJadwalTenagaMedisInput! @spread
+    ): JadwalTenagaMedis
+        @update(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+
+    deleteJadwalTenagaMedis(id: ID! @eq(key: "id")): JadwalTenagaMedis
+        @delete(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+
+    restoreJadwalTenagaMedis(id: ID!): JadwalTenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Mutations\\JadwalTenagaMedisMutation@restore"
+        )
+
+    forceDeleteJadwalTenagaMedis(id: ID!): JadwalTenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Mutations\\JadwalTenagaMedisMutation@forceDelete"
+        )
+}

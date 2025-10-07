@@ -1,0 +1,58 @@
+type Poli {
+    id: ID!
+    nama_poli: String!
+    deskripsi: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+}
+
+input CreatePoliInput {
+    nama_poli: String!
+    deskripsi: String
+}
+input UpdatePoliInput {
+    nama_poli: String
+    deskripsi: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type PoliPaginator {
+    data: [Poli!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allPoli: [Poli!]! @all(model: "App\\Models\\Poli\\Poli")
+
+    allPoliPaginator(search: String, page: Int, first: Int): PoliPaginator
+        @field(resolver: "App\\GraphQL\\Poli\\Queries\\PoliQuery@all")
+
+    Poli(id: ID! @eq(key: "id")): Poli @find(model: "App\\Models\\Poli\\Poli")
+}
+
+extend type Mutation {
+    createPoli(input: CreatePoliInput! @spread): Poli
+        @create(model: "App\\Models\\Poli\\Poli")
+
+    updatePoli(id: ID! @eq(key: "id"), input: UpdatePoliInput! @spread): Poli
+        @update(model: "App\\Models\\Poli\\Poli")
+
+    deletePoli(id: ID! @eq(key: "id")): Poli
+        @delete(model: "App\\Models\\Poli\\Poli")
+
+    restorePoli(id: ID!): Poli
+        @field(resolver: "App\\GraphQL\\Poli\\Mutations\\PoliMutation@restore")
+
+    forceDeletePoli(id: ID!): Poli
+        @field(
+            resolver: "App\\GraphQL\\Poli\\Mutations\\PoliMutation@forceDelete"
+        )
+}

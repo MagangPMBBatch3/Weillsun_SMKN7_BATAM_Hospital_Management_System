@@ -1,0 +1,87 @@
+enum Status {
+    pending
+    lunas
+}
+
+type PembelianObat {
+    id: ID!
+    supplier_id: ID!
+    tanggal: Date!
+    total_biaya: Float!
+    status: Status!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+}
+
+input CreatePembelianObatInput {
+    supplier_id: ID!
+    tanggal: Date!
+    total_biaya: Float!
+    status: Status!
+}
+input UpdatePembelianObatInput {
+    supplier_id: ID
+    tenaga_medis_id: ID
+    tanggal: Date
+    total_biaya: Float
+    status: Status
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type PembelianObatPaginator {
+    data: [PembelianObat!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allPembelianObat: [PembelianObat!]!
+        @all(model: "App\\Models\\PembelianObat\\PembelianObat")
+
+    allPembelianObatPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): PembelianObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@all"
+        )
+
+    PembelianObat(id: ID! @eq(key: "id")): PembelianObat
+        @find(model: "App\\Models\\PembelianObat\\PembelianObat")
+}
+
+extend type Mutation {
+    createPembelianObat(
+        input: CreatePembelianObatInput! @spread
+    ): PembelianObat
+        @create(model: "App\\Models\\PembelianObat\\PembelianObat")
+
+    updatePembelianObat(
+        id: ID! @eq(key: "id")
+        input: UpdatePembelianObatInput! @spread
+    ): PembelianObat
+        @update(model: "App\\Models\\PembelianObat\\PembelianObat")
+
+    deletePembelianObat(id: ID! @eq(key: "id")): PembelianObat
+        @delete(model: "App\\Models\\PembelianObat\\PembelianObat")
+
+    restorePembelianObat(id: ID!): PembelianObat
+        @field(
+            resolver: "App\\GraphQL\\PembelianObat\\Mutations\\PembelianObatMutation@restore"
+        )
+
+    forceDeletePembelianObat(id: ID!): PembelianObat
+        @field(
+            resolver: "App\\GraphQL\\PembelianObat\\Mutations\\PembelianObatMutation@forceDelete"
+        )
+}

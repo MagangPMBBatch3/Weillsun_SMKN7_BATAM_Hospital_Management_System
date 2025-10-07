@@ -1,0 +1,86 @@
+type RekamMedis {
+    id: ID!
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    diagnosis: String!
+    tindakan: String!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+    tenagaMedis: TenagaMedis @belongsTo
+}
+
+input CreateRekamMedisInput {
+    pasien_id: ID!
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    diagnosis: String!
+    tindakan: String!
+}
+input UpdateRekamMedisInput {
+    pasien_id: ID
+    tenaga_medis_id: ID
+    tenaga_medis_id: ID
+    tanggal: Date
+    diagnosis: String
+    tindakan: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type RekamMedisPaginator {
+    data: [RekamMedis!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allRekamMedis: [RekamMedis!]!
+        @all(model: "App\\Models\\RekamMedis\\RekamMedis")
+
+    allRekamMedisPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): RekamMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\RekamMedis\\Queries\\RekamMedisQuery@all"
+        )
+
+    RekamMedis(id: ID! @eq(key: "id")): RekamMedis
+        @find(model: "App\\Models\\RekamMedis\\RekamMedis")
+}
+
+extend type Mutation {
+    createRekamMedis(
+        input: CreateRekamMedisInput! @spread
+    ): RekamMedis
+        @create(model: "App\\Models\\RekamMedis\\RekamMedis")
+
+    updateRekamMedis(
+        id: ID! @eq(key: "id")
+        input: UpdateRekamMedisInput! @spread
+    ): RekamMedis
+        @update(model: "App\\Models\\RekamMedis\\RekamMedis")
+
+    deleteRekamMedis(id: ID! @eq(key: "id")): RekamMedis
+        @delete(model: "App\\Models\\RekamMedis\\RekamMedis")
+
+    restoreRekamMedis(id: ID!): RekamMedis
+        @field(
+            resolver: "App\\GraphQL\\RekamMedis\\Mutations\\RekamMedisMutation@restore"
+        )
+
+    forceDeleteRekamMedis(id: ID!): RekamMedis
+        @field(
+            resolver: "App\\GraphQL\\RekamMedis\\Mutations\\RekamMedisMutation@forceDelete"
+        )
+}

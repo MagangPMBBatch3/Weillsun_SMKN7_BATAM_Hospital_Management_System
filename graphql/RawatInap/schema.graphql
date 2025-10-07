@@ -1,0 +1,93 @@
+enum StatusInap {
+    Aktif
+    Pulang
+    Pindah_Ruangan
+}
+
+type RawatInap {
+    id: ID!
+    pasien_id: ID!
+    ruangan_id: ID!
+    tanggal_masuk: Date!
+    tanggal_keluar: Date!
+    status: StatusInap!
+
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pasien: Pasien @belongsTo
+    ruangan: Ruangan @belongsTo
+}
+
+input CreateRawatInapInput {
+    pasien_id: ID!
+    ruangan_id: ID!
+    tanggal_masuk: Date!
+    tanggal_keluar: Date
+    status: StatusInap!
+}
+input UpdateRawatInapInput {
+    pasien_id: ID
+    tenaga_medis_id: ID
+    ruangan_id: ID
+    tanggal_masuk: Date
+    tanggal_keluar: Date
+    status: StatusInap
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type RawatInapPaginator {
+    data: [RawatInap!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allRawatInap: [RawatInap!]!
+        @all(model: "App\\Models\\RawatInap\\RawatInap")
+
+    allRawatInapPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): RawatInapPaginator
+        @field(
+            resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@all"
+        )
+
+    RawatInap(id: ID! @eq(key: "id")): RawatInap
+        @find(model: "App\\Models\\RawatInap\\RawatInap")
+}
+
+extend type Mutation {
+    createRawatInap(
+        input: CreateRawatInapInput! @spread
+    ): RawatInap
+        @create(model: "App\\Models\\RawatInap\\RawatInap")
+
+    updateRawatInap(
+        id: ID! @eq(key: "id")
+        input: UpdateRawatInapInput! @spread
+    ): RawatInap
+        @update(model: "App\\Models\\RawatInap\\RawatInap")
+
+    deleteRawatInap(id: ID! @eq(key: "id")): RawatInap
+        @delete(model: "App\\Models\\RawatInap\\RawatInap")
+
+    restoreRawatInap(id: ID!): RawatInap
+        @field(
+            resolver: "App\\GraphQL\\RawatInap\\Mutations\\RawatInapMutation@restore"
+        )
+
+    forceDeleteRawatInap(id: ID!): RawatInap
+        @field(
+            resolver: "App\\GraphQL\\RawatInap\\Mutations\\RawatInapMutation@forceDelete"
+        )
+}

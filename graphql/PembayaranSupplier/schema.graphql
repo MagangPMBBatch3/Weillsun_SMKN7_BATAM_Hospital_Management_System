@@ -1,0 +1,87 @@
+enum Metode {
+    cash
+    transfer
+}
+
+type PembayaranSupplier {
+    id: ID!
+    pembelian_id: ID!
+    jumlah_bayar: Float!
+    metode_bayar: Metode!
+    tanggal_bayar: Date!
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    pembelianObat: PembelianObat @belongsTo
+}
+
+input CreatePembayaranSupplierInput {
+    pembelian_id: ID!
+    jumlah_bayar: Float!
+    metode_bayar: Metode!
+    tanggal_bayar: Date!
+}
+input UpdatePembayaranSupplierInput {
+    pembelian_id: ID
+    tenaga_medis_id: ID
+    jumlah_bayar: Float
+    metode_bayar: Metode
+    tanggal_bayar: Date
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type PembayaranSupplierPaginator {
+    data: [PembayaranSupplier!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allPembayaranSupplier: [PembayaranSupplier!]!
+        @all(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
+
+    allPembayaranSupplierPaginator(
+        search: String
+        page: Int
+        first: Int
+    ): PembayaranSupplierPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembayaranSupplier\\Queries\\PembayaranSupplierQuery@all"
+        )
+
+    PembayaranSupplier(id: ID! @eq(key: "id")): PembayaranSupplier
+        @find(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
+}
+
+extend type Mutation {
+    createPembayaranSupplier(
+        input: CreatePembayaranSupplierInput! @spread
+    ): PembayaranSupplier
+        @create(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
+
+    updatePembayaranSupplier(
+        id: ID! @eq(key: "id")
+        input: UpdatePembayaranSupplierInput! @spread
+    ): PembayaranSupplier
+        @update(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
+
+    deletePembayaranSupplier(id: ID! @eq(key: "id")): PembayaranSupplier
+        @delete(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
+
+    restorePembayaranSupplier(id: ID!): PembayaranSupplier
+        @field(
+            resolver: "App\\GraphQL\\PembayaranSupplier\\Mutations\\PembayaranSupplierMutation@restore"
+        )
+
+    forceDeletePembayaranSupplier(id: ID!): PembayaranSupplier
+        @field(
+            resolver: "App\\GraphQL\\PembayaranSupplier\\Mutations\\PembayaranSupplierMutation@forceDelete"
+        )
+}
