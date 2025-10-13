@@ -16,6 +16,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 
 <body class="font-sans antialiased">
@@ -32,10 +33,11 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="grid place-items-center min-h-screen px-6">
+        <main>
             {{ $slot }}
         </main>
     </div>
+    
     @stack('scripts')
 </body>
 

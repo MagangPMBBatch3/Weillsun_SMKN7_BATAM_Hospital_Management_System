@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     
     Route::get('rekamMedis', [AuthController::class, 'rekamMedis'])->name('rekamMedis.index');
     
-    Route::get('resepobat', [AuthController::class, 'resepobat'])->name('resepobat.index');
+    Route::get('resepObat', [AuthController::class, 'resepObat'])->name('resepObat.index');
     
     Route::get('ruangan', [AuthController::class, 'ruangan'])->name('ruangan.index');
     

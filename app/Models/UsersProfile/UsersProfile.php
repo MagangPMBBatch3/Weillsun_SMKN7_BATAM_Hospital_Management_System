@@ -25,3 +25,4 @@ class UsersProfile extends Model
         return $this->hasOne(TenagaMedis::class, 'profile_id');
     }
 }
+

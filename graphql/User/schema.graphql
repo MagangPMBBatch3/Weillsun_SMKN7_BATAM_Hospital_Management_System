@@ -1,8 +1,13 @@
+enum Role{
+    admin
+    receptionist
+}
+
 type User {
     id: ID!
     name: String!
     email: String!
-    role: String
+    role: Role
     email_verified_at: DateTime
     created_at: DateTime
     updated_at: DateTime
@@ -14,13 +19,13 @@ input CreateUserInput {
     name: String!
     email: String!
     password: String!
-    role: String
+    role: Role
 }
 
 input UpdateUserInput {
     name: String
     email: String
-    role: String
+    role: Role
     email_verified_at: DateTime
 }
 
@@ -41,14 +46,22 @@ extend type Query {
     allUser: [User!]!
         @all(model: "App\\Models\\User")
 
-    allUserPaginator(
+    allUserPaginate(
         search: String
         page: Int
         first: Int
     ): UserPaginator
         @field(
             resolver: "App\\GraphQL\\User\\Queries\\UserQuery@all"
-        )
+    )
+    allUserArchive(
+        search: String
+        page: Int
+        first: Int
+    ): UserPaginator
+        @field(
+            resolver: "App\\GraphQL\\User\\Queries\\UserQuery@allArchive"
+    )
 
     User(id: ID! @eq(key: "id")): User
         @find(model: "App\\Models\\User")
