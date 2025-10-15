@@ -45,9 +45,9 @@ class UserObserver
 
     protected function catatAktivitas($pesan)
     {
-        LogAktivitas::create([
-            'user_id' => Auth::id() ?? 1,
-            'aktivitas' => $pesan,
-        ]);
+        // LogAktivitas::create([
+        //     'user_id' => Auth::id(),
+        //     'aktivitas' => $pesan,
+        // ]);
     }
 }

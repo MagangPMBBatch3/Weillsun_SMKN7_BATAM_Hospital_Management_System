@@ -24,9 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::get('kunjungan', [AuthController::class, 'kunjungan'])->name('kunjungan.index');
     
     Route::get('labPemeriksaan', [AuthController::class, 'labPemeriksaan'])->name('labPemeriksaan.index');
-    
-    Route::get('logAktivitas', [AuthController::class, 'logAktivitas'])->name('logAktivitas.index');
-    
+        
     Route::get('obat', [AuthController::class, 'obat'])->name('obat.index');
     
     Route::get('pasien', [AuthController::class, 'pasien'])->name('pasien.index');

@@ -19,10 +19,6 @@ class AuthController extends Controller
         return view('kunjungan.index');
     }
 
-    public function logAktivitas(){
-        return view('logAktivitas.index');
-    }
-
     public function obat(){
         return view('obat.index');
     }

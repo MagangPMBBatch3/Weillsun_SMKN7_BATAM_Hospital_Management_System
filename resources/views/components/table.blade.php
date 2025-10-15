@@ -7,27 +7,25 @@
     }
 @endphp
 
-<div class="overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-800 rounded-lg shadow-md">
-    <table {{ $attributes->merge(['class' => 'min-w-full divide-y divide-gray-200 dark:divide-gray-700']) }}>
-        <thead class="bg-gray-50 dark:bg-gray-700">
+
+    <table {{ $attributes->merge(['class' => 'min-w-full text-sm rounded-t-2xl border-b-4 border-dashed text-gray-700 dark:text-gray-200']) }}>
+        <thead class="bg-gradient-to-r from-indigo-500 to-violet-500 text-white">
             <tr>
                 @foreach ($headers as $header)
-                    <th scope="col"
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold tracking-wider uppercase">
                         {{ $header }}
                     </th>
                 @endforeach
-                
-                @if($hasPermission)
-                    <th scope="col"
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+
+                @if ($hasPermission)
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold tracking-wider uppercase">
                         Actions
                     </th>
                 @endif
             </tr>
         </thead>
-        <tbody class="">
-            {{ $slot }}
-        </tbody>
+
+        {{ $slot }}
+
     </table>
-</div>
+

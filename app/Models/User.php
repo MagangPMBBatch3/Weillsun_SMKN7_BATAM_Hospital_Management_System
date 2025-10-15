@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\TenagaMedis\TenagaMedis;
 use Illuminate\Notifications\Notifiable;
-use App\Models\LogAktivitas\LogAktivitas;
 use App\Models\UsersProfile\UsersProfile;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -31,11 +29,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profile()
     {
         return $this->hasOne(UsersProfile::class, 'user_id');
-    }
-
-    public function logAktivitas()
-    {
-        return $this->hasMany(LogAktivitas::class, 'user_id');
     }
 
     /**

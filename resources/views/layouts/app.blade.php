@@ -9,6 +9,8 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" href="{{ asset('MedicaHub-Logo.png') }}" type="image/png">
 
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+
     <!-- Fonts -->
     <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -19,14 +21,14 @@
 
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+<body class="font-sans antialiased bg-gradient-to-br from-green-100 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div class="min-h-screen">
         @include('layouts.navigation')
 
         <!-- Page Heading -->
         @isset($header)
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <header>
+                <div class="max-w-8xl mx-auto pt-2 pb-4 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>

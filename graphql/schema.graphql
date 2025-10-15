@@ -4,7 +4,6 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import JadwalTenagaMedis/schema.graphql
 #import Kunjungan/schema.graphql
 #import LabPemeriksaan/schema.graphql
-#import LogAktivitas/schema.graphql
 #import Obat/schema.graphql
 #import Pasien/schema.graphql
 #import PembayaranPasien/schema.graphql

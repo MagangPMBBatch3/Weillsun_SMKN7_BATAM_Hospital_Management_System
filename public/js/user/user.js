@@ -3,18 +3,20 @@ let currentPageActive = 1;
 let currentPageArchive = 1;
 
 function showLoading() {
+    document.body.style.overflow = "hidden";
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) overlay.classList.remove("hidden");
 }
 
 function hideLoading() {
+    document.body.style.overflow = "";
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) overlay.classList.add("hidden");
 }
 
 // Load data User (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
-    showLoading(); 
+    showLoading();
 
     if (isActive) {
         currentPageActive = page;
@@ -46,7 +48,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
         `;
         const variablesActive = {
             first: parseInt(
-                isActive ? perPage : document.getElementById("perPage")?.value || 5
+                isActive
+                    ? perPage
+                    : document.getElementById("perPage")?.value || 5
             ),
             page: currentPageActive,
             search: searchValue,
@@ -109,8 +113,8 @@ async function loadDataPaginate(page = 1, isActive = true) {
 // Hapus
 async function hapusUser(id) {
     if (!confirm("Yakin ingin masukkan ke archive?")) return;
-    
-    showLoading(); 
+
+    showLoading();
     const mutation = `mutation($id: ID!){ deleteUser(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
@@ -122,15 +126,15 @@ async function hapusUser(id) {
     } catch (error) {
         console.error("Error:", error);
         alert("Gagal menghapus data");
-        hideLoading(); 
+        hideLoading();
     }
 }
 
 // restore
 async function restoreUser(id) {
     if (!confirm("Yakin ingin restore data ini?")) return;
-    
-    showLoading(); 
+
+    showLoading();
     const mutation = `mutation($id: ID!){ restoreUser(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
@@ -142,15 +146,15 @@ async function restoreUser(id) {
     } catch (error) {
         console.error("Error:", error);
         alert("Gagal restore data");
-        hideLoading(); 
+        hideLoading();
     }
 }
 
 // force delete
 async function forceDeleteUser(id) {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
-    
-    showLoading(); 
+
+    showLoading();
     const mutation = `mutation($id: ID!){ forceDeleteUser(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
@@ -162,7 +166,7 @@ async function forceDeleteUser(id) {
     } catch (error) {
         console.error("Error:", error);
         alert("Gagal menghapus data permanen");
-        hideLoading(); 
+        hideLoading();
     }
 }
 
@@ -175,7 +179,7 @@ async function createUser() {
 
     if (!name || !email || !password) return alert("Semua field wajib diisi!");
 
-    showLoading(); 
+    showLoading();
 
     const mutationUser = `
         mutation($input: CreateUserInput!) {
@@ -190,7 +194,10 @@ async function createUser() {
         const resUser = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: mutationUser, variables: variablesUser }),
+            body: JSON.stringify({
+                query: mutationUser,
+                variables: variablesUser,
+            }),
         });
 
         const resultUser = await resUser.json();
@@ -198,7 +205,7 @@ async function createUser() {
 
         if (!newUser) {
             alert("Gagal membuat user");
-            hideLoading(); 
+            hideLoading();
             return;
         }
 
@@ -241,7 +248,7 @@ async function createUser() {
     } catch (error) {
         console.error("Error:", error);
         alert("Terjadi kesalahan saat membuat user");
-        hideLoading(); 
+        hideLoading();
     }
 }
 
@@ -252,7 +259,7 @@ async function updateUser() {
     const email = document.getElementById("edit-email").value.trim();
     const role = document.getElementById("edit-role").value;
 
-    showLoading(); 
+    showLoading();
 
     const mutation = `mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id name email role } }`;
     try {
@@ -271,7 +278,7 @@ async function updateUser() {
     } catch (error) {
         console.error("Error:", error);
         alert("Gagal update data");
-        hideLoading(); 
+        hideLoading();
     }
 }
 
@@ -299,45 +306,76 @@ function renderUserTable(result, tableId, isActive) {
             : document.getElementById("nextBtnArchive");
 
         if (pageInfoEl) {
-            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${pageInfo.lastPage || 1} (Total: 0)`;
+            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
+                pageInfo.lastPage || 1
+            } (Total: 0)`;
         }
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
-        
+
         return;
     }
 
     items.forEach((item) => {
         let actions = "";
+        const baseBtn = `
+        inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-md font-semibold
+        transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
+    `;
+
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                    <button onclick="openEditModal(${item.id}, '${item.name}', '${item.email}', '${item.role}')" 
-                        class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">Edit</button>
-                    <button onclick="hapusUser(${item.id})" 
-                        class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Archive</button>`;
+                <button onclick="openEditModal(${item.id}, '${item.name}', '${item.email}', '${item.role}')"
+                    class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
+                    <i class='bx bx-edit-alt'></i> Edit
+                </button>
+                <button onclick="hapusUser(${item.id})"
+                    class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
+                    <i class='bx bx-archive'></i> Archive
+                </button>`;
             } else {
                 actions = `
-                    <button onclick="restoreUser(${item.id})" 
-                        class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Restore</button>
-                    <button onclick="forceDeleteUser(${item.id})" 
-                        class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Hapus Permanen</button>`;
+                <button onclick="restoreUser(${item.id})"
+                    class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
+                    <i class='bx bx-refresh-ccw-alt'></i>  Restore
+                </button>
+                <button onclick="forceDeleteUser(${item.id})"
+                    class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
+                    <i class='bx bx-trash'></i> Delete
+                </button>`;
             }
         }
 
         tbody.innerHTML += `
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 even:bg-gray-100 odd:bg-white">
-                <td class="px-6 py-4 text-center">${item.id}</td>
-                <td class="px-6 py-4 text-center">${item.name}</td>
-                <td class="px-6 py-4 text-center">${item.email}</td>
-                <td class="px-6 py-4 text-center">${item.role}</td>
-                ${
-                    window.currentUserRole === "admin"
-                        ? `<td class="px-6 py-4 text-center">${actions}</td>`
-                        : ""
-                }
-            </tr>
-        `;
+        <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50">
+            <td class="p-4 text-center font-semibold">
+                <span class="rounded-full text-white bg-green-500 py-1 px-2">${
+                    item.id
+                }</span>
+            </td>
+            <td class="p-4 text-center text-base font-semibold">${
+                item.name
+            }</td>
+            <td class="p-4 text-center text-base font-semibold">${
+                item.email
+            }</td>
+            <td class="p-4 text-center font-semibold capitalize">
+                <span class="px-2 py-1 rounded-full text-sm ${
+                    item.role === "admin"
+                        ? "bg-yellow-100 text-yellow-600"
+                        : "bg-blue-100 text-blue-600"
+                    }">
+                    ${item.role}
+                </span>
+            </td>
+            ${
+                window.currentUserRole === "admin"
+                    ? `<td class="p-4 text-center space-x-1">${actions}</td>`
+                    : ""
+            }
+        </tr>
+    `;
     });
 
     // Update tombol prev/next & info halaman
