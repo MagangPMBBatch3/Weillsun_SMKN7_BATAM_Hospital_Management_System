@@ -6,7 +6,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Update your account's profile information.") }}
         </p>
     </header>
 
@@ -41,16 +41,16 @@
         @endpush
 
         <div>
-            <x-input-label for="nama" :value="__('Name')" />
-            <x-text-input id="nama" name="nama" type="text" class="mt-1 block w-full" :value="old('nama', $user->profile?->nama ?? $user->name)"
-                required autocomplete="nama" />
-            <x-input-error class="mt-2" :messages="$errors->get('nama')" />
+            <x-input-label for="nickname" :value="__('Nickname')" />
+            <x-text-input id="nickname" name="nickname" type="text" class="mt-1 block w-full" :value="old('nickname', $user->profile?->nickname ?? $user->name)"
+                required autocomplete="nickname" />
+            <x-input-error class="mt-2" :messages="$errors->get('nickname')" />
         </div>
 
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" inputmode="email" class="mt-1 block w-full"
-                :value="old('email', $user->profile?->email ?? $user->email)" required autocomplete="username" />
+            <x-text-input id="email" name="email" type="email" inputmode="email" class="mt-1 bg-gray-100 block w-full"
+                :value="old('email', $user->email)" readonly autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             <div class="mt-4">
@@ -77,7 +77,7 @@
                     @foreach ($tenagaMedisList as $tenagaMedis)
                         <option value="{{ $tenagaMedis->id }}"
                             {{ old('tenaga_medis_id', $tenagaMedis->id) == optional($user->profile)->id ? 'selected' : '' }}>
-                            {{ $tenagaMedis->profile?->nama }} - {{ $tenagaMedis->spesialisasi }}
+                            {{ $tenagaMedis->profile?->nickname }} - {{ $tenagaMedis->spesialisasi }}
                         </option>
                     @endforeach
                 </select>
@@ -104,13 +104,61 @@
             @endif
         </div>
 
-        <div class="flex justify-end gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="flex justify-between gap-4">
 
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400">{{ __('Saved.') }}</p>
+            @if ($userTenagaMedis)
+                <div class="flex items-center text-green-600 dark:text-green-400">
+                    <i class='bx bx-check-circle mr-2 text-xl'></i>
+                    <p class="px-2 py-1 rounded-full bg-green-100">
+                        Already a <span class="font-semibold">{{ $userTenagaMedis->spesialisasi }}</span> Specialist
+                    </p>
+                </div>
+            @else
+                <x-blue-button x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'create-tenaga-medis')">
+                    Add as Med Staff
+                </x-blue-button>
             @endif
+
+            <div class="flex gap-2 items-center">
+                <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+                @if (session('status') === 'profile-updated')
+                    <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                        class="text-sm text-gray-600 dark:text-gray-400">{{ __('Saved.') }}</p>
+                @endif
+            </div>
         </div>
     </form>
+
+    <x-modal name="create-tenaga-medis" focusable>
+        <div class="p-6">
+            <form onsubmit="event.preventDefault(); createTenagaMedis(); ">
+
+                <x-loading></x-loading>
+
+                <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Med Staff</h2>
+
+                <div class="space-y-3">
+                    <input type="hidden" id="create-profile-id" value="{{ $user->profile?->id ?? '' }}" />
+
+                    <x-input-label>Specialization</x-input-label>
+                    <x-text-input id="create-spesialisasi" type="text" placeholder="Enter Your Specialization..."
+                        class="border p-2 w-full rounded" required />
+
+                    <x-input-label>No STR</x-input-label>
+                    <x-text-input id="create-noStr" type="number" placeholder="Enter Your STR number..."
+                        class="border p-2 w-full rounded" required />
+
+                    <div class="flex justify-end mt-4">
+                        <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                        <x-primary-button class="ml-2">Save</x-primary-button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    <script src="{{ asset('js/tenagaMedis/tenagaMedis.js') }}"></script>
+
 </section>

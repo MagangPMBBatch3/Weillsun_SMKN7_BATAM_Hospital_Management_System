@@ -7,8 +7,8 @@
     }
 @endphp
 
-
-    <table {{ $attributes->merge(['class' => 'min-w-full text-sm rounded-t-2xl border-b-4 border-dashed text-gray-700 dark:text-gray-200']) }}>
+<div class="overflow-x-auto">
+    <table {{ $attributes->merge(['class' => 'min-w-full overflow-x-scroll text-sm rounded-t-2xl border-b-4 border-dashed text-gray-700 dark:text-gray-200']) }}>
         <thead class="bg-gradient-to-r from-indigo-500 to-violet-500 text-white">
             <tr>
                 @foreach ($headers as $header)
@@ -28,4 +28,4 @@
         {{ $slot }}
 
     </table>
-
+</div>

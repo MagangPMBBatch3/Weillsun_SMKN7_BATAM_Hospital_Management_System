@@ -1,6 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-gray-900/60 rounded-2xl p-5 shadow-md border border-gray-200/50 dark:border-gray-700/50">
+        <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-gray-900/60 rounded-2xl p-5 shadow-md border border-gray-200/50 dark:border-gray-700/50">
 
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
@@ -69,68 +70,31 @@
             </x-table>
 
             {{-- Pagination untuk AKTIF --}}
-            <div id="paginationActive" class="flex justify-between px-6 pb-4 items-center mt-4">
-                <div id="pageInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
-
-                <div class="flex items-center gap-4">
-                    <select id="perPage" onchange="loadDataPaginate(1, true)" class="border py-1 px-5 rounded-full">
-                        <option value="5" selected>5</option>
-                        <option value="10">10</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-
-                    <div class="flex gap-2">
-                        <button id="prevBtn" onclick="prevPage()"
-                            class="bg-indigo-600 bg px-3 py-1 disabled:cursor-not-allowed rounded disabled:opacity-50">
-                            <i class='text-white bx bx-arrow-big-left-line font-medium text-lg'></i> 
-                        </button>
-                        <button id="nextBtn" onclick="nextPage()"
-                            class="bg-indigo-600 bg px-3 py-1 disabled:cursor-not-allowed rounded disabled:opacity-50">
-                            <i class='text-white bx bx-arrow-big-right-line font-medium  text-lg'></i> 
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <x-pagination-active></x-pagination-active>
 
             {{-- Pagination untuk ARSIP --}}
-            <div id="paginationArchive" class="hidden flex justify-between px-6 pb-4 items-center mt-4">
-                <div id="pageInfoArchive" class="text-sm text-gray-600 dark:text-gray-300"></div>
-
-                <div class="flex items-center gap-4">
-                    <select id="perPageArchive" onchange="loadDataPaginate(1, false)" class="border py-1 px-5 rounded-full">
-                        <option value="5" selected>5</option>
-                        <option value="10">10</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-
-                    <div class="flex gap-2">
-                        <button id="prevBtnArchive" onclick="prevPageArchive()"
-                            class="bg-indigo-600 bg px-3 py-1 disabled:cursor-not-allowed rounded disabled:opacity-50">
-                            <i class='text-white bx bx-arrow-big-left-line font-medium text-lg'></i> 
-                        </button>
-                        <button id="nextBtnArchive" onclick="nextPageArchive()"
-                            class="bg-indigo-600 bg px-3 py-1 disabled:cursor-not-allowed rounded disabled:opacity-50">
-                            <i class='text-white bx bx-arrow-big-right-line font-medium  text-lg'></i> 
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <x-pagination-archive></x-pagination-archive>
 
             {{-- Modal CREATE --}}
             <x-modal name="create-user" focusable>
                 <div class="p-6">
                     <form onsubmit="event.preventDefault(); createUser()">
-                        <h2 class="text-lg font-bold mb-4">Tambah User</h2>
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New User</h2>
 
                         <div class="space-y-3">
-                            <x-text-input id="create-name" type="text" placeholder="Nama"
+                            <x-input-label>Name</x-input-label>
+                            <x-text-input id="create-name" type="text" placeholder="Enter Your Name..."
                                 class="border p-2 w-full rounded" required />
-                            <x-text-input id="create-email" type="email" placeholder="Email"
+
+                            <x-input-label>Email</x-input-label>
+                            <x-text-input id="create-email" type="email" placeholder="Enter Your Email..."
                                 class="border p-2 w-full rounded" required />
-                            <x-text-input id="create-password" type="password" placeholder="Password"
+
+                            <x-input-label>Password</x-input-label>
+                            <x-text-input id="create-password" type="password" placeholder="Enter Your Password..."
                                 class="border p-2 w-full rounded" required />
+
+                            <x-input-label class="italic">Choose the role</x-input-label>
                             <select id="create-role" required class="border p-2 w-full rounded">
                                 <option value="receptionist">Receptionist</option>
                                 <option value="admin">Admin</option>
@@ -138,8 +102,8 @@
                         </div>
 
                         <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
-                            <x-primary-button class="ml-2">Simpan</x-primary-button>
+                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                            <x-primary-button class="ml-2">Save</x-primary-button>
                         </div>
                     </form>
                 </div>
@@ -149,15 +113,20 @@
             <x-modal name="edit-user">
                 <div class="p-6">
                     <form onsubmit="event.preventDefault(); updateUser()">
-                        <h2 class="text-lg font-bold mb-4">Edit User</h2>
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit User</h2>
 
                         <x-text-input type="hidden" id="edit-id" />
 
                         <div class="space-y-3">
-                            <x-text-input id="edit-name" type="text" placeholder="Nama"
+                            <x-input-label>New Name</x-input-label>
+                            <x-text-input id="edit-name" type="text" placeholder="Name"
                                 class="border p-2 w-full rounded" />
+
+                            <x-input-label>New Email</x-input-label>
                             <x-text-input id="edit-email" type="email" placeholder="Email"
                                 class="border p-2 w-full rounded" />
+
+                            <x-input-label class="italic">Choose the new role</x-input-label>
                             <select id="edit-role" class="border p-2 w-full rounded">
                                 <option value="admin">Admin</option>
                                 <option value="receptionist">Receptionist</option>
@@ -165,7 +134,7 @@
                         </div>
 
                         <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
+                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
                             <x-primary-button class="ml-2">Update</x-primary-button>
                         </div>
                     </form>

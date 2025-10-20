@@ -18,6 +18,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::post('/upload-foto', [ProfileController::class, 'uploadFoto'])->name('upload.foto');
+
     
     Route::get('jadwalTenagaMedis', [AuthController::class, 'jadwalTenagaMedis'])->name('jadwalTenagaMedis.index');
     

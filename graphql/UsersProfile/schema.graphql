@@ -1,9 +1,8 @@
 type UsersProfile {
     id: ID!
     user_id: ID!
-    nama: String!
+    nickname: String!
     alamat: String
-    email: String
     telepon: String
     foto: String
 
@@ -16,17 +15,16 @@ type UsersProfile {
 
 input CreateUsersProfileInput {
     user_id: ID!
-    nama: String!
+    nickname: String!
     alamat: String
-    email: String
     telepon: String
     foto: String
 }
 
 input UpdateUsersProfileInput {
-    nama: String
+    user_id: ID
+    nickname: String
     alamat: String
-    email: String
     telepon: String
     foto: String
 }
@@ -45,7 +43,8 @@ type UsersProfilePaginator {
 }
 
 extend type Query {
-    allUsersProfile: [UsersProfile!]! @all(model: "App\\Models\\UsersProfile\\UsersProfile")
+    allUsersProfile: [UsersProfile!]!
+        @all(model: "App\\Models\\UsersProfile\\UsersProfile")
 
     allUsersProfilePaginate(
         search: String
@@ -75,8 +74,7 @@ extend type Mutation {
     updateUsersProfile(
         id: ID! @eq
         input: UpdateUsersProfileInput! @spread
-    ): UsersProfile
-        @update(model: "App\\Models\\UsersProfile\\UsersProfile")
+    ): UsersProfile @update(model: "App\\Models\\UsersProfile\\UsersProfile")
 
     deleteUsersProfile(id: ID! @eq): UsersProfile
         @delete(model: "App\\Models\\UsersProfile\\UsersProfile")

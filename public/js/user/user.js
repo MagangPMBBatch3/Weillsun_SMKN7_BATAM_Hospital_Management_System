@@ -104,7 +104,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         );
     } catch (error) {
         console.error("Error loading data:", error);
-        alert("Terjadi kesalahan saat memuat data");
+        alert("An error occurred while loading data");
     } finally {
         hideLoading();
     }
@@ -112,7 +112,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
 
 // Hapus
 async function hapusUser(id) {
-    if (!confirm("Yakin ingin masukkan ke archive?")) return;
+    if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ deleteUser(id: $id){ id } }`;
@@ -125,14 +125,14 @@ async function hapusUser(id) {
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
-        alert("Gagal menghapus data");
+        alert("Failed to delete data");
         hideLoading();
     }
 }
 
 // restore
 async function restoreUser(id) {
-    if (!confirm("Yakin ingin restore data ini?")) return;
+    if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ restoreUser(id: $id){ id } }`;
@@ -145,14 +145,14 @@ async function restoreUser(id) {
         loadDataPaginate(currentPageArchive, false);
     } catch (error) {
         console.error("Error:", error);
-        alert("Gagal restore data");
+        alert("Failed restore data");
         hideLoading();
     }
 }
 
 // force delete
 async function forceDeleteUser(id) {
-    if (!confirm("Yakin ingin menghapus data ini?")) return;
+    if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ forceDeleteUser(id: $id){ id } }`;
@@ -165,7 +165,7 @@ async function forceDeleteUser(id) {
         loadDataPaginate(currentPageArchive, false);
     } catch (error) {
         console.error("Error:", error);
-        alert("Gagal menghapus data permanen");
+        alert("Failed to delete permanent data");
         hideLoading();
     }
 }
@@ -177,7 +177,12 @@ async function createUser() {
     const password = document.getElementById("create-password").value.trim();
     const role = document.getElementById("create-role").value;
 
-    if (!name || !email || !password) return alert("Semua field wajib diisi!");
+    if (!name || !email || !password)
+        return alert("Please fill in all required fields!");
+    if (password.length < 8) {
+        return alert("Password must be at least 8 characters long!");
+    }
+    
 
     showLoading();
 
@@ -204,7 +209,7 @@ async function createUser() {
         const newUser = resultUser?.data?.createUser;
 
         if (!newUser) {
-            alert("Gagal membuat user");
+            alert("Failed to create user");
             hideLoading();
             return;
         }
@@ -212,15 +217,14 @@ async function createUser() {
         const mutationProfile = `
             mutation($input: CreateUsersProfileInput!) {
                 createUsersProfile(input: $input) {
-                    id user_id nama
+                    id user_id nickname
                 }
             }
         `;
         const variablesProfile = {
             input: {
                 user_id: newUser.id,
-                nama: newUser.name,
-                email: null,
+                nickname: newUser.name,
                 telepon: null,
                 alamat: null,
                 foto: null,
@@ -238,7 +242,7 @@ async function createUser() {
 
         const resultProfile = await resProfile.json();
         if (!resultProfile?.data?.createUsersProfile) {
-            alert("User berhasil dibuat, tapi gagal membuat profile");
+            alert("User created successfully, but failed to create profile");
         }
 
         window.dispatchEvent(
@@ -247,7 +251,7 @@ async function createUser() {
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
-        alert("Terjadi kesalahan saat membuat user");
+        alert("An error occurred while creating the user");
         hideLoading();
     }
 }
@@ -277,7 +281,7 @@ async function updateUser() {
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
-        alert("Gagal update data");
+        alert("Failed to update data");
         hideLoading();
     }
 }
@@ -292,7 +296,7 @@ function renderUserTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 text-red-500" colspan="5">Data tidak ditemukan</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">no related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -365,13 +369,13 @@ function renderUserTable(result, tableId, isActive) {
                     item.role === "admin"
                         ? "bg-yellow-100 text-yellow-600"
                         : "bg-blue-100 text-blue-600"
-                    }">
+                }">
                     ${item.role}
                 </span>
             </td>
             ${
                 window.currentUserRole === "admin"
-                    ? `<td class="p-4 text-center space-x-1">${actions}</td>`
+                    ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }
         </tr>

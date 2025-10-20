@@ -11,9 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class UsersProfile extends Model
 {
     use HasFactory, SoftDeletes;
+    
     protected $table = 'users_profile';
     protected $primaryKey = 'id';
-    protected $fillable = ['user_id','nama','email','telepon','alamat','foto'];
+    protected $fillable = ['user_id', 'nickname', 'telepon', 'alamat', 'foto'];
 
     public function user()
     {
@@ -25,4 +26,3 @@ class UsersProfile extends Model
         return $this->hasOne(TenagaMedis::class, 'profile_id');
     }
 }
-
