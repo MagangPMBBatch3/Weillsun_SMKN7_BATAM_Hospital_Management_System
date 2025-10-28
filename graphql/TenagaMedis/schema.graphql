@@ -6,6 +6,8 @@ type TenagaMedis {
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
+
+    profile: UsersProfile @belongsTo
 }
 
 input CreateTenagaMedisInput {
@@ -36,13 +38,22 @@ extend type Query {
     allTenagaMedis: [TenagaMedis!]!
         @all(model: "App\\Models\\TenagaMedis\\TenagaMedis")
 
-    allTenagaMedisPaginator(
+    allTenagaMedisPaginate(
         search: String
         page: Int
         first: Int
     ): TenagaMedisPaginator
         @field(
             resolver: "App\\GraphQL\\TenagaMedis\\Queries\\TenagaMedisQuery@all"
+    )
+
+    allTenagaMedisArchive(
+        search: String
+        page: Int
+        first: Int
+    ): TenagaMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\TenagaMedis\\Queries\\TenagaMedisQuery@allArchive"
         )
 
     TenagaMedis(id: ID! @eq(key: "id")): TenagaMedis

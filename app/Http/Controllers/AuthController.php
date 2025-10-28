@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UsersProfile\UsersProfile;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -56,7 +57,11 @@ class AuthController extends Controller
     }
 
     public function tenagaMedis(){
-        return view('tenagaMedis.index');
+        $profiles = UsersProfile::select('id', 'nickname')->whereDoesntHave('tenagaMedis')
+        ->get();
+        $Allprofiles = UsersProfile::select('id', 'nickname')
+        ->get();
+        return view('tenagaMedis.index', compact('profiles', 'Allprofiles'));
     }
 
     public function usersProfile(){

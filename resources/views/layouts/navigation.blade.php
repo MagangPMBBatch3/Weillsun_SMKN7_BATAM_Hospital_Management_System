@@ -48,6 +48,11 @@
                                 <x-dropdown-link :href="route('usersProfile.index')">
                                     {{ __('User Profiles') }}
                                 </x-dropdown-link>
+
+                                {{-- Tenaga Medis --}}
+                                <x-dropdown-link :href="route('tenagaMedis.index')">
+                                    {{ __('Tenaga Medis') }}
+                                </x-dropdown-link>
                                 
                             </x-slot>
                         </x-dropdown>

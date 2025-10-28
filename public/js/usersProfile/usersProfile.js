@@ -91,11 +91,10 @@ async function loadDataPaginate(page = 1, isActive = true) {
                         id
                         user_id
                         nickname
-                        
                         alamat
                         foto
                         telepon
-                        user { role email}
+                        user { role email }
                     }
                     paginatorInfo {
                         currentPage
@@ -154,7 +153,7 @@ function renderUsersProfileTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <div class="col-span-full text-center py-8">
-                <p class="text-white bg-red-500 rounded-md px-6 py-2 w-fit mx-auto text-lg italic font-semibold capitalize">no related data found</p>
+                <p class="text-white bg-red-500 rounded-md px-6 py-2 w-fit mx-auto text-lg italic font-semibold capitalize">No related data found</p>
             </div>
         `;
 
@@ -183,7 +182,11 @@ function renderUsersProfileTable(result, tableId, isActive) {
         let actions = "";
         if (isActive) {
             actions = `
-                <a onclick='openEditUsersProfileModal(${item.id}, "${item.nickname}", "${item.user?.email || ""}", "${item.telepon || ""}", "${item.alamat || ""}", "${item.user?.role || ""}")'>
+                <a onclick='openEditUsersProfileModal(${item.id}, "${
+                item.nickname
+            }", "${item.user?.email || ""}", "${item.telepon || ""}", "${
+                item.alamat || ""
+            }", "${item.user?.role || ""}")'>
                     <i class='bx bx-edit text-xl px-2 text-white bg-green-600 hover:text-green-600 hover:border-2 hover:border-green-600 rounded-full py-1 hover:bg-white hover:border-dashed'></i>
                 </a>
                 
@@ -207,7 +210,11 @@ function renderUsersProfileTable(result, tableId, isActive) {
             <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-2xl transition duration-300 w-[12rem]">
                 <div class="flex flex-col items-center p-4">
                     <div class="relative w-28 h-28 mx-auto">
-                        <img src="${item.foto ? '/storage/' + item.foto : '/default_pp.jpg'}" 
+                        <img src="${
+                            item.foto
+                                ? "/storage/" + item.foto
+                                : "/default_pp.jpg"
+                        }" 
                             id="usersProfileFotoPreview-${item.id}" 
                                 class="w-28 h-28 rounded-full mx-auto object-cover" 
                                 alt="User Photo">
@@ -217,7 +224,9 @@ function renderUsersProfileTable(result, tableId, isActive) {
                             <i class='bx bxs-edit-alt text-md'></i>
                         </button>
 
-                        <input type="file" id="addUsersProfileFoto-${item.id}" name="foto" class="hidden" accept="image/*" />
+                        <input type="file" id="addUsersProfileFoto-${
+                            item.id
+                        }" name="foto" class="hidden" accept="image/*" />
                     </div>
 
 
@@ -425,7 +434,6 @@ async function forceDeleteUsersProfile(id) {
     }
 }
 
-
 async function openEditUsersProfileModal(
     id,
     nickname,
@@ -484,7 +492,6 @@ async function updateUsersProfile() {
             nickname,
             telepon,
             alamat,
-            
         },
     };
 

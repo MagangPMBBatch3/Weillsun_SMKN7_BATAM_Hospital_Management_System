@@ -139,8 +139,6 @@
         </x-modal>
     </div>
 
-
-
     {{-- script --}}
     <script>
         window.currentUserRole = "{{ Auth::user()->role }}";

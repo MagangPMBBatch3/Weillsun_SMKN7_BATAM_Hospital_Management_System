@@ -49,8 +49,8 @@
 
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" inputmode="email" class="mt-1 bg-gray-100 block w-full"
-                :value="old('email', $user->email)" readonly autocomplete="username" />
+            <x-text-input id="email" name="email" type="email" inputmode="email"
+                class="mt-1 bg-gray-100 block w-full" :value="old('email', $user->email)" readonly autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             <div class="mt-4">
@@ -133,7 +133,7 @@
 
     <x-modal name="create-tenaga-medis" focusable>
         <div class="p-6">
-            <form onsubmit="event.preventDefault(); createTenagaMedis(); ">
+            <form onsubmit="createTenagaMedis(); event.preventDefault();">
 
                 <x-loading></x-loading>
 
@@ -147,7 +147,7 @@
                         class="border p-2 w-full rounded" required />
 
                     <x-input-label>No STR</x-input-label>
-                    <x-text-input id="create-noStr" type="number" placeholder="Enter Your STR number..."
+                    <x-text-input id="create-no-str" type="number" placeholder="Enter Your STR number..."
                         class="border p-2 w-full rounded" required />
 
                     <div class="flex justify-end mt-4">
@@ -159,6 +159,81 @@
         </div>
     </x-modal>
 
-    <script src="{{ asset('js/tenagaMedis/tenagaMedis.js') }}"></script>
+    <script>
+        const API_URL = "/graphql";
+
+        function showLoading() {
+            document.body.style.overflow = "hidden";
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) overlay.classList.remove("hidden");
+        }
+
+        function hideLoading() {
+            document.body.style.overflow = "";
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) overlay.classList.add("hidden");
+        }
+
+        async function createTenagaMedis() {
+            const profile_id = document.getElementById("create-profile-id").value.trim();
+            const spesialisasi = document.getElementById("create-spesialisasi").value.trim();
+            const no_str = document.getElementById("create-no-str").value.trim();
+
+            if (!spesialisasi || !no_str)
+                return alert("Please fill in all required fields!");
+
+            showLoading();
+
+            const mutationTenagaMedis = `
+                mutation($input: CreateTenagaMedisInput!) {
+                    createTenagaMedis(input: $input) {
+                        id spesialisasi no_str profile_id
+                    }
+                }
+            `;
+            const variablesTenagaMedis = {
+                input: {
+                    profile_id,
+                    spesialisasi,
+                    no_str
+                },
+            };
+
+            try {
+                const resTenagaMedis = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        query: mutationTenagaMedis,
+                        variables: variablesTenagaMedis,
+                    }),
+                });
+
+                const resultTenagaMedis = await resTenagaMedis.json();
+                const dataTenagaMedis = resultTenagaMedis?.data?.createTenagaMedis;
+
+                if (dataTenagaMedis) {
+                    window.dispatchEvent(
+                        new CustomEvent("close-modal", {
+                            detail: "create-tenaga-medis"
+                        })
+                    );
+                        
+                
+                } else {
+                    console.error("GraphQL Error:", resultTenagaMedis.errors);
+                    alert("Failed to create Tenaga Medis!");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while creating the data");
+            } finally {
+                hideLoading();
+            }
+            window.location.reload();
+        }
+    </script>
 
 </section>
