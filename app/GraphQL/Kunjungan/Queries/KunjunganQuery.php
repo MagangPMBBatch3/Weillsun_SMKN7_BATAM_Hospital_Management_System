@@ -6,7 +6,7 @@ use App\Models\Kunjungan\Kunjungan;
 
 class KunjunganQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = Kunjungan::query();
 
@@ -17,9 +17,9 @@ class KunjunganQuery
                 $q->where('tanggal_kunjungan', 'like', "%$search%")
                     ->orWhere('keluhan', 'like', "%$search%")
                     ->orWhere('biaya_konsultasi', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class KunjunganQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return Kunjungan::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return Kunjungan::onlyTrashed();
+    }
 }

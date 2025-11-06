@@ -6,7 +6,7 @@ use App\Models\Supplier\Supplier;
 
 class SupplierQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = Supplier::query();
 
@@ -18,9 +18,9 @@ class SupplierQuery
                     ->orWhere('alamat', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
                     ->orWhere('telepon', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -38,8 +38,8 @@ class SupplierQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return Supplier::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return Supplier::onlyTrashed();
+    }
 }

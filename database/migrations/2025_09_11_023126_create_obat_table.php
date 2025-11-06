@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('stok')->default(0);
             $table->decimal('harga', 10, 2);
             $table->decimal('markup_persen', 5, 2);
+            $table->decimal('harga_jual', 10, 2);
             $table->timestamps();
             $table->softDeletes();
         });

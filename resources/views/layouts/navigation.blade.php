@@ -51,7 +51,17 @@
 
                                 {{-- Tenaga Medis --}}
                                 <x-dropdown-link :href="route('tenagaMedis.index')">
-                                    {{ __('Tenaga Medis') }}
+                                    {{ __('Medical Personnels') }}
+                                </x-dropdown-link>
+
+                                {{-- Pasien --}}
+                                <x-dropdown-link :href="route('pasien.index')">
+                                    {{ __('Patient') }}
+                                </x-dropdown-link>
+                                
+                                {{-- Obat --}}
+                                <x-dropdown-link :href="route('obat.index')">
+                                    {{ __('Medicine') }}
                                 </x-dropdown-link>
                                 
                             </x-slot>

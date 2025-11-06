@@ -5,6 +5,7 @@ type Obat {
     stok: Int!
     harga: Float
     markup_persen: Float!
+    harga_jual: Float
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
@@ -17,6 +18,7 @@ input CreateObatInput {
     stok: Int!
     harga: Float!
     markup_persen: Float!
+    harga_jual: Float!
 }
 input UpdateObatInput {
     nama_obat: String
@@ -24,6 +26,7 @@ input UpdateObatInput {
     stok: Int
     harga: Float
     markup_persen: Float
+    harga_jual: Float
 }
 
 type PageInfo {
@@ -43,14 +46,23 @@ extend type Query {
     allObat: [Obat!]!
         @all(model: "App\\Models\\Obat\\Obat")
 
-    allObatPaginator(
+    allObatPaginate(
         search: String
         page: Int
         first: Int
     ): ObatPaginator
         @field(
             resolver: "App\\GraphQL\\Obat\\Queries\\ObatQuery@all"
-        )
+    )
+
+    allObatArchive(
+        search: String
+        page: Int
+        first: Int
+    ): ObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\Obat\\Queries\\ObatQuery@allArchive"
+    )
 
     Obat(id: ID! @eq(key: "id")): Obat
         @find(model: "App\\Models\\Obat\\Obat")

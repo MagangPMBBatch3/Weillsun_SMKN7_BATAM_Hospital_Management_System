@@ -6,7 +6,7 @@ use App\Models\ResepObat\ResepObat;
 
 class ResepObatQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = ResepObat::query();
 
@@ -17,9 +17,9 @@ class ResepObatQuery
                 $q->where('obat_id', 'like', "%$search%")
                     ->orWhere('jumlah', 'like', "%$search%")
                     ->orWhere('aturan_pakai', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class ResepObatQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return ResepObat::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return ResepObat::onlyTrashed();
+    }
 }

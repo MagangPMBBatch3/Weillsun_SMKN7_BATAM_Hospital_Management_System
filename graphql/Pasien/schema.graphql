@@ -47,12 +47,21 @@ extend type Query {
     allPasien: [Pasien!]!
     @all(model: "App\\Models\\Pasien\\Pasien")
 
-    allPasienPaginator(
+    allPasienPaginate(
         search: String
         page: Int
         first: Int
     ): PasienPaginator
      @field(resolver: "App\\GraphQL\\Pasien\\Queries\\PasienQuery@all")
+
+    allPasienArchive(
+        search: String
+        page: Int
+        first: Int
+    ): PasienPaginator
+        @field(
+            resolver: "App\\GraphQL\\Pasien\\Queries\\PasienQuery@allArchive"
+    )
 
      pasien(id: ID! @eq(key: "id")): Pasien
      @find(model: "App\\Models\\Pasien\\Pasien")

@@ -6,7 +6,7 @@ use App\Models\LabPemeriksaan\LabPemeriksaan;
 
 class LabPemeriksaanQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = LabPemeriksaan::query();
 
@@ -18,9 +18,9 @@ class LabPemeriksaanQuery
                     ->orWhere('hasil', 'like', "%$search%")
                     ->orWhere('tanggal', 'like', "%$search%")
                     ->orWhere('biaya_lab', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -38,8 +38,8 @@ class LabPemeriksaanQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return LabPemeriksaan::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return LabPemeriksaan::onlyTrashed();
+    }
 }

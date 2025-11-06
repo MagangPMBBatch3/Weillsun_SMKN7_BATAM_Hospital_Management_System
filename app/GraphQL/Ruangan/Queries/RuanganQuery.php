@@ -17,9 +17,9 @@ class RuanganQuery
                 $q->where('nama_ruangan', 'like', "%$search%")
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class RuanganQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return Ruangan::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return Ruangan::onlyTrashed();
+    }
 }

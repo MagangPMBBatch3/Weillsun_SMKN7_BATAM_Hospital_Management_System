@@ -6,7 +6,7 @@ use App\Models\PembayaranSupplier\PembayaranSupplier;
 
 class PembayaranSupplierQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = PembayaranSupplier::query();
 
@@ -17,9 +17,9 @@ class PembayaranSupplierQuery
                 $q->where('jumlah_bayar', 'like', "%$search%")
                     ->orWhere('metode_bayar', 'like', "%$search%")
                     ->orWhere('tanggal_bayar', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class PembayaranSupplierQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return PembayaranSupplier::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return PembayaranSupplier::onlyTrashed();
+    }
 }

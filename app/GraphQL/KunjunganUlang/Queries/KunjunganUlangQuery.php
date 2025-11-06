@@ -6,7 +6,7 @@ use App\Models\KunjunganUlang\KunjunganUlang;
 
 class KunjunganUlangQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = KunjunganUlang::query();
 
@@ -17,9 +17,9 @@ class KunjunganUlangQuery
                 $q->where('tanggal_ulang', 'like', "%$search%")
                     ->orWhere('jam_ulang', 'like', "%$search%")
                     ->orWhere('catatan', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class KunjunganUlangQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return KunjunganUlang::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return KunjunganUlang::onlyTrashed();
+    }
 }

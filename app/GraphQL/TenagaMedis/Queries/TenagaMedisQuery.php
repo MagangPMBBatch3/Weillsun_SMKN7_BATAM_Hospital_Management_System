@@ -6,7 +6,7 @@ use App\Models\TenagaMedis\TenagaMedis;
 
 class TenagaMedisQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = TenagaMedis::query();
 
@@ -19,11 +19,11 @@ class TenagaMedisQuery
                     ->orWhere('spesialisasi', 'like', "%$search%")
                     ->orWhere('no_str', 'like', "%$search%");
             })
-            ->orWhereHas('profile', function ($q) use ($search) {
+                ->orWhereHas('profile', function ($q) use ($search) {
                     $q->where('nickname', 'like', "%$search%");
                 });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -42,10 +42,10 @@ class TenagaMedisQuery
     }
 
     public function allArchive($_, array $args)
-   {
-       $query = TenagaMedis::onlyTrashed();
+    {
+        $query = TenagaMedis::onlyTrashed();
 
-       if (!empty($args['search'])) {
+        if (!empty($args['search'])) {
             $search = $args['search'];
 
             $query->where(function ($q) use ($search) {
@@ -54,11 +54,11 @@ class TenagaMedisQuery
                     ->orWhere('spesialisasi', 'like', "%$search%")
                     ->orWhere('no_str', 'like', "%$search%");
             })
-            ->orWhereHas('profile', function ($q) use ($search) {
+                ->orWhereHas('profile', function ($q) use ($search) {
                     $q->where('nickname', 'like', "%$search%");
                 });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -74,5 +74,5 @@ class TenagaMedisQuery
                 'total' => $paginator->total(),
             ],
         ];
-   }
+    }
 }

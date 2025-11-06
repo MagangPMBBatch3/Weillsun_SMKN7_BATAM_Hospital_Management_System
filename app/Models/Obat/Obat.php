@@ -13,7 +13,7 @@ class Obat extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'obat';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama_obat', 'jenis_obat', 'stok', 'harga', 'markup_persen'];
+    protected $fillable = ['nama_obat', 'jenis_obat', 'stok', 'harga', 'markup_persen', 'harga_jual'];
 
     protected $casts = [
         'created_at' => 'datetime',

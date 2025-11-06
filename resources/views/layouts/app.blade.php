@@ -22,7 +22,7 @@
     <style>
         .loader {
             --cloud-color: #4387f4;
-            --arrows-color: #666769;
+            /* --arrows-color: #2563EB; */
             --time-animation: 1s;
             transform: scale(1.2);
         }

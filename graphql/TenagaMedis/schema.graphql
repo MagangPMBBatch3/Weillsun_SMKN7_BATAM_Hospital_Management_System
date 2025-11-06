@@ -54,7 +54,7 @@ extend type Query {
     ): TenagaMedisPaginator
         @field(
             resolver: "App\\GraphQL\\TenagaMedis\\Queries\\TenagaMedisQuery@allArchive"
-        )
+    )
 
     TenagaMedis(id: ID! @eq(key: "id")): TenagaMedis
         @find(model: "App\\Models\\TenagaMedis\\TenagaMedis")

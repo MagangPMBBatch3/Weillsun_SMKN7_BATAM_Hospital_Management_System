@@ -18,9 +18,9 @@ class DetailPembayaranPasienQuery
                     ->orWhere('jumlah', 'like', "%$search%")
                     ->orWhere('harga_satuan', 'like', "%$search%")
                     ->orWhere('subtotal', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -38,8 +38,8 @@ class DetailPembayaranPasienQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return DetailPembayaranPasien::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return DetailPembayaranPasien::onlyTrashed();
+    }
 }

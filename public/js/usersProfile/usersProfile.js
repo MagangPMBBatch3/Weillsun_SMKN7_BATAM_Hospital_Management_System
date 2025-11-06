@@ -14,6 +14,37 @@ function hideLoading() {
     if (overlay) overlay.classList.add("hidden");
 }
 
+// Pagination controls
+function prevPage() {
+    if (currentPageActive > 1) {
+        loadDataPaginate(currentPageActive - 1, true);
+    }
+}
+
+function nextPage() {
+    loadDataPaginate(currentPageActive + 1, true);
+}
+
+function prevPageArchive() {
+    if (currentPageArchive > 1) {
+        loadDataPaginate(currentPageArchive - 1, false);
+    }
+}
+
+function nextPageArchive() {
+    loadDataPaginate(currentPageArchive + 1, false);
+}
+
+// Search functionality
+let searchTimeout = null;
+function searchUsersProfile() {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        loadDataPaginate(1, true);
+        loadDataPaginate(1, false);
+    }, 500);
+}
+
 // Load data UsersProfile (Aktif & Arsip sekaligus dengan Pagination)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
@@ -522,37 +553,6 @@ async function updateUsersProfile() {
     } finally {
         hideLoading();
     }
-}
-
-// Pagination controls
-function prevPage() {
-    if (currentPageActive > 1) {
-        loadDataPaginate(currentPageActive - 1, true);
-    }
-}
-
-function nextPage() {
-    loadDataPaginate(currentPageActive + 1, true);
-}
-
-function prevPageArchive() {
-    if (currentPageArchive > 1) {
-        loadDataPaginate(currentPageArchive - 1, false);
-    }
-}
-
-function nextPageArchive() {
-    loadDataPaginate(currentPageArchive + 1, false);
-}
-
-// Search functionality
-let searchTimeout = null;
-function searchUsersProfile() {
-    if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        loadDataPaginate(1, true);
-        loadDataPaginate(1, false);
-    }, 500);
 }
 
 // Initialize on page load

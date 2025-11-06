@@ -6,7 +6,7 @@ use App\Models\PembayaranPasien\PembayaranPasien;
 
 class PembayaranPasienQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = PembayaranPasien::query();
 
@@ -17,9 +17,9 @@ class PembayaranPasienQuery
                 $q->where('total_biaya', 'like', "%$search%")
                     ->orWhere('metode_bayar', 'like', "%$search%")
                     ->orWhere('tanggal_bayar', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class PembayaranPasienQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return PembayaranPasien::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return PembayaranPasien::onlyTrashed();
+    }
 }

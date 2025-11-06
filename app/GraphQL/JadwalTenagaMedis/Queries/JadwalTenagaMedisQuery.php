@@ -6,7 +6,7 @@ use App\Models\JadwalTenagaMedis\JadwalTenagaMedis;
 
 class JadwalTenagaMedisQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = JadwalTenagaMedis::query();
 
@@ -17,9 +17,9 @@ class JadwalTenagaMedisQuery
                 $q->where('tanggal', 'like', "%$search%")
                     ->orWhere('jam_mulai', 'like', "%$search%")
                     ->orWhere('jam_selesai', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class JadwalTenagaMedisQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return JadwalTenagaMedis::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return JadwalTenagaMedis::onlyTrashed();
+    }
 }

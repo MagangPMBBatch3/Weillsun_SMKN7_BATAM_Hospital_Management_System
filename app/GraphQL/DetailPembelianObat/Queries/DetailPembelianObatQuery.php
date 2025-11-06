@@ -6,7 +6,7 @@ use App\Models\DetailPembelianObat\DetailPembelianObat;
 
 class DetailPembelianObatQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = DetailPembelianObat::query();
 
@@ -17,9 +17,9 @@ class DetailPembelianObatQuery
                 $q->where('pembayaran_id', 'like', "%$search%")
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class DetailPembelianObatQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return DetailPembelianObat::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return DetailPembelianObat::onlyTrashed();
+    }
 }

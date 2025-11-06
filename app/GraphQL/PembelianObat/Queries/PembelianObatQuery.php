@@ -6,7 +6,7 @@ use App\Models\PembelianObat\PembelianObat;
 
 class PembelianObatQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = PembelianObat::query();
 
@@ -17,9 +17,9 @@ class PembelianObatQuery
                 $q->where('tanggal', 'like', "%$search%")
                     ->orWhere('total_biaya', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class PembelianObatQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return PembelianObat::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return PembelianObat::onlyTrashed();
+    }
 }

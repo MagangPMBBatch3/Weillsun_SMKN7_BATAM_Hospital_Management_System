@@ -6,7 +6,7 @@ use App\Models\RawatInap\RawatInap;
 
 class RawatInapQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = RawatInap::query();
 
@@ -17,9 +17,9 @@ class RawatInapQuery
                 $q->where('tanggal_masuk', 'like', "%$search%")
                     ->orWhere('tanggal_keluar', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class RawatInapQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return RawatInap::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return RawatInap::onlyTrashed();
+    }
 }

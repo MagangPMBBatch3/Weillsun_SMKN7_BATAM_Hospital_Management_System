@@ -6,7 +6,7 @@ use App\Models\Radiologi\Radiologi;
 
 class RadiologiQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = Radiologi::query();
 
@@ -18,9 +18,9 @@ class RadiologiQuery
                     ->orWhere('hasil', 'like', "%$search%")
                     ->orWhere('tanggal', 'like', "%$search%")
                     ->orWhere('biaya_radiologi', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -38,8 +38,8 @@ class RadiologiQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return Radiologi::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return Radiologi::onlyTrashed();
+    }
 }

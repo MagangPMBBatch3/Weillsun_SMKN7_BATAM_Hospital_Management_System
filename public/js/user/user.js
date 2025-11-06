@@ -14,6 +14,29 @@ function hideLoading() {
     if (overlay) overlay.classList.add("hidden");
 }
 
+function prevPage() {
+    if (currentPageActive > 1) loadDataPaginate(currentPageActive - 1, true);
+}
+function nextPage() {
+    loadDataPaginate(currentPageActive + 1, true);
+}
+
+function prevPageArchive() {
+    if (currentPageArchive > 1) loadDataPaginate(currentPageArchive - 1, false);
+}
+function nextPageArchive() {
+    loadDataPaginate(currentPageArchive + 1, false);
+}
+
+let searchTimeout = null;
+function searchUser() {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        loadDataPaginate(1, true);
+        loadDataPaginate(1, false);
+    }, 500);
+}
+
 // Load data User (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
@@ -110,66 +133,6 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Hapus
-async function hapusUser(id) {
-    if (!confirm("Are you sure you want to add to the archive??")) return;
-
-    showLoading();
-    const mutation = `mutation($id: ID!){ deleteUser(id: $id){ id } }`;
-    try {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: mutation, variables: { id } }),
-        });
-        loadDataPaginate(currentPageActive, true);
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to delete data");
-        hideLoading();
-    }
-}
-
-// restore
-async function restoreUser(id) {
-    if (!confirm("Are you sure you want to restore this data?")) return;
-
-    showLoading();
-    const mutation = `mutation($id: ID!){ restoreUser(id: $id){ id } }`;
-    try {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: mutation, variables: { id } }),
-        });
-        loadDataPaginate(currentPageArchive, false);
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed restore data");
-        hideLoading();
-    }
-}
-
-// force delete
-async function forceDeleteUser(id) {
-    if (!confirm("Are you sure you want to delete this data??")) return;
-
-    showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteUser(id: $id){ id } }`;
-    try {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: mutation, variables: { id } }),
-        });
-        loadDataPaginate(currentPageArchive, false);
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to delete permanent data");
-        hideLoading();
-    }
-}
-
 // Create
 async function createUser() {
     const name = document.getElementById("create-name").value.trim();
@@ -253,6 +216,16 @@ async function createUser() {
         alert("An error occurred while creating the user");
         hideLoading();
     }
+}
+
+function openEditModal(id, name, email, role) {
+    document.getElementById("edit-id").value = id;
+    document.getElementById("edit-name").value = name;
+    document.getElementById("edit-email").value = email;
+    document.getElementById("edit-role").value = role;
+    window.dispatchEvent(
+        new CustomEvent("open-modal", { detail: "edit-user" })
+    );
 }
 
 // Update
@@ -400,37 +373,65 @@ function renderUserTable(result, tableId, isActive) {
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
 
-function prevPage() {
-    if (currentPageActive > 1) loadDataPaginate(currentPageActive - 1, true);
-}
-function nextPage() {
-    loadDataPaginate(currentPageActive + 1, true);
+
+// Hapus
+async function hapusUser(id) {
+    if (!confirm("Are you sure you want to add to the archive??")) return;
+
+    showLoading();
+    const mutation = `mutation($id: ID!){ deleteUser(id: $id){ id } }`;
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: mutation, variables: { id } }),
+        });
+        loadDataPaginate(currentPageActive, true);
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to delete data");
+        hideLoading();
+    }
 }
 
-function prevPageArchive() {
-    if (currentPageArchive > 1) loadDataPaginate(currentPageArchive - 1, false);
-}
-function nextPageArchive() {
-    loadDataPaginate(currentPageArchive + 1, false);
+// restore
+async function restoreUser(id) {
+    if (!confirm("Are you sure you want to restore this data?")) return;
+
+    showLoading();
+    const mutation = `mutation($id: ID!){ restoreUser(id: $id){ id } }`;
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: mutation, variables: { id } }),
+        });
+        loadDataPaginate(currentPageArchive, false);
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed restore data");
+        hideLoading();
+    }
 }
 
-let searchTimeout = null;
-function searchUser() {
-    if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        loadDataPaginate(1, true);
-        loadDataPaginate(1, false);
-    }, 500);
-}
+// force delete
+async function forceDeleteUser(id) {
+    if (!confirm("Are you sure you want to delete this data??")) return;
 
-function openEditModal(id, name, email, role) {
-    document.getElementById("edit-id").value = id;
-    document.getElementById("edit-name").value = name;
-    document.getElementById("edit-email").value = email;
-    document.getElementById("edit-role").value = role;
-    window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-user" })
-    );
+    showLoading();
+    const mutation = `mutation($id: ID!){ forceDeleteUser(id: $id){ id } }`;
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: mutation, variables: { id } }),
+        });
+        loadDataPaginate(currentPageArchive, false);
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to delete permanent data");
+        hideLoading();
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => loadDataPaginate(1, true));

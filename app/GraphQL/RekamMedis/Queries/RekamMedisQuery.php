@@ -6,7 +6,7 @@ use App\Models\RekamMedis\RekamMedis;
 
 class RekamMedisQuery
 {
-    public function all($_, array $args)  
+    public function all($_, array $args)
     {
         $query = RekamMedis::query();
 
@@ -17,9 +17,9 @@ class RekamMedisQuery
                 $q->where('tanggal', 'like', "%$search%")
                     ->orWhere('diagnosis', 'like', "%$search%")
                     ->orWhere('tindakan', 'like', "%$search%");
-            }); 
+            });
         }
-        
+
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
@@ -37,8 +37,8 @@ class RekamMedisQuery
         ];
     }
 
-    public function allArsip($_, array $args)
-   {
-       return RekamMedis::onlyTrashed()->get();
-   }
+    public function allArchive($_, array $args)
+    {
+        return RekamMedis::onlyTrashed();
+    }
 }
