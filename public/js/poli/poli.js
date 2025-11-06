@@ -28,8 +28,10 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
+//  ------------------------- POLI
+
 let searchTimeout = null;
-function searchPasien() {
+function searchPoli() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -37,7 +39,7 @@ function searchPasien() {
     }, 500);
 }
 
-// Load data Pasien (Aktif & Arsip sekaligus)
+// Load data Poli (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -56,9 +58,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allPasienPaginate(first: $first, page: $page, search: $search){
+                allPoliPaginate(first: $first, page: $page, search: $search){
                     data { 
-                            id nama tanggal_lahir jenis_kelamin alamat telepon
+                            id nama_poli deskripsi
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -87,18 +89,18 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderPasienTable(
-            dataActive?.data?.allPasienPaginate || {},
-            "dataPasienAktif",
+        renderPoliTable(
+            dataActive?.data?.allPoliPaginate || {},
+            "dataPoliAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allPasienArchive(first: $first, page: $page, search: $search){
+                allPoliArchive(first: $first, page: $page, search: $search){
                     data { 
-                            id nama tanggal_lahir jenis_kelamin alamat telepon
+                            id nama_poli deskripsi
                         }
                     paginatorInfo { 
                             currentPage 
@@ -127,9 +129,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderPasienTable(
-            dataArchive?.data?.allPasienArchive || {},
-            "dataPasienArsip",
+        renderPoliTable(
+            dataArchive?.data?.allPoliArchive || {},
+            "dataPoliArsip",
             false
         );
     } catch (error) {
@@ -141,97 +143,84 @@ async function loadDataPaginate(page = 1, isActive = true) {
 }
 
 // Create
-async function createPasien() {
-    const nama = document.getElementById("create-name").value.trim();
-    const tanggal_lahir = document.getElementById("create-birth").value;
-    const jenis_kelamin = document.getElementById("create-gender").value;
-    const alamat = document.getElementById("create-address").value.trim();
-    const telepon = document.getElementById("create-phone").value.trim();
+async function createPoli() {
+    const nama_poli = document.getElementById("create-nama_poli").value.trim();
+    const deskripsi = document.getElementById("create-deskripsi").value.trim();
 
-    if (!nama || !tanggal_lahir || !jenis_kelamin || !alamat || !telepon)
+
+    if (!nama_poli || !deskripsi)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationPasien = `
-        mutation($input: CreatePasienInput!) {
-            createPasien(input: $input) {
+    const mutationPoli = `
+        mutation($input: CreatePoliInput!) {
+            createPoli(input: $input) {
                 id
-                nama
-                tanggal_lahir
-                jenis_kelamin
-                alamat
-                telepon
+                nama_poli
+                deskripsi
             }
         }
     `;
-    const variablesPasien = {
-        input: { nama, tanggal_lahir, jenis_kelamin, alamat, telepon },
+    const variablesPoli = {
+        input: { nama_poli, deskripsi },
     };
 
     try {
-        const resPasien = await fetch(API_URL, {
+        const resPoli = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationPasien,
-                variables: variablesPasien,
+                query: mutationPoli,
+                variables: variablesPoli,
             }),
         });
 
-        const resultPasien = await resPasien.json();
-        const dataPasien = resultPasien?.data?.createPasien;
+        const resultPoli = await resPoli.json();
+        const dataPoli = resultPoli?.data?.createPoli;
 
-        if (dataPasien) {
+        if (dataPoli) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-pasien" })
+                new CustomEvent("close-modal", { detail: "create-poli" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultPasien.errors);
-            alert("Failed to create Patient!");
+            console.error("GraphQL Error:", resultPoli.errors);
+            alert("Failed to create Clinic!");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the patient");
+        alert("An error occurred while creating the clinic");
     } finally {
         hideLoading();
     }
 }
 
-function openEditModal(id, nama, tanggal_lahir, jenis_kelamin, alamat, telepon) {
+function openEditModal(id, nama_poli, deskripsi) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-name").value = nama;
-    document.getElementById("edit-birth").value = tanggal_lahir;
-    document.getElementById("edit-gender").value = jenis_kelamin;
-    document.getElementById("edit-address").value = alamat;
-    document.getElementById("edit-phone").value = telepon;
+    document.getElementById("edit-nama_poli").value = nama_poli;
+    document.getElementById("edit-deskripsi").value = deskripsi;
+
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-pasien" })
+        new CustomEvent("open-modal", { detail: "edit-poli" })
     );
 }
 
 // Update
-async function updatePasien() {
+async function updatePoli() {
     const id = document.getElementById("edit-id").value;
-    const nama = document.getElementById("edit-name").value.trim();
-    const tanggal_lahir = document.getElementById("edit-birth").value;
-    const jenis_kelamin = document.getElementById("edit-gender").value;
-    const alamat = document.getElementById("edit-address").value.trim();
-    const telepon = document.getElementById("edit-phone").value.trim();
+    const nama_poli = document.getElementById("edit-nama_poli").value.trim();
+    const deskripsi = document.getElementById("edit-deskripsi").value.trim();
 
-    if (!nama || !tanggal_lahir || !jenis_kelamin || !alamat || !telepon)
+    if (!nama_poli || !deskripsi)
         return alert("Please fill in all required fields!");
     showLoading();
 
-    const mutation = `mutation($id: ID!, $input: UpdatePasienInput!) { updatePasien(id: $id, input: $input) 
+    const mutation = `mutation($id: ID!, $input: UpdatePoliInput!) { updatePoli(id: $id, input: $input) 
                         { 
                             id 
-                            nama 
-                            tanggal_lahir 
-                            jenis_kelamin 
-                            alamat 
-                            telepon
+                            nama_poli 
+                            deskripsi
                         } 
                     }`;
     try {
@@ -240,11 +229,11 @@ async function updatePasien() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { nama, tanggal_lahir, jenis_kelamin, alamat, telepon } },
+                variables: { id, input: { nama_poli, deskripsi } },
             }),
         });
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-pasien" })
+            new CustomEvent("close-modal", { detail: "edit-poli" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -254,7 +243,7 @@ async function updatePasien() {
     }
 }
 
-function renderPasienTable(result, tableId, isActive) {
+function renderPoliTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -264,7 +253,7 @@ function renderPasienTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="4">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -298,21 +287,21 @@ function renderPasienTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.nama}', '${item.tanggal_lahir}', '${item.jenis_kelamin}', '${item.alamat}', '${item.telepon}')"
+                <button onclick="openEditModal(${item.id}, '${item.nama_poli}', '${item.deskripsi}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusPasien(${item.id})"
+                <button onclick="hapusPoli(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restorePasien(${item.id})"
+                <button onclick="restorePoli(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeletePasien(${item.id})"
+                <button onclick="forceDeletePoli(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -327,32 +316,11 @@ function renderPasienTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.nama
+                item.nama_poli
             }</td>
-            <td class="p-4 text-center text-base font-semibold">
+            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
                 ${
-                    item.tanggal_lahir
-                }
-            </td>
-            
-            <td class="p-4 text-center font-semibold capitalize">
-                <span class="px-3 py-1 rounded-full text-sm ${
-                    item.jenis_kelamin === "L"
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-pink-100 text-pink-600"
-                }">
-                    ${item.jenis_kelamin}
-                </span>
-            </td>
-
-            <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.alamat
-                }
-            </td>
-            <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.telepon
+                    item.deskripsi
                 }
             </td>
 
@@ -386,11 +354,11 @@ function renderPasienTable(result, tableId, isActive) {
 
 
 // Hapus
-async function hapusPasien(id) {
+async function hapusPoli(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deletePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deletePoli(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -406,11 +374,11 @@ async function hapusPasien(id) {
 }
 
 // restore
-async function restorePasien(id) {
+async function restorePoli(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restorePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restorePoli(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -426,11 +394,11 @@ async function restorePasien(id) {
 }
 
 // force delete
-async function forceDeletePasien(id) {
+async function forceDeletePoli(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeletePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeletePoli(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",

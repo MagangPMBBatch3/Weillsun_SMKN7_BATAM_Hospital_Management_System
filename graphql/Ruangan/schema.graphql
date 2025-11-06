@@ -35,12 +35,23 @@ type RuanganPaginator {
 extend type Query {
     allRuangan: [Ruangan!]! @all(model: "App\\Models\\Ruangan\\Ruangan")
 
-    allRuanganPaginator(
+    allRuanganPaginate(
         search: String
         page: Int
         first: Int
     ): RuanganPaginator
-        @field(resolver: "App\\GraphQL\\Ruangan\\Queries\\RuanganQuery@all")
+        @field(
+            resolver: "App\\GraphQL\\Ruangan\\Queries\\RuanganQuery@all"
+    )
+
+    allRuanganArchive(
+        search: String
+        page: Int
+        first: Int
+    ): RuanganPaginator
+        @field(
+            resolver: "App\\GraphQL\\Ruangan\\Queries\\RuanganQuery@allArchive"
+    )
 
     Ruangan(id: ID! @eq(key: "id")): Ruangan
         @find(model: "App\\Models\\Ruangan\\Ruangan")

@@ -140,6 +140,21 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
+    // Format dan unformat number
+
+    function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function unformatNumber(value) {
+        return value.replace(/\./g, "");
+    }
+
+    function filterAngka(str) {
+        // hapus semua karakter selain angka dan titik
+        return str.replace(/[^0-9.]/g, "");
+    }
+
 // Create
 async function createObat() {
     const nama_obat = document.getElementById("create-nama_obat").value.trim();
@@ -208,7 +223,7 @@ async function createObat() {
             loadDataPaginate(currentPageActive, true);
         } else {
             console.error("GraphQL Error:", resultObat.errors);
-            alert("Failed to create Patient!");
+            alert("Failed to create Medicine!");
         }
     } catch (error) {
         console.error("Error:", error);
@@ -218,63 +233,6 @@ async function createObat() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const hargaInput = document.getElementById("create-harga");
-    const markupInput = document.getElementById("create-markup_persen");
-    const hargaJualInput = document.getElementById("create-harga_jual");
-    const stokInput = document.getElementById("create-stok");
-
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
-
-    function hitungHargaJual() {
-        const harga = parseFloat(unformatNumber(hargaInput.value)) || 0;
-        const markup = parseFloat(unformatNumber(markupInput.value)) || 0;
-        const hargaJual = harga + (harga * markup) / 100;
-        hargaJualInput.value = formatNumber(hargaJual.toFixed(0));
-    }
-
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
-
-    // --- EVENT UNTUK HARGA ---
-    hargaInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-        hitungHargaJual();
-    });
-
-    // --- EVENT UNTUK MARKUP ---
-    markupInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-
-        if (value) {
-            let num = parseFloat(value);
-            if (num < 1) num = 1;
-            if (num > 100) num = 100;
-            e.target.value = formatNumber(num);
-        } else {
-            e.target.value = "";
-        }
-
-        hitungHargaJual();
-    });
-
-    // --- EVENT UNTUK STOK ---
-    stokInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-    });
-});
 
 function openEditModal(
     id,
@@ -288,10 +246,10 @@ function openEditModal(
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama_obat").value = nama_obat;
     document.getElementById("edit-jenis_obat").value = jenis_obat;
-    document.getElementById("edit-stok").value = stok;
-    document.getElementById("edit-harga").value = harga;
-    document.getElementById("edit-markup_persen").value = markup_persen;
-    document.getElementById("edit-harga_jual").value = harga_jual;
+    document.getElementById("edit-stok").value = formatNumber(stok);
+    document.getElementById("edit-harga").value = formatNumber(harga);
+    document.getElementById("edit-markup_persen").value = formatNumber(markup_persen);
+    document.getElementById("edit-harga_jual").value = formatNumber(harga_jual);
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-obat" })
     );
@@ -359,22 +317,22 @@ async function updateObat() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const hargaInput = document.getElementById("create-harga");
+    const markupInput = document.getElementById("create-markup_persen");
+    const hargaJualInput = document.getElementById("create-harga_jual");
+    const stokInput = document.getElementById("create-stok");
+
     const editHargaInput = document.getElementById("edit-harga");
     const editMarkupInput = document.getElementById("edit-markup_persen");
     const editHargaJualInput = document.getElementById("edit-harga_jual");
     const editStokInput = document.getElementById("edit-stok");
 
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
-
-    function filterAngka(str) {
-        // hanya izinkan angka dan titik
-        return str.replace(/[^0-9.]/g, "");
+    function hitungHargaJual() {
+        const harga = parseFloat(unformatNumber(hargaInput.value)) || 0;
+        const markup = parseFloat(unformatNumber(markupInput.value)) || 0;
+        const hargaJual = harga + (harga * markup) / 100;
+        hargaJualInput.value = formatNumber(hargaJual.toFixed(0));
     }
 
     function hitungEditHargaJual() {
@@ -384,7 +342,40 @@ document.addEventListener("DOMContentLoaded", () => {
         editHargaJualInput.value = formatNumber(hargaJual.toFixed(0));
     }
 
-    // --- EVENT UNTUK EDIT HARGA ---
+    // --- EVENT UNTUK HARGA ---
+    hargaInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+        hitungHargaJual();
+    });
+
+    // --- EVENT UNTUK MARKUP ---
+    markupInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+
+        if (value) {
+            let num = parseFloat(value);
+            if (num < 0) num = 0;
+            if (num > 100) num = 100;
+            e.target.value = formatNumber(num);
+        } else {
+            e.target.value = "";
+        }
+
+        hitungHargaJual();
+    });
+
+    // --- EVENT UNTUK STOK ---
+    stokInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+    // EDIT
+
+       // --- EVENT UNTUK EDIT HARGA ---
     editHargaInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         if (value) e.target.value = formatNumber(value);

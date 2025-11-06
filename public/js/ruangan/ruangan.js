@@ -28,8 +28,10 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
+//  -------------------------------- Ruangan --------------------------------------- \\
+
 let searchTimeout = null;
-function searchPasien() {
+function searchRuangan() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -37,7 +39,7 @@ function searchPasien() {
     }, 500);
 }
 
-// Load data Pasien (Aktif & Arsip sekaligus)
+// Load data Ruangan (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -56,9 +58,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allPasienPaginate(first: $first, page: $page, search: $search){
+                allRuanganPaginate(first: $first, page: $page, search: $search){
                     data { 
-                            id nama tanggal_lahir jenis_kelamin alamat telepon
+                            id nama_ruangan kapasitas tarif_per_hari
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -87,18 +89,18 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderPasienTable(
-            dataActive?.data?.allPasienPaginate || {},
-            "dataPasienAktif",
+        renderRuanganTable(
+            dataActive?.data?.allRuanganPaginate || {},
+            "dataRuanganAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allPasienArchive(first: $first, page: $page, search: $search){
+                allRuanganArchive(first: $first, page: $page, search: $search){
                     data { 
-                            id nama tanggal_lahir jenis_kelamin alamat telepon
+                            id nama_ruangan kapasitas tarif_per_hari
                         }
                     paginatorInfo { 
                             currentPage 
@@ -127,9 +129,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderPasienTable(
-            dataArchive?.data?.allPasienArchive || {},
-            "dataPasienArsip",
+        renderRuanganTable(
+            dataArchive?.data?.allRuanganArchive || {},
+            "dataRuanganArsip",
             false
         );
     } catch (error) {
@@ -140,98 +142,119 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Create
-async function createPasien() {
-    const nama = document.getElementById("create-name").value.trim();
-    const tanggal_lahir = document.getElementById("create-birth").value;
-    const jenis_kelamin = document.getElementById("create-gender").value;
-    const alamat = document.getElementById("create-address").value.trim();
-    const telepon = document.getElementById("create-phone").value.trim();
+// Format dan Unformat Number
+    function formatNumber(value) {
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
-    if (!nama || !tanggal_lahir || !jenis_kelamin || !alamat || !telepon)
+    function unformatNumber(value) {
+        return value.replace(/\./g, "");
+    }
+
+    function filterAngka(str) {
+        // hapus semua karakter selain angka dan titik
+        return str.replace(/[^0-9.]/g, "");
+    }
+
+// Create
+async function createRuangan() {
+    const nama_ruangan = document
+        .getElementById("create-nama_ruangan")
+        .value.trim();
+    const kapasitas = document
+        .getElementById("create-kapasitas")
+        .value.replace(/\./g, "");
+    const tarif_per_hari = document
+        .getElementById("create-tarif_per_hari")
+        .value.replace(/\./g, "");
+
+    if (!nama_ruangan || !kapasitas || !tarif_per_hari)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationPasien = `
-        mutation($input: CreatePasienInput!) {
-            createPasien(input: $input) {
+    const mutationRuangan = `
+        mutation($input: CreateRuanganInput!) {
+            createRuangan(input: $input) {
                 id
-                nama
-                tanggal_lahir
-                jenis_kelamin
-                alamat
-                telepon
+                nama_ruangan
+                kapasitas
+                tarif_per_hari
             }
         }
     `;
-    const variablesPasien = {
-        input: { nama, tanggal_lahir, jenis_kelamin, alamat, telepon },
+    const variablesRuangan = {
+        input: {
+            nama_ruangan,
+            kapasitas: parseInt(kapasitas),
+            tarif_per_hari: parseFloat(tarif_per_hari),
+        },
     };
 
     try {
-        const resPasien = await fetch(API_URL, {
+        const resRuangan = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationPasien,
-                variables: variablesPasien,
+                query: mutationRuangan,
+                variables: variablesRuangan,
             }),
         });
 
-        const resultPasien = await resPasien.json();
-        const dataPasien = resultPasien?.data?.createPasien;
+        const resultRuangan = await resRuangan.json();
+        const dataRuangan = resultRuangan?.data?.createRuangan;
 
-        if (dataPasien) {
+        if (dataRuangan) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-pasien" })
+                new CustomEvent("close-modal", { detail: "create-ruangan" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultPasien.errors);
-            alert("Failed to create Patient!");
+            console.error("GraphQL Error:", resultRuangan.errors);
+            alert("Failed to create room!");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the patient");
+        alert("An error occurred while creating the room");
     } finally {
         hideLoading();
     }
 }
 
-function openEditModal(id, nama, tanggal_lahir, jenis_kelamin, alamat, telepon) {
+function openEditModal(id, nama_ruangan, kapasitas, tarif_per_hari) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-name").value = nama;
-    document.getElementById("edit-birth").value = tanggal_lahir;
-    document.getElementById("edit-gender").value = jenis_kelamin;
-    document.getElementById("edit-address").value = alamat;
-    document.getElementById("edit-phone").value = telepon;
+    document.getElementById("edit-nama_ruangan").value = nama_ruangan;
+    document.getElementById("edit-kapasitas").value = formatNumber(kapasitas);
+    document.getElementById("edit-tarif_per_hari").value = formatNumber(tarif_per_hari);
+
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-pasien" })
+        new CustomEvent("open-modal", { detail: "edit-ruangan" })
     );
 }
 
 // Update
-async function updatePasien() {
+async function updateRuangan() {
     const id = document.getElementById("edit-id").value;
-    const nama = document.getElementById("edit-name").value.trim();
-    const tanggal_lahir = document.getElementById("edit-birth").value;
-    const jenis_kelamin = document.getElementById("edit-gender").value;
-    const alamat = document.getElementById("edit-address").value.trim();
-    const telepon = document.getElementById("edit-phone").value.trim();
+    const nama_ruangan = document
+        .getElementById("edit-nama_ruangan")
+        .value.trim();
+    const kapasitas = document
+        .getElementById("edit-kapasitas")
+        .value.replace(/\./g, "");
+    const tarif_per_hari = document
+        .getElementById("edit-tarif_per_hari")
+        .value.replace(/\./g, "");
 
-    if (!nama || !tanggal_lahir || !jenis_kelamin || !alamat || !telepon)
+    if (!nama_ruangan || !kapasitas || !tarif_per_hari)
         return alert("Please fill in all required fields!");
     showLoading();
 
-    const mutation = `mutation($id: ID!, $input: UpdatePasienInput!) { updatePasien(id: $id, input: $input) 
+    const mutation = `mutation($id: ID!, $input: UpdateRuanganInput!) { updateRuangan(id: $id, input: $input) 
                         { 
                             id 
-                            nama 
-                            tanggal_lahir 
-                            jenis_kelamin 
-                            alamat 
-                            telepon
+                            nama_ruangan 
+                            kapasitas
+                            tarif_per_hari
                         } 
                     }`;
     try {
@@ -240,11 +263,18 @@ async function updatePasien() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { nama, tanggal_lahir, jenis_kelamin, alamat, telepon } },
+                variables: {
+                    id,
+                    input: {
+                        nama_ruangan,
+                        kapasitas: parseInt(kapasitas),
+                        tarif_per_hari: parseFloat(tarif_per_hari),
+                    },
+                },
             }),
         });
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-pasien" })
+            new CustomEvent("close-modal", { detail: "edit-ruangan" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -254,7 +284,43 @@ async function updatePasien() {
     }
 }
 
-function renderPasienTable(result, tableId, isActive) {
+document.addEventListener("DOMContentLoaded", () => {
+    const kapasitasInput = document.getElementById("create-kapasitas");
+    const tarifPerHariInput = document.getElementById("create-tarif_per_hari");
+
+    const editKapasitasInput = document.getElementById("edit-kapasitas");
+    const editTarifPerHariInput = document.getElementById(
+        "edit-tarif_per_hari"
+    );
+
+    kapasitasInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+    tarifPerHariInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+    // EDIT
+
+    editKapasitasInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+    editTarifPerHariInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+});
+
+function renderRuanganTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -264,7 +330,7 @@ function renderPasienTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -298,21 +364,21 @@ function renderPasienTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.nama}', '${item.tanggal_lahir}', '${item.jenis_kelamin}', '${item.alamat}', '${item.telepon}')"
+                <button onclick="openEditModal(${item.id}, '${item.nama_ruangan}', '${item.kapasitas}', '${item.tarif_per_hari}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusPasien(${item.id})"
+                <button onclick="hapusRuangan(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restorePasien(${item.id})"
+                <button onclick="restoreRuangan(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeletePasien(${item.id})"
+                <button onclick="forceDeleteRuangan(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -327,33 +393,13 @@ function renderPasienTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.nama
+                item.nama_ruangan
             }</td>
-            <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.tanggal_lahir
-                }
+            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
+                ${item.kapasitas.toLocaleString("id-ID")}
             </td>
-            
-            <td class="p-4 text-center font-semibold capitalize">
-                <span class="px-3 py-1 rounded-full text-sm ${
-                    item.jenis_kelamin === "L"
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-pink-100 text-pink-600"
-                }">
-                    ${item.jenis_kelamin}
-                </span>
-            </td>
-
-            <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.alamat
-                }
-            </td>
-            <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.telepon
-                }
+            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
+                Rp${item.tarif_per_hari.toLocaleString("id-ID")}
             </td>
 
             ${
@@ -384,13 +430,12 @@ function renderPasienTable(result, tableId, isActive) {
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
 
-
 // Hapus
-async function hapusPasien(id) {
+async function hapusRuangan(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deletePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deleteRuangan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -406,11 +451,11 @@ async function hapusPasien(id) {
 }
 
 // restore
-async function restorePasien(id) {
+async function restoreRuangan(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restorePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restoreRuangan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -426,11 +471,11 @@ async function restorePasien(id) {
 }
 
 // force delete
-async function forceDeletePasien(id) {
+async function forceDeleteRuangan(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeletePasien(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeleteRuangan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",

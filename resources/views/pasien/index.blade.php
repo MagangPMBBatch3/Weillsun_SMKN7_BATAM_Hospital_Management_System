@@ -14,7 +14,7 @@
 
                 <!-- Search Bar -->
                 <div class="relative w-full sm:w-72">
-                    <input type="text" id="search" placeholder="Search user..."
+                    <input type="text" id="search" placeholder="Search..."
                         class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm px-4 py-2.5 pl-9 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition duration-200"
                         oninput="searchPasien()">
                     <i class='bx bx-search absolute left-3 top-3 h-5 w-5 text-gray-600 '></i>

@@ -32,8 +32,23 @@ type PoliPaginator {
 extend type Query {
     allPoli: [Poli!]! @all(model: "App\\Models\\Poli\\Poli")
 
-    allPoliPaginator(search: String, page: Int, first: Int): PoliPaginator
-        @field(resolver: "App\\GraphQL\\Poli\\Queries\\PoliQuery@all")
+    allPoliPaginate(
+        search: String
+        page: Int
+        first: Int
+    ): PoliPaginator
+        @field(
+            resolver: "App\\GraphQL\\Poli\\Queries\\PoliQuery@all"
+    )
+
+    allPoliArchive(
+        search: String
+        page: Int
+        first: Int
+    ): PoliPaginator
+        @field(
+            resolver: "App\\GraphQL\\Poli\\Queries\\PoliQuery@allArchive"
+    )
 
     Poli(id: ID! @eq(key: "id")): Poli @find(model: "App\\Models\\Poli\\Poli")
 }
