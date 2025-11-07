@@ -5,7 +5,7 @@
 
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <i class='bx bx-user text-3xl text-blue-500'></i>
+                <i class='bx bx-categories text-3xl text-blue-500'></i>
                 <span class=" tracking-wider">Outpatient Department</span>
             </h2>
 

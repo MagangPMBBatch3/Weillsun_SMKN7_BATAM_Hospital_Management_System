@@ -7,7 +7,7 @@
 
             {{-- title --}}
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <i class='bx bx-user text-3xl text-blue-500'></i>
+                <i class='bx bx-user-hexagon text-4xl text-blue-500'></i>
                 <span class=" tracking-wider">User Profiles</span>
             </h2>
 
@@ -45,11 +45,11 @@
     <div class=" px-10">
         <x-loading></x-loading>
 
-        <div id="dataUsersProfile" class="mt-4 grid grid-cols-1 lg:grid-cols-6 gap-4"></div>
+        <div id="dataUsersProfile" class="mt-4 grid grid-cols-2 lg:grid-cols-6 gap-4"></div>
         <div id="dataUsersProfileArchive" class="hidden mt-4 grid grid-cols-1 lg:grid-cols-6 gap-4"></div>
 
         {{-- Pagination untuk AKTIF --}}
-        <div id="paginationActive" class="flex justify-between px-6 pb-4 items-center mt-4">
+        <div id="paginationActive" class="flex justify-between items-center bg-white border-l-4 border-r-4 border-blue-500 rounded-md px-6 py-2 shadow-md mt-4">
             <div id="pageInfo" class="text-sm text-gray-600 dark:text-gray-300"></div>
 
             <div class="flex items-center gap-4">
@@ -75,8 +75,8 @@
 
 
         {{-- Pagination uruk arsip --}}
-        <div id="paginationArchive" class="hidden flex justify-between px-6 pb-4 items-center mt-4">
-        <div id="pageInfoArchive" class="text-sm text-gray-600 dark:text-gray-300"></div>
+        <div id="paginationArchive" class="hidden flex justify-between bg-white border-l-4 border-r-4 border-blue-500 rounded-md px-6 py-2 shadow-md shadow-black items-center mt-4">
+            <div id="pageInfoArchive" class="text-sm text-gray-600 dark:text-gray-300"></div>
 
             <div class="flex items-center gap-4">
                 <select id="perPageArchive" onchange="loadDataPaginate(1, false)" class="border py-1 px-5 rounded-full">
@@ -126,8 +126,9 @@
                             class="border p-2 w-full rounded" />
 
                         <x-input-label class="italic">Role</x-input-label>
-                        <x-text-input id="edit-role" name="user_id" class="bg-gray-100 capitalize" readonly></x-text-input>
-                
+                        <x-text-input id="edit-role" name="user_id" class="bg-gray-100 capitalize"
+                            readonly></x-text-input>
+
                     </div>
 
                     <div class="flex justify-end mt-4">

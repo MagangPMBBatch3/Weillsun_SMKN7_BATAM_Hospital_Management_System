@@ -28,8 +28,10 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
+//  ------------------------- Supplier ------------------------- \\
+
 let searchTimeout = null;
-function searchObat() {
+function searchSupplier() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -37,7 +39,7 @@ function searchObat() {
     }, 500);
 }
 
-// Load data Obat (Aktif & Arsip sekaligus)
+// Load data Supplier (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -56,9 +58,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allObatPaginate(first: $first, page: $page, search: $search){
+                allSupplierPaginate(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_obat jenis_obat stok harga markup_persen harga_jual
+                            id nama_supplier alamat telepon email
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -87,18 +89,18 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderObatTable(
-            dataActive?.data?.allObatPaginate || {},
-            "dataObatAktif",
+        renderSupplierTable(
+            dataActive?.data?.allSupplierPaginate || {},
+            "dataSupplierAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allObatArchive(first: $first, page: $page, search: $search){
+                allSupplierArchive(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_obat jenis_obat stok harga markup_persen harga_jual
+                            id nama_supplier alamat telepon email
                         }
                     paginatorInfo { 
                             currentPage 
@@ -127,9 +129,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderObatTable(
-            dataArchive?.data?.allObatArchive || {},
-            "dataObatArsip",
+        renderSupplierTable(
+            dataArchive?.data?.allSupplierArchive || {},
+            "dataSupplierArsip",
             false
         );
     } catch (error) {
@@ -140,150 +142,95 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-    // Format dan unformat number
-
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
-
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
-
 // Create
-async function createObat() {
-    const nama_obat = document.getElementById("create-nama_obat").value.trim();
-    const jenis_obat = document
-        .getElementById("create-jenis_obat")
-        .value.trim();
-    const stok = document
-        .getElementById("create-stok")
-        .value.replace(/\./g, "");
-    const harga = document
-        .getElementById("create-harga")
-        .value.replace(/\./g, "");
-    const markup_persen = document
-        .getElementById("create-markup_persen")
-        .value.replace(/\./g, "");
-    const harga_jual = document
-        .getElementById("create-harga_jual")
-        .value.replace(/\./g, "");
+async function createSupplier() {
+    const nama_supplier = document.getElementById("create-nama_supplier").value.trim();
+    const alamat = document.getElementById("create-alamat").value.trim();
+    const telepon = document.getElementById("create-telepon").value.trim();
+    const email = document.getElementById("create-email").value.trim();
 
-    if (!nama_obat || !jenis_obat || !stok || !harga || !markup_persen)
+
+    if (!nama_supplier || !alamat || !telepon || !email)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationObat = `
-        mutation($input: CreateObatInput!) {
-            createObat(input: $input) {
+    const mutationSupplier = `
+        mutation($input: CreateSupplierInput!) {
+            createSupplier(input: $input) {
                 id
-                nama_obat
-                jenis_obat
-                stok
-                harga
-                markup_persen
-                harga_jual
+                nama_supplier
+                alamat
+                telepon
+                email
             }
         }
     `;
-    const variablesObat = {
-        input: {
-            nama_obat,
-            jenis_obat,
-            stok: parseInt(stok),
-            harga: parseFloat(harga),
-            markup_persen: parseFloat(markup_persen),
-            harga_jual: parseFloat(harga_jual),
-        },
+    const variablesSupplier = {
+        input: { nama_supplier, alamat, telepon, email },
     };
 
     try {
-        const resObat = await fetch(API_URL, {
+        const resSupplier = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationObat,
-                variables: variablesObat,
+                query: mutationSupplier,
+                variables: variablesSupplier,
             }),
         });
 
-        const resultObat = await resObat.json();
-        const dataObat = resultObat?.data?.createObat;
+        const resultSupplier = await resSupplier.json();
+        const dataSupplier = resultSupplier?.data?.createSupplier;
 
-        if (dataObat) {
+        if (dataSupplier) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-obat" })
+                new CustomEvent("close-modal", { detail: "create-supplier" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultObat.errors);
-            alert("Failed to create Medicine!");
+            console.error("GraphQL Error:", resultSupplier.errors);
+            alert("Failed to create Supplier!");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the medicine");
+        alert("An error occurred while creating the Supplier");
     } finally {
         hideLoading();
     }
 }
 
-
-function openEditModal(
-    id,
-    nama_obat,
-    jenis_obat,
-    stok,
-    harga,
-    markup_persen,
-    harga_jual
-) {
+function openEditModal(id, nama_supplier, alamat, telepon, email) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-nama_obat").value = nama_obat;
-    document.getElementById("edit-jenis_obat").value = jenis_obat;
-    document.getElementById("edit-stok").value = formatNumber(stok);
-    document.getElementById("edit-harga").value = formatNumber(harga);
-    document.getElementById("edit-markup_persen").value = formatNumber(markup_persen);
-    document.getElementById("edit-harga_jual").value = formatNumber(harga_jual);
+    document.getElementById("edit-nama_supplier").value = nama_supplier;
+    document.getElementById("edit-alamat").value = alamat;
+    document.getElementById("edit-telepon").value = telepon;
+    document.getElementById("edit-email").value = email;
+
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-obat" })
+        new CustomEvent("open-modal", { detail: "edit-supplier" })
     );
 }
 
 // Update
-async function updateObat() {
+async function updateSupplier() {
     const id = document.getElementById("edit-id").value;
-    const nama_obat = document.getElementById("edit-nama_obat").value.trim();
-    const jenis_obat = document.getElementById("edit-jenis_obat").value.trim();
-    const stok = document.getElementById("edit-stok").value.replace(/\./g, "");
-    const harga = document
-        .getElementById("edit-harga")
-        .value.replace(/\./g, "");
-    const markup_persen = document
-        .getElementById("edit-markup_persen")
-        .value.replace(/\./g, "");
-    const harga_jual = document
-        .getElementById("edit-harga_jual")
-        .value.replace(/\./g, "");
+    const nama_supplier = document.getElementById("edit-nama_supplier").value.trim();
+    const alamat = document.getElementById("edit-alamat").value.trim();
+    const telepon = document.getElementById("edit-telepon").value.trim();
+    const email = document.getElementById("edit-email").value.trim();
 
-    if (!nama_obat || !jenis_obat || !stok || !harga || !markup_persen)
+    if (!nama_supplier || !alamat || !telepon || !email)
         return alert("Please fill in all required fields!");
     showLoading();
 
-    const mutation = `mutation($id: ID!, $input: UpdateObatInput!) { updateObat(id: $id, input: $input) 
+    const mutation = `mutation($id: ID!, $input: UpdateSupplierInput!) { updateSupplier(id: $id, input: $input) 
                         { 
                             id 
-                            nama_obat
-                            jenis_obat
-                            stok
-                            harga
-                            markup_persen
-                            harga_jual
+                            nama_supplier 
+                            alamat
+                            telepon
+                            email
                         } 
                     }`;
     try {
@@ -292,21 +239,11 @@ async function updateObat() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: {
-                    id,
-                    input: {
-                        nama_obat,
-                        jenis_obat,
-                        stok: parseInt(stok),
-                        harga: parseFloat(harga),
-                        markup_persen: parseFloat(markup_persen),
-                        harga_jual: parseFloat(harga_jual),
-                    },
-                },
+                variables: { id, input: { nama_supplier, alamat, telepon, email } },
             }),
         });
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-obat" })
+            new CustomEvent("close-modal", { detail: "edit-supplier" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -316,98 +253,7 @@ async function updateObat() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const hargaInput = document.getElementById("create-harga");
-    const markupInput = document.getElementById("create-markup_persen");
-    const hargaJualInput = document.getElementById("create-harga_jual");
-    const stokInput = document.getElementById("create-stok");
-
-    const editHargaInput = document.getElementById("edit-harga");
-    const editMarkupInput = document.getElementById("edit-markup_persen");
-    const editHargaJualInput = document.getElementById("edit-harga_jual");
-    const editStokInput = document.getElementById("edit-stok");
-
-
-    function hitungHargaJual() {
-        const harga = parseFloat(unformatNumber(hargaInput.value)) || 0;
-        const markup = parseFloat(unformatNumber(markupInput.value)) || 0;
-        const hargaJual = harga + (harga * markup) / 100;
-        hargaJualInput.value = formatNumber(hargaJual.toFixed(0));
-    }
-
-    function hitungEditHargaJual() {
-        const harga = parseFloat(unformatNumber(editHargaInput.value)) || 0;
-        const markup = parseFloat(unformatNumber(editMarkupInput.value)) || 0;
-        const hargaJual = harga + (harga * markup) / 100;
-        editHargaJualInput.value = formatNumber(hargaJual.toFixed(0));
-    }
-
-    // --- EVENT UNTUK HARGA ---
-    hargaInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-        hitungHargaJual();
-    });
-
-    // --- EVENT UNTUK MARKUP ---
-    markupInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-
-        if (value) {
-            let num = parseFloat(value);
-            if (num < 0) num = 0;
-            if (num > 100) num = 100;
-            e.target.value = formatNumber(num);
-        } else {
-            e.target.value = "";
-        }
-
-        hitungHargaJual();
-    });
-
-    // --- EVENT UNTUK STOK ---
-    stokInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-    });
-
-    // EDIT
-
-       // --- EVENT UNTUK EDIT HARGA ---
-    editHargaInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-        hitungEditHargaJual();
-    });
-
-    // --- EVENT UNTUK EDIT MARKUP ---
-    editMarkupInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-
-        if (value) {
-            let num = parseFloat(value);
-            if (num < 1) num = 1;
-            if (num > 100) num = 100;
-            e.target.value = formatNumber(num);
-        } else {
-            e.target.value = "";
-        }
-
-        hitungEditHargaJual();
-    });
-
-    // --- EVENT UNTUK EDIT STOK ---
-    editStokInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-    });
-});
-
-function renderObatTable(result, tableId, isActive) {
+function renderSupplierTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -417,7 +263,7 @@ function renderObatTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -451,21 +297,21 @@ function renderObatTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.nama_obat}', '${item.jenis_obat}', '${item.stok}', '${item.harga}', '${item.markup_persen}', '${item.harga_jual}')"
+                <button onclick="openEditModal(${item.id}, '${item.nama_supplier}', '${item.alamat}', '${item.telepon}', '${item.email}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusObat(${item.id})"
+                <button onclick="hapusSupplier(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restoreObat(${item.id})"
+                <button onclick="restoreSupplier(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeleteObat(${item.id})"
+                <button onclick="forceDeleteSupplier(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -480,32 +326,22 @@ function renderObatTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.nama_obat
+                item.nama_supplier
             }</td>
-            <td class="p-4 text-center text-base font-semibold">
-                ${item.jenis_obat}
-            </td>
-            
-            <td class="p-4 text-center font-semibold capitalize">
-                <span class="px-3 py-1 rounded-full bg-blue-100 border-blue-300 border text-blue-700">
-                    ${item.stok.toLocaleString("id-ID")}
-                </span>
-            </td>
-
-            <td class="p-4 text-center text-base font-semibold">
-                <span class="text-gray-600 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full">
-                    Rp ${item.harga.toLocaleString("id-ID")}
-                </span>
+            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
+                ${
+                    item.alamat
+                }
             </td>
             <td class="p-4 text-center text-base font-semibold">
-                <span class="px-3 py-1 rounded-full bg-yellow-100 border-yellow-300 border text-yellow-700">
-                    ${item.markup_persen.toLocaleString("id-ID")}%
-                </span>
+                ${
+                    item.telepon
+                }
             </td>
-            <td class="p-4 text-center text-base">
-                <span class="font-bold text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">
-                    Rp ${item.harga_jual.toLocaleString("id-ID")}
-                </span>
+            <td class="p-4 text-center text-base font-semibold">
+                ${
+                    item.email
+                }
             </td>
 
             ${
@@ -536,12 +372,13 @@ function renderObatTable(result, tableId, isActive) {
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
 
+
 // Hapus
-async function hapusObat(id) {
+async function hapusSupplier(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deleteObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deleteSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -557,11 +394,11 @@ async function hapusObat(id) {
 }
 
 // restore
-async function restoreObat(id) {
+async function restoreSupplier(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restoreObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restoreSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -577,11 +414,11 @@ async function restoreObat(id) {
 }
 
 // force delete
-async function forceDeleteObat(id) {
+async function forceDeleteSupplier(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeleteSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",

@@ -5,7 +5,7 @@
 
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <i class='bx bx-user text-3xl text-blue-500'></i>
+                <i class='bx bx-pill text-3xl text-blue-500'></i>
                 <span class=" tracking-wider">Medicine</span>
             </h2>
 
@@ -84,27 +84,27 @@
                             <div class="w-full">
                                 <x-input-label>Medicine Name</x-input-label>
                                 <x-text-input id="create-nama_obat" type="text"
-                                    placeholder="Enter The Medicine Name..." class="border p-2 w-full rounded mb-3"
+                                    placeholder="Enter Medicine Name..." class="border p-2 w-full rounded mb-3"
                                     required />
 
                                 <x-input-label>Medicine Type</x-input-label>
                                 <x-text-input id="create-jenis_obat" type="text"
-                                    placeholder="Enter The Medicine Type..." class="border p-2 w-full rounded mb-3"
+                                    placeholder="Enter Medicine Type..." class="border p-2 w-full rounded mb-3"
                                     required />
 
                                 <x-input-label>Stock</x-input-label>
-                                <x-text-input id="create-stok" type="text" placeholder="Enter The Stock..."
+                                <x-text-input id="create-stok" type="text" placeholder="Enter Stock..."
                                     class="border p-2 w-full rounded mb-3" required />
                             </div>
 
                             <div class="w-full">
                                 <x-input-label>Price</x-input-label>
-                                <x-text-input id="create-harga" type="text" placeholder="Enter The Markup..."
+                                <x-text-input id="create-harga" type="text" placeholder="Enter Markup..."
                                     class="border p-2 w-full rounded mb-3" required />
 
                                 <x-input-label>Markup Percent</x-input-label>
                                 <x-text-input id="create-markup_persen" type="text"
-                                    placeholder="Enter The Markup (1-100)..." class="border p-2 w-full rounded mb-3"
+                                    placeholder="Enter Markup (1-100)..." class="border p-2 w-full rounded mb-3"
                                     required />
 
                                 <x-input-label>Selling Price</x-input-label>
@@ -133,27 +133,27 @@
                             <div class="w-full">
                                 <x-input-label>New Medicine Name</x-input-label>
                                 <x-text-input id="edit-nama_obat" type="text"
-                                    placeholder="Enter The Medicine Name..." class="border p-2 w-full rounded mb-3"
+                                    placeholder="Enter Medicine Name..." class="border p-2 w-full rounded mb-3"
                                     required />
 
                                 <x-input-label>New Medicine Type</x-input-label>
                                 <x-text-input id="edit-jenis_obat" type="text"
-                                    placeholder="Enter The Medicine Type..." class="border p-2 w-full rounded mb-3"
+                                    placeholder="Enter Medicine Type..." class="border p-2 w-full rounded mb-3"
                                     required />
 
                                 <x-input-label>New Stock</x-input-label>
-                                <x-text-input id="edit-stok" type="text" placeholder="Enter The Stock..."
+                                <x-text-input id="edit-stok" type="text" placeholder="Enter Stock..."
                                     class="border p-2 w-full rounded mb-3" required />
                             </div>
 
                             <div class="w-full">
                                 <x-input-label>Price</x-input-label>
-                                <x-text-input id="edit-harga" type="text" placeholder="Enter The Price..."
+                                <x-text-input id="edit-harga" type="text" placeholder="Enter Price..."
                                     class="border p-2 w-full rounded mb-3" min="0" step="100" required />
 
                                 <x-input-label>New Markup Percent</x-input-label>
                                 <x-text-input id="edit-markup_persen" type="text"
-                                    placeholder="Enter The Markup (1-100)..." class="border p-2 w-full rounded mb-3" required />
+                                    placeholder="Enter Markup (1-100)..." class="border p-2 w-full rounded mb-3" required />
 
                                 <x-input-label>New Harga Jual</x-input-label>
                                 <x-text-input id="edit-harga_jual" type="text" placeholder="0"

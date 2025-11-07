@@ -39,14 +39,23 @@ extend type Query {
     allSupplier: [Supplier!]!
         @all(model: "App\\Models\\Supplier\\Supplier")
 
-    allSupplierPaginator(
+    allSupplierPaginate(
         search: String
         page: Int
         first: Int
     ): SupplierPaginator
         @field(
             resolver: "App\\GraphQL\\Supplier\\Queries\\SupplierQuery@all"
-        )
+    )
+
+    allSupplierArchive(
+        search: String
+        page: Int
+        first: Int
+    ): SupplierPaginator
+        @field(
+            resolver: "App\\GraphQL\\Supplier\\Queries\\SupplierQuery@allArchive"
+    )
 
     Supplier(id: ID! @eq(key: "id")): Supplier
         @find(model: "App\\Models\\Supplier\\Supplier")
