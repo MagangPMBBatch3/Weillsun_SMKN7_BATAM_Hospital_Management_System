@@ -1,6 +1,6 @@
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b-2 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xlmx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -11,7 +11,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-4 sm:-my-px sm:ms-10 sm:flex">
                     {{-- dashboard --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
@@ -45,12 +45,12 @@
                                     </div>
 
                                     <div class="flex flex-col py-1">
-                                        <x-dropdown-link :href="route('user.index')"
+                                        <x-dropdown-link :href="route('user.index')" :active="request()->routeIs('user.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🧑 {{ __('User') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('usersProfile.index')"
+                                        <x-dropdown-link :href="route('usersProfile.index')" :active="request()->routeIs('usersProfile.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🧩 {{ __('User Profiles') }}
                                         </x-dropdown-link>
@@ -63,34 +63,97 @@
                                     </div>
 
                                     <div class="flex flex-col py-1">
-                                        <x-dropdown-link :href="route('tenagaMedis.index')"
+                                        <x-dropdown-link :href="route('tenagaMedis.index')" :active="request()->routeIs('tenagaMedis.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🩺 {{ __('Medical Personnels') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('pasien.index')"
+                                        <x-dropdown-link :href="route('pasien.index')" :active="request()->routeIs('pasien.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🧍 {{ __('Patient') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('obat.index')"
+                                        <x-dropdown-link :href="route('obat.index')" :active="request()->routeIs('obat.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             💊 {{ __('Medicine') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('poli.index')"
+                                        <x-dropdown-link :href="route('poli.index')" :active="request()->routeIs('poli.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🏩 {{ __('Outpatient Department') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('ruangan.index')"
+                                        <x-dropdown-link :href="route('ruangan.index')" :active="request()->routeIs('ruangan.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🛏️ {{ __('Room') }}
                                         </x-dropdown-link>
 
-                                        <x-dropdown-link :href="route('supplier.index')"
+                                        <x-dropdown-link :href="route('supplier.index')" :active="request()->routeIs('supplier.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🚚 {{ __('Supplier') }}
+                                        </x-dropdown-link>
+                                    </div>
+                                </div>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
+
+                    {{-- medical services --}}
+                    <div class="flex items-center">
+                        <x-dropdown align="right" width="60">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                                    <span class="mr-2">Medical Services</span>
+                                    <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </x-slot>
+
+                            {{-- Dropdown Content --}}
+                            <x-slot name="content">
+                                <div
+                                    class="py-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-60 transition-all duration-200">
+
+                                    {{--  User Section --}}
+                                    <div
+                                        class="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                                        <span>Services</span>
+                                    </div>
+
+                                    <div class="flex flex-col py-1">
+                                        <x-dropdown-link :href="route('kunjungan.index')" :active="request()->routeIs('kunjungan.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            🚶‍♂️ {{ __('Visits') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('rekamMedis.index')" :active="request()->routeIs('rekamMedis.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            📋 {{ __('Records') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('resepObat.index')" :active="request()->routeIs('resepObat.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            💊 {{ __('Prescriptions') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('rawatInap.index')" :active="request()->routeIs('rawatInap.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            🏥 {{ __('Inpatient Care') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('labPemeriksaan.index')" :active="request()->routeIs('labPemeriksaan.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            🔬 {{ __('Laboratory') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('radiologi.index')" :active="request()->routeIs('radiologi.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            ☢️ {{ __('Radiology') }}
                                         </x-dropdown-link>
                                     </div>
                                 </div>

@@ -18,10 +18,10 @@ class TenagaMedisQuery
                     ->orWhere('id', 'like', "%$search%")
                     ->orWhere('spesialisasi', 'like', "%$search%")
                     ->orWhere('no_str', 'like', "%$search%");
-            })
-                ->orWhereHas('profile', function ($q) use ($search) {
-                    $q->where('nickname', 'like', "%$search%");
-                });
+                    })
+                    ->orWhereHas('profile', function ($q) use ($search) {
+                        $q->where('nickname', 'like', "%$search%");
+                    });
         }
 
         $perPage = $args['first'] ?? 10;

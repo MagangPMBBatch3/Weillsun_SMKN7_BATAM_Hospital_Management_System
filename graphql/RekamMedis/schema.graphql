@@ -23,7 +23,6 @@ input CreateRekamMedisInput {
 input UpdateRekamMedisInput {
     pasien_id: ID
     tenaga_medis_id: ID
-    tenaga_medis_id: ID
     tanggal: Date
     diagnosis: String
     tindakan: String
@@ -46,14 +45,23 @@ extend type Query {
     allRekamMedis: [RekamMedis!]!
         @all(model: "App\\Models\\RekamMedis\\RekamMedis")
 
-    allRekamMedisPaginator(
+    allRekamMedisPaginate(
         search: String
         page: Int
         first: Int
     ): RekamMedisPaginator
         @field(
             resolver: "App\\GraphQL\\RekamMedis\\Queries\\RekamMedisQuery@all"
-        )
+    )
+
+    allRekamMedisArchive(
+        search: String
+        page: Int
+        first: Int
+    ): RekamMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\RekamMedis\\Queries\\RekamMedisQuery@allArchive"
+    )
 
     RekamMedis(id: ID! @eq(key: "id")): RekamMedis
         @find(model: "App\\Models\\RekamMedis\\RekamMedis")

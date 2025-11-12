@@ -44,12 +44,23 @@ type KunjunganPaginator {
 extend type Query {
     allKunjungan: [Kunjungan!]! @all(model: "App\\Models\\Kunjungan\\Kunjungan")
 
-    allKunjunganPaginator(
+    allKunjunganPaginate(
         search: String
         page: Int
         first: Int
     ): KunjunganPaginator
-        @field(resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@all")
+        @field(
+            resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@all"
+    )
+
+    allKunjunganArchive(
+        search: String
+        page: Int
+        first: Int
+    ): KunjunganPaginator
+        @field(
+            resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@allArchive"
+    )
 
     Kunjungan(id: ID! @eq(key: "id")): Kunjungan
         @find(model: "App\\Models\\Kunjungan\\Kunjungan")

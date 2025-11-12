@@ -47,14 +47,23 @@ extend type Query {
     allResepObat: [ResepObat!]!
         @all(model: "App\\Models\\ResepObat\\ResepObat")
 
-    allResepObatPaginator(
+    allResepObatPaginate(
         search: String
         page: Int
         first: Int
     ): ResepObatPaginator
         @field(
             resolver: "App\\GraphQL\\ResepObat\\Queries\\ResepObatQuery@all"
-        )
+    )
+
+    allResepObatArchive(
+        search: String
+        page: Int
+        first: Int
+    ): ResepObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\ResepObat\\Queries\\ResepObatQuery@allArchive"
+    )
 
     ResepObat(id: ID! @eq(key: "id")): ResepObat
         @find(model: "App\\Models\\ResepObat\\ResepObat")

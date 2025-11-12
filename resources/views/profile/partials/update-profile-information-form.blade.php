@@ -73,7 +73,7 @@
                 <x-input-label for="tenaga_medis_id" :value="__('Tenaga Medis')" />
                 <select id="tenaga_medis_id" name="tenaga_medis_id"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                    <option value="">Pilih Tenaga Medis</option>
+                    <option value="" class="text-gray-500 italic">Pilih Tenaga Medis</option>
                     @foreach ($tenagaMedisList as $tenagaMedis)
                         <option value="{{ $tenagaMedis->id }}"
                             {{ old('tenaga_medis_id', $tenagaMedis->id) == optional($user->profile)->id ? 'selected' : '' }}>
@@ -220,8 +220,8 @@
                             detail: "create-tenaga-medis"
                         })
                     );
-                        
-                
+
+
                 } else {
                     console.error("GraphQL Error:", resultTenagaMedis.errors);
                     alert("Failed to create Tenaga Medis!");

@@ -28,8 +28,9 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
+// ----------------------------------------------------------------------------------- \\
 let searchTimeout = null;
-function searchTenagaMedis() {
+function searchResepObat() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -37,7 +38,7 @@ function searchTenagaMedis() {
     }, 500);
 }
 
-// Load data User (Aktif & Arsip sekaligus)
+// Load data (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -56,16 +57,28 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allTenagaMedisPaginate(first: $first, page: $page, search: $search){
+                allResepObatPaginate(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            profile_id
-                            spesialisasi
-                            no_str
-                            profile {
+                            pasien_id
+                            tenaga_medis_id
+                            obat_id
+                            jumlah
+                            aturan_pakai
+                            pasien {
                                 id
-                                nickname
-                            } 
+                                nama
+                            }
+                            obat {
+                                id
+                                nama_obat
+                            }
+                            tenagaMedis {
+                                id
+                                profile {
+                                    nickname
+                                }
+                            }
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -94,25 +107,37 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderTenagaMedisTable(
-            dataActive?.data?.allTenagaMedisPaginate || {},
-            "dataTenagaMedisAktif",
+        renderResepObatTable(
+            dataActive?.data?.allResepObatPaginate || {},
+            "dataResepObatAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allTenagaMedisArchive(first: $first, page: $page, search: $search){
+                allResepObatArchive(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            profile_id
-                            spesialisasi
-                            no_str
-                            profile {
+                            pasien_id
+                            tenaga_medis_id
+                            obat_id
+                            jumlah
+                            aturan_pakai
+                            pasien {
                                 id
-                                nickname
-                            } 
+                                nama
+                            }
+                            obat {
+                                id
+                                nama_obat
+                            }
+                            tenagaMedis {
+                                id
+                                profile {
+                                    nickname
+                                }
+                            }
                         }
                     paginatorInfo { currentPage lastPage total hasMorePages }
                 }
@@ -136,9 +161,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderTenagaMedisTable(
-            dataArchive?.data?.allTenagaMedisArchive || {},
-            "dataTenagaMedisArsip",
+        renderResepObatTable(
+            dataArchive?.data?.allResepObatArchive || {},
+            "dataResepObatArsip",
             false
         );
     } catch (error) {
@@ -149,54 +174,84 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Create
-async function createTenagaMedis() {
-    const profile_id = document.getElementById("create-profile-id").value;
-    const spesialisasi = document
-        .getElementById("create-spesialisasi")
-        .value.trim();
-    const no_str = document.getElementById("create-no-str").value.trim();
+    // Format dan unformat number
 
-    if (!profile_id || !spesialisasi || !no_str)
+    function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function unformatNumber(value) {
+        return value.replace(/\./g, "");
+    }
+
+    function filterAngka(str) {
+        // hapus semua karakter selain angka dan titik
+        return str.replace(/[^0-9.]/g, "");
+    }
+
+// Create
+async function createResepObat() {
+    const tenaga_medis_id = document.getElementById("create-nickname").value;
+    const pasien_id = document.getElementById("create-nama").value;
+    const obat_id = document.getElementById("create-nama-obat").value;
+    const jumlah = document.getElementById("create-jumlah").value.replace(/\./g, "");
+    const aturan_pakai = document.getElementById("create-aturan-pakai").value.trim();
+
+    if (!pasien_id || !obat_id || !jumlah || !tenaga_medis_id || !aturan_pakai)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationTenagaMedis = `
-        mutation($input: CreateTenagaMedisInput!) {
-            createTenagaMedis(input: $input) {
-                id spesialisasi no_str profile_id
-                profile {
+    const mutationResepObat = `
+        mutation($input: CreateResepObatInput!) {
+            createResepObat(input: $input) {
+                id
+                pasien_id
+                tenaga_medis_id
+                obat_id
+                jumlah
+                aturan_pakai
+                pasien {
                     id
-                    nickname
+                     nama
+                }
+                obat {
+                    id
+                    nama_obat
+                }
+                tenagaMedis {
+                    id
+                    profile {
+                        nickname
+                    }
                 }
             }
         }
     `;
-    const variablesTenagaMedis = {
-        input: { profile_id, spesialisasi, no_str },
+    const variablesResepObat = {
+        input: { pasien_id, tenaga_medis_id, obat_id, jumlah:parseInt(jumlah), aturan_pakai},
     };
 
     try {
-        const resTenagaMedis = await fetch(API_URL, {
+        const resResepObat = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationTenagaMedis,
-                variables: variablesTenagaMedis,
+                query: mutationResepObat,
+                variables: variablesResepObat,
             }),
         });
 
-        const resultTenagaMedis = await resTenagaMedis.json();
-        const dataTenagaMedis = resultTenagaMedis?.data?.createTenagaMedis;
+        const resultResepObat = await resResepObat.json();
+        const dataResepObat = resultResepObat?.data?.createResepObat;
 
-        if (dataTenagaMedis) {
+        if (dataResepObat) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-tenagaMedis" })
+                new CustomEvent("close-modal", { detail: "create-resepObat" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultTenagaMedis.errors);
+            console.error("GraphQL Error:", resultResepObat.errors);
             alert("Failed to create Tenaga Medis!");
         }
     } catch (error) {
@@ -207,35 +262,53 @@ async function createTenagaMedis() {
     }
 }
 
-function openEditModal(id, profile_id, spesialisasi, no_str) {
+function openEditModal(id, pasien_id, tenaga_medis_id, obat_id, jumlah, aturan_pakai) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-nickname").value = profile_id;
-    document.getElementById("edit-spesialisasi").value = spesialisasi;
-    document.getElementById("edit-no-str").value = no_str;
+    document.getElementById("edit-nama").value = pasien_id;
+    document.getElementById("edit-nickname").value = tenaga_medis_id;
+    document.getElementById("edit-nama-obat").value = obat_id;
+    document.getElementById("edit-jumlah").value = formatNumber(jumlah);
+    document.getElementById("edit-aturan-pakai").value = aturan_pakai;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-tenagaMedis" })
+        new CustomEvent("open-modal", { detail: "edit-resepObat" })
     );
 }
 
 // Update
-async function updateTenagaMedis() {
+async function updateResepObat() {
     const id = document.getElementById("edit-id").value;
-    const profile_id = document.getElementById("edit-nickname").value;
-    const spesialisasi = document
-        .getElementById("edit-spesialisasi")
-        .value.trim();
-    const no_str = document.getElementById("edit-no-str").value;
 
-    if (!id || !profile_id || !spesialisasi || !no_str)
-        return alert("Please fill in all required fields!");
-
+    const tenaga_medis_id = document.getElementById("edit-nickname").value;
+    const pasien_id = document.getElementById("edit-nama").value;
+    const obat_id = document.getElementById("edit-nama-obat").value;
+    const jumlah = document.getElementById("edit-jumlah").value.replace(/\./g, "");
+    const aturan_pakai = document.getElementById("edit-aturan-pakai").value.trim();
     showLoading();
 
     const mutation = `
-        mutation($id: ID!, $input: UpdateTenagaMedisInput!) {
-            updateTenagaMedis(id: $id, input: $input) {
-                id profile_id spesialisasi no_str
+        mutation($id: ID!, $input: UpdateResepObatInput!) {
+            updateResepObat(id: $id, input: $input) {
+                id
+                pasien_id
+                tenaga_medis_id
+                obat_id
+                jumlah
+                aturan_pakai
+                pasien {
+                    id
+                    nama
+                }
+                obat {
+                    id
+                    nama_obat
+                }
+                tenagaMedis {
+                    id
+                    profile {
+                        nickname
+                    }
+                }
             }
         }
     `;
@@ -246,12 +319,14 @@ async function updateTenagaMedis() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { profile_id, spesialisasi, no_str } },
+                variables: { id, 
+                    input: { pasien_id, tenaga_medis_id, obat_id, jumlah:parseInt(jumlah), aturan_pakai}
+                },
             }),
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-tenagaMedis" })
+            new CustomEvent("close-modal", { detail: "edit-resepObat" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -262,7 +337,25 @@ async function updateTenagaMedis() {
     }
 }
 
-function renderTenagaMedisTable(result, tableId, isActive) {
+document.addEventListener("DOMContentLoaded", () => {
+    const jumlahInput = document.getElementById('create-jumlah');
+    const editJumlahInput = document.getElementById('edit-jumlah');
+
+    jumlahInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+        
+    });
+    editJumlahInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+        
+    });
+})
+
+function renderResepObatTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -272,7 +365,7 @@ function renderTenagaMedisTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -306,21 +399,21 @@ function renderTenagaMedisTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.profile_id}', '${item.spesialisasi}', '${item.no_str}')"
+                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.tenaga_medis_id}', '${item.obat_id}', '${item.jumlah}', '${item.aturan_pakai}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusTenagaMedis(${item.id})"
+                <button onclick="hapusResepObat(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restoreTenagaMedis(${item.id})"
+                <button onclick="restoreResepObat(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeleteTenagaMedis(${item.id})"
+                <button onclick="forceDeleteResepObat(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -335,13 +428,19 @@ function renderTenagaMedisTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.profile?.nickname
+                item.pasien?.nama
             }</td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.spesialisasi
+                item.tenagaMedis?.profile?.nickname
+            }</td>
+            <td class="p-4 text-center text-base font-semibold">${
+                item.obat?.nama_obat
             }</td>
             <td class="p-4 text-center font-semibold capitalize">
-                ${item.no_str}
+                ${item.jumlah.toLocaleString("id-ID")}
+            </td>
+            <td class="p-4 text-center font-semibold capitalize">
+                ${item.aturan_pakai}
             </td>
             ${
                 window.currentUserRole === "admin"
@@ -372,11 +471,11 @@ function renderTenagaMedisTable(result, tableId, isActive) {
 }
 
 // Hapus
-async function hapusTenagaMedis(id) {
+async function hapusResepObat(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deleteTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deleteResepObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -392,11 +491,11 @@ async function hapusTenagaMedis(id) {
 }
 
 // restore
-async function restoreTenagaMedis(id) {
+async function restoreResepObat(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restoreTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restoreResepObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -412,11 +511,11 @@ async function restoreTenagaMedis(id) {
 }
 
 // force delete
-async function forceDeleteTenagaMedis(id) {
+async function forceDeleteResepObat(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeleteResepObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",

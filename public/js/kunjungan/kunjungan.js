@@ -26,10 +26,12 @@ function prevPageArchive() {
 }
 function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
-}
+} 
+
+// ---------------------------------------- Kunjungan --------------------------------------- \\
 
 let searchTimeout = null;
-function searchTenagaMedis() {
+function searchKunjungan() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -56,15 +58,21 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allTenagaMedisPaginate(first: $first, page: $page, search: $search){
+                allKunjunganPaginate(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            profile_id
-                            spesialisasi
-                            no_str
-                            profile {
+                            pasien_id
+                            poli_id
+                            tanggal_kunjungan
+                            keluhan
+                            biaya_konsultasi
+                            pasien {
                                 id
-                                nickname
+                                nama
+                            } 
+                            poli {
+                                id
+                                nama_poli
                             } 
                         }
                             paginatorInfo { 
@@ -94,24 +102,30 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderTenagaMedisTable(
-            dataActive?.data?.allTenagaMedisPaginate || {},
-            "dataTenagaMedisAktif",
+        renderKunjunganTable(
+            dataActive?.data?.allKunjunganPaginate || {},
+            "dataKunjunganAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allTenagaMedisArchive(first: $first, page: $page, search: $search){
+                allKunjunganArchive(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            profile_id
-                            spesialisasi
-                            no_str
-                            profile {
+                            pasien_id
+                            poli_id
+                            tanggal_kunjungan
+                            keluhan
+                            biaya_konsultasi
+                            pasien {
                                 id
-                                nickname
+                                nama
+                            } 
+                            poli {
+                                id
+                                nama_poli
                             } 
                         }
                     paginatorInfo { currentPage lastPage total hasMorePages }
@@ -136,9 +150,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderTenagaMedisTable(
-            dataArchive?.data?.allTenagaMedisArchive || {},
-            "dataTenagaMedisArsip",
+        renderKunjunganTable(
+            dataArchive?.data?.allKunjunganArchive || {},
+            "dataKunjunganArsip",
             false
         );
     } catch (error) {
@@ -149,54 +163,85 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Create
-async function createTenagaMedis() {
-    const profile_id = document.getElementById("create-profile-id").value;
-    const spesialisasi = document
-        .getElementById("create-spesialisasi")
-        .value.trim();
-    const no_str = document.getElementById("create-no-str").value.trim();
+    // Format dan unformat number
 
-    if (!profile_id || !spesialisasi || !no_str)
+    function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function unformatNumber(value) {
+        return value.replace(/\./g, "");
+    }
+
+    function filterAngka(str) {
+        // hapus semua karakter selain angka dan titik
+        return str.replace(/[^0-9.]/g, "");
+    }
+
+// Create
+async function createKunjungan() {
+    const pasien_id = document.getElementById("create-pasien-id").value;
+    const poli_id = document.getElementById("create-poli-id").value;
+    const tanggal_kunjungan = document.getElementById("create-tanggal-kunjungan").value;
+    const keluhan = document.getElementById("create-keluhan").value.trim();
+    const biaya_konsultasi = document.getElementById("create-biaya-konsultasi").value.replace(/\./g, "");
+
+    if (!pasien_id || !poli_id || !keluhan || !tanggal_kunjungan || !biaya_konsultasi)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationTenagaMedis = `
-        mutation($input: CreateTenagaMedisInput!) {
-            createTenagaMedis(input: $input) {
-                id spesialisasi no_str profile_id
-                profile {
+    const mutationKunjungan = `
+        mutation($input: CreateKunjunganInput!) {
+            createKunjungan(input: $input) {
+                id
+                pasien_id
+                poli_id
+                tanggal_kunjungan
+                keluhan
+                biaya_konsultasi
+                pasien {
                     id
-                    nickname
-                }
+                    nama
+                } 
+                poli {
+                    id
+                    nama_poli
+                } 
             }
         }
     `;
-    const variablesTenagaMedis = {
-        input: { profile_id, spesialisasi, no_str },
+    const variablesKunjungan = {
+        input: { 
+            pasien_id,
+            poli_id,
+            tanggal_kunjungan,
+            keluhan,
+            biaya_konsultasi: parseFloat(biaya_konsultasi)
+         }
     };
 
     try {
-        const resTenagaMedis = await fetch(API_URL, {
+        const resKunjungan = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationTenagaMedis,
-                variables: variablesTenagaMedis,
+                query: mutationKunjungan,
+                variables: variablesKunjungan,
             }),
         });
 
-        const resultTenagaMedis = await resTenagaMedis.json();
-        const dataTenagaMedis = resultTenagaMedis?.data?.createTenagaMedis;
+        const resultKunjungan = await resKunjungan.json();
+        const dataKunjungan = resultKunjungan?.data?.createKunjungan;
 
-        if (dataTenagaMedis) {
+        if (dataKunjungan) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-tenagaMedis" })
+                new CustomEvent("close-modal", { detail: "create-kunjungan" })
             );
+            
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultTenagaMedis.errors);
+            console.error("GraphQL Error:", resultKunjungan.errors);
             alert("Failed to create Tenaga Medis!");
         }
     } catch (error) {
@@ -207,35 +252,42 @@ async function createTenagaMedis() {
     }
 }
 
-function openEditModal(id, profile_id, spesialisasi, no_str) {
+function openEditModal(id, pasien_id, poli_id, tanggal_kunjungan, keluhan, biaya_konsultasi) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-nickname").value = profile_id;
-    document.getElementById("edit-spesialisasi").value = spesialisasi;
-    document.getElementById("edit-no-str").value = no_str;
-
+    document.getElementById("edit-pasien-id").value = pasien_id;
+    document.getElementById("edit-poli-id").value = poli_id;
+    document.getElementById("edit-tanggal-kunjungan").value = tanggal_kunjungan;
+    document.getElementById("edit-keluhan").value = keluhan;
+    document.getElementById("edit-biaya-konsultasi").value = formatNumber(biaya_konsultasi);
+    
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-tenagaMedis" })
+        new CustomEvent("open-modal", { detail: "edit-kunjungan" })
     );
 }
 
 // Update
-async function updateTenagaMedis() {
+async function updateKunjungan() {
     const id = document.getElementById("edit-id").value;
-    const profile_id = document.getElementById("edit-nickname").value;
-    const spesialisasi = document
-        .getElementById("edit-spesialisasi")
-        .value.trim();
-    const no_str = document.getElementById("edit-no-str").value;
+    const pasien_id = document.getElementById("edit-pasien-id").value;
+    const poli_id = document.getElementById("edit-poli-id").value;
+    const tanggal_kunjungan = document.getElementById("edit-tanggal-kunjungan").value;
+    const keluhan = document.getElementById("edit-keluhan").value.trim();
+    const biaya_konsultasi = document.getElementById("edit-biaya-konsultasi").value.replace(/\./g, "");
 
-    if (!id || !profile_id || !spesialisasi || !no_str)
+    if (!pasien_id || !poli_id || !keluhan || !tanggal_kunjungan || !biaya_konsultasi)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
     const mutation = `
-        mutation($id: ID!, $input: UpdateTenagaMedisInput!) {
-            updateTenagaMedis(id: $id, input: $input) {
-                id profile_id spesialisasi no_str
+        mutation($id: ID!, $input: UpdateKunjunganInput!) {
+            updateKunjungan(id: $id, input: $input) {
+                id
+                pasien_id
+                poli_id
+                tanggal_kunjungan
+                keluhan
+                biaya_konsultasi
             }
         }
     `;
@@ -246,12 +298,20 @@ async function updateTenagaMedis() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { profile_id, spesialisasi, no_str } },
+                variables: { id, 
+                    input: { 
+                        pasien_id,
+                        poli_id,
+                        tanggal_kunjungan,
+                        keluhan,
+                        biaya_konsultasi: parseFloat(biaya_konsultasi)
+                    }
+                 },
             }),
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-tenagaMedis" })
+            new CustomEvent("close-modal", { detail: "edit-kunjungan" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -262,7 +322,26 @@ async function updateTenagaMedis() {
     }
 }
 
-function renderTenagaMedisTable(result, tableId, isActive) {
+document.addEventListener("DOMContentLoaded", () => {
+    const biayaKonsultasiInput = document.getElementById("create-biaya-konsultasi");
+
+    const editBiayaKonsultasiInput = document.getElementById("edit-biaya-konsultasi");
+
+        biayaKonsultasiInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+       editBiayaKonsultasiInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+
+});
+
+function renderKunjunganTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -272,7 +351,7 @@ function renderTenagaMedisTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -306,21 +385,21 @@ function renderTenagaMedisTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.profile_id}', '${item.spesialisasi}', '${item.no_str}')"
-                    class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
+                <button onclick="openEditModal(${item.id}, ${item.pasien_id}, ${item.poli_id}, '${item.tanggal_kunjungan}', '${item.keluhan}', '${item.biaya_konsultasi}')"
+                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusTenagaMedis(${item.id})"
+                <button onclick="hapusKunjungan(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restoreTenagaMedis(${item.id})"
+                <button onclick="restoreKunjungan(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeleteTenagaMedis(${item.id})"
+                <button onclick="forceDeleteKunjungan(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -330,19 +409,33 @@ function renderTenagaMedisTable(result, tableId, isActive) {
         tbody.innerHTML += `
         <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50">
             <td class="p-4 text-center font-semibold">
-                <span class="rounded-full text-white bg-green-500 py-1 px-2">${
-                    item.id
-                }</span>
+                <span class="rounded-full text-white bg-green-500 py-1 px-2">
+                    ${ item.id }
+                </span>
             </td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.profile?.nickname
-            }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.spesialisasi
-            }</td>
+
+            <td class="p-4 text-center text-base font-semibold">
+                ${ item.pasien?.nama }
+            </td>
+
+            <td class="p-4 text-center text-base font-semibold">
+                ${ item.poli?.nama_poli }
+            </td>
+
             <td class="p-4 text-center font-semibold capitalize">
-                ${item.no_str}
+                ${ item.tanggal_kunjungan }
             </td>
+
+            <td class="p-4 text-center font-semibold capitalize">
+                ${ item.keluhan }
+            </td>
+
+            <td class="p-4 text-center capitalize">
+                <span class="font-bold text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">
+                    Rp ${ item.biaya_konsultasi.toLocaleString("id-ID") }
+                </span>
+            </td>
+
             ${
                 window.currentUserRole === "admin"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
@@ -372,11 +465,11 @@ function renderTenagaMedisTable(result, tableId, isActive) {
 }
 
 // Hapus
-async function hapusTenagaMedis(id) {
+async function hapusKunjungan(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deleteTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deleteKunjungan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -392,11 +485,11 @@ async function hapusTenagaMedis(id) {
 }
 
 // restore
-async function restoreTenagaMedis(id) {
+async function restoreKunjungan(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restoreTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restoreKunjungan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -412,11 +505,11 @@ async function restoreTenagaMedis(id) {
 }
 
 // force delete
-async function forceDeleteTenagaMedis(id) {
+async function forceDeleteKunjungan(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteTenagaMedis(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeleteKunjungan(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
