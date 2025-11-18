@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kunjungan\Kunjungan;
 use App\Models\Obat\Obat;
 use App\Models\Poli\Poli;
-use App\Models\TenagaMedis\TenagaMedis;
-use App\Models\UsersProfile\UsersProfile;
 use Illuminate\Http\Request;
 use App\Models\Pasien\Pasien;
+use App\Models\Ruangan\Ruangan;
+use App\Models\Kunjungan\Kunjungan;
+use App\Models\RawatInap\RawatInap;
+use App\Models\RekamMedis\RekamMedis;
+use App\Models\ResepObat\ResepObat;
+use App\Models\TenagaMedis\TenagaMedis;
+use App\Models\UsersProfile\UsersProfile;
 
 class AuthController extends Controller
 {
@@ -26,7 +30,11 @@ class AuthController extends Controller
 
     public function kunjungan()
     {
-        $pasiens = Pasien::select('id', 'nama')->whereDoesntHave('kunjungan')->get();
+        $pasienTerpakai = Kunjungan::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
         $Allpolies = Poli::select('id', 'nama_poli')->get();
@@ -65,12 +73,25 @@ class AuthController extends Controller
 
     public function rawatInap()
     {
-        return view('rawatInap.index');
+        $pasienTerpakai = RawatInap::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
+        $Allpasiens = Pasien::select('id', 'nama')->get();
+
+        $ruangan = Ruangan::select('id', 'nama_ruangan')->get();
+
+        return view('rawatInap.index', compact('pasiens', 'Allpasiens', 'ruangan'));
     }
 
     public function rekamMedis()
     {
-        $pasiens = Pasien::select('id', 'nama')->whereDoesntHave('rekamMedis')->get();
+        $pasienTerpakai = RekamMedis::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
         // $tenagaMedises = TenagaMedis::with('profile:id,nickname')
@@ -84,7 +105,11 @@ class AuthController extends Controller
 
     public function resepobat()
     {
-        $pasiens = Pasien::select('id', 'nama')->whereDoesntHave('rekamMedis')->get();
+        $pasienTerpakai = ResepObat::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
         // $tenagaMedises = TenagaMedis::with('profile:id,nickname')
@@ -92,9 +117,9 @@ class AuthController extends Controller
         //     ->get();
         $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
             ->get();
-        
+
         $obats = Obat::select('id', 'nama_obat')->get();
-        
+
         return view('resepobat.index', compact('pasiens', 'Allpasiens', 'AlltenagaMedises', 'obats'));
     }
 
@@ -105,8 +130,11 @@ class AuthController extends Controller
 
     public function tenagaMedis()
     {
-        $profiles = UsersProfile::select('id', 'nickname')->whereDoesntHave('tenagaMedis')
+        $profileTerpakai = TenagaMedis::withTrashed()->pluck('profile_id');
+        $profiles = UsersProfile::whereNotIn('id', $profileTerpakai)
+            ->select('id', 'nickname')
             ->get();
+
         $Allprofiles = UsersProfile::select('id', 'nickname')
             ->get();
         return view('tenagaMedis.index', compact('profiles', 'Allprofiles'));
@@ -144,7 +172,15 @@ class AuthController extends Controller
 
     public function labPemeriksaan()
     {
-        return view('labPemeriksaan.index');
+        $pasienTerpakai = ResepObat::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
+        $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
+            ->get();
+
+        return view('labPemeriksaan.index', compact('pasiens', 'AlltenagaMedises'));
     }
 
     public function detailPembelianObat()

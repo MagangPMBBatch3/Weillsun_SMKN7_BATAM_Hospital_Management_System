@@ -42,7 +42,7 @@ class Pasien extends Model
 
     public function rawatInap()
     {
-        return $this->hasMany(RawatInap::class, 'pasien_id');
+        return $this->hasOne(RawatInap::class, 'pasien_id');
     }
 
     public function rekamMedis()

@@ -53,14 +53,23 @@ extend type Query {
     allRawatInap: [RawatInap!]!
         @all(model: "App\\Models\\RawatInap\\RawatInap")
 
-    allRawatInapPaginator(
+    allRawatInapPaginate(
         search: String
         page: Int
         first: Int
     ): RawatInapPaginator
         @field(
             resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@all"
-        )
+    )
+
+    allRawatInapArchive(
+        search: String
+        page: Int
+        first: Int
+    ): RawatInapPaginator
+        @field(
+            resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@allArchive"
+    )
 
     RawatInap(id: ID! @eq(key: "id")): RawatInap
         @find(model: "App\\Models\\RawatInap\\RawatInap")

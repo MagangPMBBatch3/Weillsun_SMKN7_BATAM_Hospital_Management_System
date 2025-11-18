@@ -5,8 +5,8 @@
 
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <i class='bx bx-heart-plus text-3xl text-blue-500'></i>
-                <span class=" tracking-wider">Medical Personnels</span>
+                <i class='bx bx-receipt text-3xl text-blue-500'></i>
+                <span class=" tracking-wider">Inpatient Care</span>
             </h2>
 
             <!-- Search & Buttons -->
@@ -16,19 +16,19 @@
                 <div class="relative w-full sm:w-72">
                     <input type="text" id="search" placeholder="Search..."
                         class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm px-4 py-2.5 pl-9 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition duration-200"
-                        oninput="searchTenagaMedis()">
+                        oninput="searchRawatInap()">
                     <i class='bx bx-search absolute left-3 top-3 h-5 w-5 text-gray-600 '></i>
                 </div>
 
                 <!-- Tombol New User -->
                 @if (auth()->user()->role === 'admin')
                     <x-primary-button x-data=""
-                        x-on:click.prevent="$dispatch('open-modal', 'create-tenagaMedis')"
+                        x-on:click.prevent="$dispatch('open-modal', 'create-rawatInap')"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        New Personnel
+                        New Data
                     </x-primary-button>
                 @endif
 
@@ -60,13 +60,13 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Nickname', 'Specialist', 'No STR']" requireRole="admin">
-                <tbody id="dataTenagaMedisAktif"></tbody>
+            <x-table id="tableActive" :headers="['ID', 'patient', 'room', 'entry date', 'exit date', 'status']" requireRole="admin">
+                <tbody id="dataRawatInapAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Nickname', 'Specialist', 'No STR']" requireRole="admin">
-                <tbody id="dataTenagaMedisArsip"></tbody>
+            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient', 'room', 'entry date', 'exit date', 'status']" requireRole="admin">
+                <tbody id="dataRawatInapArsip"></tbody>
             </x-table>
 
             {{-- Pagination untuk AKTIF --}}
@@ -76,31 +76,54 @@
             <x-pagination-archive></x-pagination-archive>
 
             {{-- Modal CREATE --}}
-            <x-modal name="create-tenagaMedis" focusable>
+            <x-modal name="create-rawatInap" focusable>
                 <div class="p-6">
-                    <form onsubmit="event.preventDefault(); createTenagaMedis()">
-                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Personnel</h2>
+                    <form onsubmit="event.preventDefault(); createRawatInap()">
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Record</h2>
 
                         <div class="space-y-3">
-                            <x-input-label>Nickname</x-input-label>
+
+                            <x-input-label>Patient</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="create-profile-id" id="create-profile-id">
-                                <option value="" class="text-gray-500 italic">Select Nickname</option>
-                                @foreach ($profiles as $profile)
-                                    <option value="{{ $profile->id }}">
-                                        {{ $profile->nickname }}
+                                name="create-nama" id="create-nama">
+                                <option value="" class="text-gray-500 italic">Select Patient</option>
+                                @foreach ($pasiens as $pasien)
+                                    <option value="{{ $pasien->id }}">
+                                        {{ $pasien->nama }}
                                     </option>
                                 @endforeach
                             </select>
 
-                            <x-input-label>Specialist</x-input-label>
-                            <x-text-input id="create-spesialisasi" type="text" placeholder="Enter Your Specialist..."
-                                class="border p-2 w-full rounded" required />
+                            <x-input-label>Room</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                name="create-ruangan" id="create-ruangan">
+                                <option value="" class="text-gray-500 italic">Select Room</option>
+                                @foreach ($ruangan as $room)
+                                    <option value="{{ $room->id }}">
+                                        {{ $room->nama_ruangan }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                            <x-input-label>No STR</x-input-label>
-                            <x-text-input id="create-no-str" type="number" placeholder="Enter Your No STR..."
-                                class="border p-2 w-full rounded" required />
+                            <x-input-label>Entry Date</x-input-label>
+                            <x-text-input id="create-tanggal-masuk" type="date" class="border p-2 w-full rounded"
+                                required />
+
+                            <x-input-label>Exit Date</x-input-label>
+                            <x-text-input id="create-tanggal-keluar" type="date" class="border p-2 w-full rounded"
+                                required />
+
+                            <x-input-label>Status</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                name="create-status" id="create-status">
+                                <option value="" class="text-gray-500 italic">Select Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Pulang">Pulang</option>
+                                <option value="Pindah_Ruangan">Pindah Ruangan</option>
+                            </select>
 
                         </div>
 
@@ -113,35 +136,54 @@
             </x-modal>
 
             {{-- Modal EDIT --}}
-            <x-modal name="edit-tenagaMedis">
+            <x-modal name="edit-rawatInap">
                 <div class="p-6">
-                    <form onsubmit="event.preventDefault(); updateTenagaMedis()">
-                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit Personnel</h2>
+                    <form onsubmit="event.preventDefault(); updateRawatInap()">
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit Record</h2>
 
                         <x-text-input type="hidden" id="edit-id" />
 
                         <div class="space-y-3">
-                            <x-input-label>New Nickname</x-input-label>
+
+                            <x-input-label>New Patient</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-nickname" id="edit-nickname">
-                                <option value="" class="text-gray-500 italic">Select Nickname</option>
-                                @foreach ($Allprofiles as $profile)
-                                    <option value="{{ $profile->id }}"
-                                        {{ old('id', $profile->id) == optional($profile)->id ? 'selected' : '' }}>
-                                        {{ $profile->nickname }}
+                                name="edit-nama" id="edit-nama">
+                                <option value="" class="text-gray-500 italic">Select Patient</option>
+                                @foreach ($Allpasiens as $pasien)
+                                    <option value="{{ $pasien->id }}">
+                                        {{ $pasien->nama }}
                                     </option>
                                 @endforeach
                             </select>
 
-                            <x-input-label>New Specialist</x-input-label>
-                            <x-text-input id="edit-spesialisasi" type="text" placeholder="Enter Your Specialist..."
-                                class="border p-2 w-full rounded" required />
+                            <x-input-label>New Room</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                name="edit-ruangan" id="edit-ruangan">
+                                <option value="" class="text-gray-500 italic">Select Room</option>
+                                @foreach ($ruangan as $room)
+                                    <option value="{{ $room->id }}">
+                                        {{ $room->nama_ruangan }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                            <x-input-label>New No STR</x-input-label>
-                            <x-text-input id="edit-no-str" type="number" placeholder="Enter Your No STR..."
-                                class="border p-2 w-full rounded" required />
+                            <x-input-label>New Entry Date</x-input-label>
+                            <x-text-input id="edit-tanggal-masuk" type="date" class="border p-2 w-full rounded" />
 
+                            <x-input-label>New Exit Date</x-input-label>
+                            <x-text-input id="edit-tanggal-keluar" type="date" class="border p-2 w-full rounded" />
+
+                            <x-input-label>New Status</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                name="edit-status" id="edit-status">
+                                <option value="" class="text-gray-500 italic">Select Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Pulang">Pulang</option>
+                                <option value="Pindah_Ruangan">Pindah Ruangan</option>
+                            </select>
                         </div>
 
                         <div class="flex justify-end mt-4">
@@ -195,7 +237,7 @@
         }
     </script>
     {{-- JS --}}
-    <script src="{{ asset('js/tenagaMedis/tenagaMedis.js') }}"></script>
+    <script src="{{ asset('js/rawatInap/rawatInap.js') }}"></script>
     <script></script>
 
 </x-app-layout>

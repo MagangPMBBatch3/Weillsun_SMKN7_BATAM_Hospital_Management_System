@@ -28,10 +28,8 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
-//  ------------------------- POLI
-
 let searchTimeout = null;
-function searchPoli() {
+function searchRawatInap() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -39,7 +37,7 @@ function searchPoli() {
     }, 500);
 }
 
-// Load data Poli (Aktif & Arsip sekaligus)
+// Load data (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -58,9 +56,22 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allPoliPaginate(first: $first, page: $page, search: $search){
+                allRawatInapPaginate(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_poli deskripsi
+                            id
+                            pasien_id
+                            ruangan_id
+                            tanggal_masuk
+                            tanggal_keluar
+                            status
+                            pasien {
+                                id
+                                nama
+                            }
+                            ruangan {
+                                id
+                                nama_ruangan
+                            }
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -89,25 +100,33 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderPoliTable(
-            dataActive?.data?.allPoliPaginate || {},
-            "dataPoliAktif",
+        renderRawatInapTable(
+            dataActive?.data?.allRawatInapPaginate || {},
+            "dataRawatInapAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allPoliArchive(first: $first, page: $page, search: $search){
+                allRawatInapArchive(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_poli deskripsi
+                            id
+                            pasien_id
+                            ruangan_id
+                            tanggal_masuk
+                            tanggal_keluar
+                            status
+                            pasien {
+                                id
+                                nama
+                            }
+                            ruangan {
+                                id
+                                nama_ruangan
+                            }
                         }
-                    paginatorInfo { 
-                            currentPage 
-                            lastPage 
-                            total 
-                            hasMorePages 
-                    }
+                    paginatorInfo { currentPage lastPage total hasMorePages }
                 }
             }
         `;
@@ -129,9 +148,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderPoliTable(
-            dataArchive?.data?.allPoliArchive || {},
-            "dataPoliArsip",
+        renderRawatInapTable(
+            dataArchive?.data?.allRawatInapArchive || {},
+            "dataRawatInapArsip",
             false
         );
     } catch (error) {
@@ -143,107 +162,155 @@ async function loadDataPaginate(page = 1, isActive = true) {
 }
 
 // Create
-async function createPoli() {
-    const nama_poli = document.getElementById("create-nama_poli").value.trim();
-    const deskripsi = document.getElementById("create-deskripsi").value.trim();
+async function createRawatInap() {
+    const pasien_id = document.getElementById("create-nama").value;
+    const ruangan_id = document.getElementById("create-ruangan").value;
+    const tanggal_masuk = document.getElementById("create-tanggal-masuk").value;
+    const tanggal_keluar = document.getElementById("create-tanggal-keluar").value.trim();
+    const status = document.getElementById("create-status").value.trim();
 
-
-    if (!nama_poli || !deskripsi)
+    if (
+        !pasien_id ||
+        !ruangan_id ||
+        !tanggal_masuk ||
+        !tanggal_keluar ||
+        !status
+    )
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationPoli = `
-        mutation($input: CreatePoliInput!) {
-            createPoli(input: $input) {
-                id
-                nama_poli
-                deskripsi
+    const mutationRawatInap = `
+        mutation($input: CreateRawatInapInput!) {
+            createRawatInap(input: $input) {
+                            id
+                            pasien_id
+                            ruangan_id
+                            tanggal_masuk
+                            tanggal_keluar
+                            status
+                            pasien {
+                                id
+                                nama
+                            }
+                            ruangan {
+                                id
+                                nama_ruangan
+                            }
             }
         }
     `;
-    const variablesPoli = {
-        input: { nama_poli, deskripsi },
+    const variablesRawatInap = {
+        input: { pasien_id, ruangan_id, tanggal_masuk, tanggal_keluar, status },
     };
 
     try {
-        const resPoli = await fetch(API_URL, {
+        const resRawatInap = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationPoli,
-                variables: variablesPoli,
+                query: mutationRawatInap,
+                variables: variablesRawatInap,
             }),
         });
 
-        const resultPoli = await resPoli.json();
-        const dataPoli = resultPoli?.data?.createPoli;
+        const resultRawatInap = await resRawatInap.json();
+        const dataRawatInap = resultRawatInap?.data?.createRawatInap;
 
-        if (dataPoli) {
+        if (dataRawatInap) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-poli" })
+                new CustomEvent("close-modal", { detail: "create-rawatInap" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultPoli.errors);
-            alert("Failed to create Clinic!");
+            console.error("GraphQL Error:", resultRawatInap.errors);
+            alert("Failed to create Tenaga Medis!");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the clinic");
+        alert("An error occurred while creating the user");
     } finally {
         hideLoading();
     }
 }
 
-function openEditModal(id, nama_poli, deskripsi) {
+function openEditModal(id, pasien_id, ruangan_id, tanggal_masuk, tanggal_keluar, status) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-nama_poli").value = nama_poli;
-    document.getElementById("edit-deskripsi").value = deskripsi;
+    document.getElementById("edit-nama").value = pasien_id;
+    document.getElementById("edit-ruangan").value = ruangan_id;
+    document.getElementById("edit-tanggal-masuk").value = tanggal_masuk;
+    document.getElementById("edit-tanggal-keluar").value = tanggal_keluar;
+    document.getElementById("edit-status").value = status;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-poli" })
+        new CustomEvent("open-modal", { detail: "edit-rawatInap" })
     );
 }
 
 // Update
-async function updatePoli() {
+async function updateRawatInap() {
     const id = document.getElementById("edit-id").value;
-    const nama_poli = document.getElementById("edit-nama_poli").value.trim();
-    const deskripsi = document.getElementById("edit-deskripsi").value.trim();
+    const pasien_id = document.getElementById("edit-nama").value;
+    const ruangan_id = document.getElementById("edit-ruangan").value;
+    const tanggal_masuk = document.getElementById("edit-tanggal-masuk").value;
+    const tanggal_keluar = document.getElementById("edit-tanggal-keluar").value.trim();
+    const status = document.getElementById("edit-status").value.trim();
 
-    if (!nama_poli || !deskripsi)
-        return alert("Please fill in all required fields!");
     showLoading();
 
-    const mutation = `mutation($id: ID!, $input: UpdatePoliInput!) { updatePoli(id: $id, input: $input) 
-                        { 
-                            id 
-                            nama_poli 
-                            deskripsi
-                        } 
-                    }`;
+    const mutation = `
+        mutation($id: ID!, $input: UpdateRawatInapInput!) {
+            updateRawatInap(id: $id, input: $input) {
+                            id
+                            pasien_id
+                            ruangan_id
+                            tanggal_masuk
+                            tanggal_keluar
+                            status
+                            pasien {
+                                id
+                                nama
+                            }
+                            ruangan {
+                                id
+                                nama_ruangan
+                            }
+            }
+        }
+    `;
+
     try {
         await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { nama_poli, deskripsi } },
+                variables: {
+                    id,
+                    input: {
+                        pasien_id,
+                        ruangan_id,
+                        tanggal_masuk,
+                        tanggal_keluar,
+                        status
+                    },
+                },
             }),
         });
+
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-poli" })
+            new CustomEvent("close-modal", { detail: "edit-rawatInap" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
         alert("Failed to update data");
+    } finally {
         hideLoading();
     }
 }
 
-function renderPoliTable(result, tableId, isActive) {
+function renderRawatInapTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -253,7 +320,7 @@ function renderPoliTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="4">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -287,21 +354,21 @@ function renderPoliTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.nama_poli}', '${item.deskripsi}')"
+                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.ruangan_id}', '${item.tanggal_masuk}', '${item.tanggal_keluar}', '${item.status}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusPoli(${item.id})"
+                <button onclick="hapusRawatInap(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restorePoli(${item.id})"
+                <button onclick="restoreRawatInap(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeletePoli(${item.id})"
+                <button onclick="forceDeleteRawatInap(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -316,14 +383,20 @@ function renderPoliTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.nama_poli
+                item.pasien?.nama
             }</td>
-            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
-                ${
-                    item.deskripsi
-                }
+            <td class="p-4 text-center text-base font-semibold">${
+                item.ruangan?.nama_ruangan
+            }</td>
+            <td class="p-4 text-center text-base font-semibold">${
+                item.tanggal_masuk
+            }</td>
+            <td class="p-4 text-center font-semibold capitalize">
+                ${item.tanggal_keluar}
             </td>
-
+            <td class="p-4 text-center font-semibold capitalize">
+                ${item.status}
+            </td>
             ${
                 window.currentUserRole === "admin"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
@@ -352,13 +425,12 @@ function renderPoliTable(result, tableId, isActive) {
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
 
-
 // Hapus
-async function hapusPoli(id) {
+async function hapusRawatInap(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deletePoli(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deleteRawatInap(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -374,11 +446,11 @@ async function hapusPoli(id) {
 }
 
 // restore
-async function restorePoli(id) {
+async function restoreRawatInap(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restorePoli(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restoreRawatInap(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -394,11 +466,11 @@ async function restorePoli(id) {
 }
 
 // force delete
-async function forceDeletePoli(id) {
+async function forceDeleteRawatInap(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeletePoli(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeleteRawatInap(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
