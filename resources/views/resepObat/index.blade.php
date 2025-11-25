@@ -60,12 +60,12 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'patient','personnel',  'Medicine', 'amount', 'instructions']" requireRole="admin">
+            <x-table id="tableActive" :headers="['ID', 'Patient', 'Personnel', 'Medicines (Amount & Instructions)']" :showActionHeader="false">
                 <tbody id="dataResepObatAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient', 'personnel',  'Medicine', 'amount', 'instructions']" requireRole="admin">
+            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient', 'Personnel', 'Medicines (Amount & Instructions)']" :showActionHeader="false">
                 <tbody id="dataResepObatArsip"></tbody>
             </x-table>
 
@@ -77,7 +77,7 @@
 
             {{-- Modal CREATE --}}
             <x-modal name="create-resepObat" focusable>
-                <div class="p-6">
+                <div class="p-6 overflow-y-scroll max-h-[100vh]">
                     <form onsubmit="event.preventDefault(); createResepObat()">
                         <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Prescriptions</h2>
 
@@ -106,31 +106,60 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>Medicine</x-input-label>
-                            <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="create-nama-obat" id="create-nama-obat">
-                                <option value="" class="text-gray-500 italic">Select Medicine</option>
-                                @foreach ($obats as $obat)
-                                    <option value="{{ $obat->id }}">
-                                        {{ $obat->nama_obat }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div id="dynamic-container" class="space-y-4">
 
-                            <x-input-label>Amount</x-input-label>
-                            <x-text-input id="create-jumlah" type="text" placeholder="Enter Amount"
-                                class="border p-2 w-full rounded" required />
+                                <!-- ROW PERTAMA -->
+                                <div
+                                    class="dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
+                                            p-4 rounded-xl shadow-sm space-y-3 transition-all">
 
-                            <x-input-label>Instructions</x-input-label>
-                            <textarea id="create-aturan-pakai" required placeholder="Enter Instructions..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"></textarea>
+                                    <div>
+                                        <x-input-label>Medicine</x-input-label>
+                                        <select name="create-nama-obat[]"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                            <option value="">Select Medicine</option>
+                                            @foreach ($obats as $obat)
+                                                <option value="{{ $obat->id }}">{{ $obat->nama_obat }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <x-input-label>Amount</x-input-label>
+                                        <input type="text" name="create-jumlah[]"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                                            placeholder="Enter Amount">
+                                    </div>
+
+                                    <div>
+                                        <x-input-label>Instructions</x-input-label>
+                                        <textarea name="create-aturan-pakai[]"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                                            placeholder="Enter Instructions..."></textarea>
+                                    </div>
+
+                                </div>
+                            </div>
 
                         </div>
 
-                        <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                            <x-primary-button class="ml-2">Save</x-primary-button>
+                        <div class="flex justify-between">
+                            <button type="button"
+                                class="mt-3 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-md hover:shadow-lg 
+                                    transition-all duration-200 active:scale-95 flex items-center gap-2"
+                                onclick="addRow()">
+                                <i class='bx bx-plus text-xl'></i> New
+                            </button>
+
+
+
+                            <div class="flex justify-end mt-4">
+                                <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                <x-primary-button class="ml-2">Save</x-primary-button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -191,6 +220,7 @@
 
                         </div>
 
+
                         <div class="flex justify-end mt-4">
                             <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
                             <x-primary-button class="ml-2">Update</x-primary-button>
@@ -203,6 +233,53 @@
     </div>
 
     <script>
+        function addRow() {
+            const container = document.getElementById("dynamic-container");
+
+            const row = document.createElement("div");
+            row.className =
+                "dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
+                "p-4 rounded-xl shadow-sm space-y-3 transition-all transform scale-95 opacity-0";
+
+            row.innerHTML = `
+                <div>
+                    <label class="block text-sm font-medium">Medicine</label>
+                    <select name="create-nama-obat[]"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                        <option value="">Select Medicine</option>
+                        @foreach ($obats as $obat)
+                            <option value="{{ $obat->id }}">{{ $obat->nama_obat }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium">Amount</label>
+                    <input type="text" name="create-jumlah[]" 
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                        placeholder="Enter Amount">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium">Instructions</label>
+                    <textarea name="create-aturan-pakai[]"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                        placeholder="Enter Instructions..."></textarea>
+                </div>
+            `;
+
+            container.appendChild(row);
+
+            // Animasi masuk
+            setTimeout(() => {
+                row.classList.remove("scale-95", "opacity-0");
+                row.classList.add("scale-100", "opacity-100");
+            }, 10);
+        }
+
         window.currentUserRole = "{{ Auth::user()->role }}";
 
         function showTable(isActive) {

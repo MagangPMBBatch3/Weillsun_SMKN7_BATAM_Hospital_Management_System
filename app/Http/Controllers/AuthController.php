@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
 use App\Models\Kunjungan\Kunjungan;
+use App\Models\LabPemeriksaan\LabPemeriksaan;
+use App\Models\Radiologi\Radiologi;
 use App\Models\RawatInap\RawatInap;
 use App\Models\RekamMedis\RekamMedis;
 use App\Models\ResepObat\ResepObat;
@@ -58,7 +60,13 @@ class AuthController extends Controller
 
     public function pembayaranPasien()
     {
-        return view('pembayaranPasien.index');
+        $pasienTerpakai = Radiologi::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
+        $Allpasiens = Pasien::select('id', 'nama')->get();
+        return view('pembayaranPasien.index', compact('pasiens', 'Allpasiens'));
     }
 
     public function poli()
@@ -68,7 +76,17 @@ class AuthController extends Controller
 
     public function radiologi()
     {
-        return view('radiologi.index');
+        $pasienTerpakai = Radiologi::withTrashed()->pluck('pasien_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
+        $Allpasiens = Pasien::select('id', 'nama')->get();
+
+        $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
+            ->get();
+
+        return view('radiologi.index', compact('pasiens', 'AlltenagaMedises', 'Allpasiens'));
     }
 
     public function rawatInap()
@@ -94,9 +112,6 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        // $tenagaMedises = TenagaMedis::with('profile:id,nickname')
-        //     ->whereDoesntHave('rekamMedis')
-        //     ->get();
         $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
             ->get();
 
@@ -172,15 +187,17 @@ class AuthController extends Controller
 
     public function labPemeriksaan()
     {
-        $pasienTerpakai = ResepObat::withTrashed()->pluck('pasien_id');
+        $pasienTerpakai = LabPemeriksaan::withTrashed()->pluck('pasien_id');
         $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
             ->select('id', 'nama')
             ->get();
 
+        $Allpasiens = Pasien::select('id', 'nama')->get();
+
         $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
             ->get();
 
-        return view('labPemeriksaan.index', compact('pasiens', 'AlltenagaMedises'));
+        return view('labPemeriksaan.index', compact('pasiens', 'AlltenagaMedises', 'Allpasiens'));
     }
 
     public function detailPembelianObat()

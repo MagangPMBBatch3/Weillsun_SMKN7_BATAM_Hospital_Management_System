@@ -24,7 +24,6 @@ input CreateResepObatInput {
 input UpdateResepObatInput {
     pasien_id: ID
     tenaga_medis_id: ID
-    tenaga_medis_id: ID
     obat_id: ID
     jumlah: Int
     aturan_pakai: String

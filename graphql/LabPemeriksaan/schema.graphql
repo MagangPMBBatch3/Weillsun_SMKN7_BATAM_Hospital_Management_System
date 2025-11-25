@@ -48,14 +48,23 @@ extend type Query {
     allLabPemeriksaan: [LabPemeriksaan!]!
         @all(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")
 
-    allLabPemeriksaanPaginator(
+    allLabPemeriksaanPaginate(
         search: String
         page: Int
         first: Int
     ): LabPemeriksaanPaginator
         @field(
             resolver: "App\\GraphQL\\LabPemeriksaan\\Queries\\LabPemeriksaanQuery@all"
-        )
+    )
+
+    allLabPemeriksaanArchive(
+        search: String
+        page: Int
+        first: Int
+    ): LabPemeriksaanPaginator
+        @field(
+            resolver: "App\\GraphQL\\LabPemeriksaan\\Queries\\LabPemeriksaanQuery@allArchive"
+    )
 
     LabPemeriksaan(id: ID! @eq(key: "id")): LabPemeriksaan
         @find(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")

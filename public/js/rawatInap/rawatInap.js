@@ -64,6 +64,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             tanggal_masuk
                             tanggal_keluar
                             status
+                            biaya_inap
                             pasien {
                                 id
                                 nama
@@ -117,6 +118,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             tanggal_masuk
                             tanggal_keluar
                             status
+                            biaya_inap
                             pasien {
                                 id
                                 nama
@@ -161,12 +163,140 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
+// Fungsi untuk menghitung lama inap
+function calculateLamaInap(tanggalMasuk, tanggalKeluar) {
+    if (!tanggalMasuk || !tanggalKeluar) return 0;
+    const masuk = new Date(tanggalMasuk);
+    const keluar = new Date(tanggalKeluar);
+    const selisihMs = keluar - masuk;
+    const selisihHari = Math.floor(selisihMs / (1000 * 60 * 60 * 24));
+    return selisihHari + 1; // +1 untuk menghitung hari keluar
+}
+
+// Fungsi untuk menghitung biaya inap otomatis (Create)
+async function calculateBiayaInapCreate() {
+    const ruangan_id = document.getElementById("create-ruangan").value;
+    const tanggal_masuk = document.getElementById("create-tanggal-masuk").value;
+    const tanggal_keluar = document.getElementById(
+        "create-tanggal-keluar"
+    ).value;
+    const biayaInput = document.getElementById("create-biaya-inap");
+
+    console.log("calculateBiayaInapCreate called", {
+        ruangan_id,
+        tanggal_masuk,
+        tanggal_keluar,
+    });
+
+    if (!ruangan_id || !tanggal_masuk || !tanggal_keluar) {
+        biayaInput.value = "0";
+        return;
+    }
+
+    try {
+        // Query untuk mendapatkan tarif per hari dari ruangan
+        const query = `
+            query($id: ID!) {
+                Ruangan(id: $id) {
+                    id
+                    tarif_per_hari
+                }
+            }
+        `;
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: query,
+                variables: { id: ruangan_id },
+            }),
+        });
+
+        const result = await res.json();
+        const ruangan = result?.data?.Ruangan;
+
+        console.log("Ruangan result:", ruangan);
+
+        if (ruangan) {
+            const lamaInap = calculateLamaInap(tanggal_masuk, tanggal_keluar);
+            const tarifPerHari = parseFloat(ruangan.tarif_per_hari) || 0;
+            const biayaInap = lamaInap * tarifPerHari;
+
+            console.log("Calculated:", { lamaInap, tarifPerHari, biayaInap });
+
+            biayaInput.value = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(biayaInap);
+        }
+    } catch (error) {
+        console.error("Error calculating biaya inap:", error);
+        biayaInput.value = "0";
+    }
+}
+
+// Fungsi untuk menghitung biaya inap otomatis (Edit)
+async function calculateBiayaInapEdit() {
+    const ruangan_id = document.getElementById("edit-ruangan").value;
+    const tanggal_masuk = document.getElementById("edit-tanggal-masuk").value;
+    const tanggal_keluar = document.getElementById("edit-tanggal-keluar").value;
+    const biayaInput = document.getElementById("edit-biaya-inap");
+
+    if (!ruangan_id || !tanggal_masuk || !tanggal_keluar) {
+        biayaInput.value = "0";
+        return;
+    }
+
+    try {
+        // Query untuk mendapatkan tarif per hari dari ruangan
+        const query = `
+            query($id: ID!) {
+                Ruangan(id: $id) {
+                    id
+                    tarif_per_hari
+                }
+            }
+        `;
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: query,
+                variables: { id: ruangan_id },
+            }),
+        });
+
+        const result = await res.json();
+        const ruangan = result?.data?.Ruangan;
+
+        if (ruangan) {
+            const lamaInap = calculateLamaInap(tanggal_masuk, tanggal_keluar);
+            const tarifPerHari = parseFloat(ruangan.tarif_per_hari) || 0;
+            const biayaInap = lamaInap * tarifPerHari;
+
+            biayaInput.value = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(biayaInap);
+        }
+    } catch (error) {
+        console.error("Error calculating biaya inap:", error);
+        biayaInput.value = "0";
+    }
+}
+
 // Create
 async function createRawatInap() {
     const pasien_id = document.getElementById("create-nama").value;
     const ruangan_id = document.getElementById("create-ruangan").value;
     const tanggal_masuk = document.getElementById("create-tanggal-masuk").value;
-    const tanggal_keluar = document.getElementById("create-tanggal-keluar").value.trim();
+    const tanggal_keluar = document
+        .getElementById("create-tanggal-keluar")
+        .value.trim();
     const status = document.getElementById("create-status").value.trim();
 
     if (
@@ -177,6 +307,20 @@ async function createRawatInap() {
         !status
     )
         return alert("Please fill in all required fields!");
+
+    // Ambil biaya inap dari input yang sudah dihitung dan diformat
+    const tarifStr = document.getElementById("create-biaya-inap").value;
+    let biaya_inap = 0;
+
+    // Parse currency format IDR - hapus semua karakter non-digit
+    if (tarifStr) {
+        const numStr = tarifStr.replace(/[^\d]/g, "");
+        biaya_inap = parseFloat(numStr) || 0;
+    }
+
+    if (biaya_inap === 0) {
+        return alert("Please select room and dates to calculate the fee!");
+    }
 
     showLoading();
 
@@ -189,6 +333,7 @@ async function createRawatInap() {
                             tanggal_masuk
                             tanggal_keluar
                             status
+                            biaya_inap
                             pasien {
                                 id
                                 nama
@@ -201,7 +346,14 @@ async function createRawatInap() {
         }
     `;
     const variablesRawatInap = {
-        input: { pasien_id, ruangan_id, tanggal_masuk, tanggal_keluar, status },
+        input: {
+            pasien_id,
+            ruangan_id,
+            tanggal_masuk,
+            tanggal_keluar,
+            status,
+            biaya_inap,
+        },
     };
 
     try {
@@ -234,7 +386,15 @@ async function createRawatInap() {
     }
 }
 
-function openEditModal(id, pasien_id, ruangan_id, tanggal_masuk, tanggal_keluar, status) {
+function openEditModal(
+    id,
+    pasien_id,
+    ruangan_id,
+    tanggal_masuk,
+    tanggal_keluar,
+    status,
+    biaya_inap = 0
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
     document.getElementById("edit-ruangan").value = ruangan_id;
@@ -242,9 +402,27 @@ function openEditModal(id, pasien_id, ruangan_id, tanggal_masuk, tanggal_keluar,
     document.getElementById("edit-tanggal-keluar").value = tanggal_keluar;
     document.getElementById("edit-status").value = status;
 
+    // Format biaya_inap untuk ditampilkan
+    if (biaya_inap > 0) {
+        document.getElementById("edit-biaya-inap").value =
+            new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(biaya_inap);
+    } else {
+        document.getElementById("edit-biaya-inap").value = "0";
+    }
+
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-rawatInap" })
     );
+
+    // Trigger perhitungan biaya setelah modal terbuka
+    setTimeout(() => {
+        calculateBiayaInapEdit();
+    }, 100);
 }
 
 // Update
@@ -253,8 +431,24 @@ async function updateRawatInap() {
     const pasien_id = document.getElementById("edit-nama").value;
     const ruangan_id = document.getElementById("edit-ruangan").value;
     const tanggal_masuk = document.getElementById("edit-tanggal-masuk").value;
-    const tanggal_keluar = document.getElementById("edit-tanggal-keluar").value.trim();
+    const tanggal_keluar = document
+        .getElementById("edit-tanggal-keluar")
+        .value.trim();
     const status = document.getElementById("edit-status").value.trim();
+
+    // Ambil biaya inap dari input yang sudah dihitung dan diformat
+    const tarifStr = document.getElementById("edit-biaya-inap").value;
+    let biaya_inap = 0;
+
+    // Parse currency format IDR - hapus semua karakter non-digit
+    if (tarifStr) {
+        const numStr = tarifStr.replace(/[^\d]/g, "");
+        biaya_inap = parseFloat(numStr) || 0;
+    }
+
+    if (biaya_inap === 0) {
+        return alert("Please select room and dates to calculate the fee!");
+    }
 
     showLoading();
 
@@ -267,6 +461,7 @@ async function updateRawatInap() {
                             tanggal_masuk
                             tanggal_keluar
                             status
+                            biaya_inap
                             pasien {
                                 id
                                 nama
@@ -292,7 +487,8 @@ async function updateRawatInap() {
                         ruangan_id,
                         tanggal_masuk,
                         tanggal_keluar,
-                        status
+                        status,
+                        biaya_inap,
                     },
                 },
             }),
@@ -354,7 +550,7 @@ function renderRawatInapTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.ruangan_id}', '${item.tanggal_masuk}', '${item.tanggal_keluar}', '${item.status}')"
+                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.ruangan_id}', '${item.tanggal_masuk}', '${item.tanggal_keluar}', '${item.status}', ${item.biaya_inap})"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
@@ -394,9 +590,22 @@ function renderRawatInapTable(result, tableId, isActive) {
             <td class="p-4 text-center font-semibold capitalize">
                 ${item.tanggal_keluar}
             </td>
-            <td class="p-4 text-center font-semibold capitalize">
-                ${item.status}
+            <td class="p-4 text-center capitalize">
+                <span class="font-bold px-3 py-1 rounded-full text-green-600 bg-green-100 border border-green-300">
+                    Rp ${item.biaya_inap.toLocaleString("id-ID")}
+                </span>
             </td>
+            <td class="p-4 text-center font-semibold capitalize">
+                <span class="px-3 py-1 rounded-full font-semibold
+                    ${item.status === 'Aktif' ? 'bg-green-100 text-green-700 border border-green-300' : 
+                    item.status === 'Pulang' ? 'bg-red-100 text-red-700 border border-red-300'  
+                    : 
+                    'bg-gray-200 text-gray-700 border border-gray-300'}">
+                    ${item.status.replace("_", " ")}
+
+                </span>
+            </td>
+
             ${
                 window.currentUserRole === "admin"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
@@ -485,4 +694,44 @@ async function forceDeleteRawatInap(id) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => loadDataPaginate(1, true));
+document.addEventListener("DOMContentLoaded", () => {
+    loadDataPaginate(1, true);
+
+    // Event listener untuk Create modal - perhitungan otomatis
+    const createRuanganSelect = document.getElementById("create-ruangan");
+    const createTanggalMasuk = document.getElementById("create-tanggal-masuk");
+    const createTanggalKeluar = document.getElementById(
+        "create-tanggal-keluar"
+    );
+
+    if (createRuanganSelect) {
+        createRuanganSelect.addEventListener(
+            "change",
+            calculateBiayaInapCreate
+        );
+    }
+    if (createTanggalMasuk) {
+        createTanggalMasuk.addEventListener("change", calculateBiayaInapCreate);
+    }
+    if (createTanggalKeluar) {
+        createTanggalKeluar.addEventListener(
+            "change",
+            calculateBiayaInapCreate
+        );
+    }
+
+    // Event listener untuk Edit modal - perhitungan otomatis
+    const editRuanganSelect = document.getElementById("edit-ruangan");
+    const editTanggalMasuk = document.getElementById("edit-tanggal-masuk");
+    const editTanggalKeluar = document.getElementById("edit-tanggal-keluar");
+
+    if (editRuanganSelect) {
+        editRuanganSelect.addEventListener("change", calculateBiayaInapEdit);
+    }
+    if (editTanggalMasuk) {
+        editTanggalMasuk.addEventListener("change", calculateBiayaInapEdit);
+    }
+    if (editTanggalKeluar) {
+        editTanggalKeluar.addEventListener("change", calculateBiayaInapEdit);
+    }
+});

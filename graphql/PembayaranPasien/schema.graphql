@@ -50,14 +50,23 @@ extend type Query {
     allPembayaranPasien: [PembayaranPasien!]!
         @all(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
 
-    allPembayaranPasienPaginator(
+    allPembayaranPasienPaginate(
         search: String
         page: Int
         first: Int
     ): PembayaranPasienPaginator
         @field(
             resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@all"
-        )
+    )
+
+    allPembayaranPasienArchive(
+        search: String
+        page: Int
+        first: Int
+    ): PembayaranPasienPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@allArchive"
+    )
 
     PembayaranPasien(id: ID! @eq(key: "id")): PembayaranPasien
         @find(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")

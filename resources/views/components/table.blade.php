@@ -1,4 +1,4 @@
-@props(['headers', 'requireRole' => null])
+@props(['headers', 'requireRole' => null, 'showActionHeader' => true])
 
 @php
     $hasPermission = true;
@@ -17,7 +17,7 @@
                     </th>
                 @endforeach
 
-                @if ($hasPermission)
+                @if ($hasPermission && $showActionHeader)
                     <th scope="col" class="px-6 py-4 text-center text-xs font-semibold tracking-wider uppercase">
                         Actions
                     </th>

@@ -189,16 +189,32 @@ async function loadDataPaginate(page = 1, isActive = true) {
         return str.replace(/[^0-9.]/g, "");
     }
 
+    
 // Create
 async function createResepObat() {
     const tenaga_medis_id = document.getElementById("create-nickname").value;
     const pasien_id = document.getElementById("create-nama").value;
-    const obat_id = document.getElementById("create-nama-obat").value;
-    const jumlah = document.getElementById("create-jumlah").value.replace(/\./g, "");
-    const aturan_pakai = document.getElementById("create-aturan-pakai").value.trim();
 
-    if (!pasien_id || !obat_id || !jumlah || !tenaga_medis_id || !aturan_pakai)
-        return alert("Please fill in all required fields!");
+    if (!pasien_id || !tenaga_medis_id) {
+        return alert("Please select Patient and Personnel!");
+    }
+
+   const rows = document.querySelectorAll('#dynamic-container .dynamic-row');
+
+    // Map rows ke array of prescription objects, lalu filter yang valid
+    const prescriptions = Array.from(rows)
+        .map(row => ({
+            obat_id: row.querySelector('select[name="create-nama-obat[]"]').value,
+            jumlah: parseInt(row.querySelector('input[name="create-jumlah[]"]').value.replace(/\./g, "") || 0),
+            aturan_pakai: row.querySelector('textarea[name="create-aturan-pakai[]"]').value.trim()
+        }))
+        .filter(item => item.obat_id && item.jumlah && item.aturan_pakai);
+
+    
+
+    if (prescriptions.length === 0) {
+        return alert("Please fill at least one prescription!");
+    }
 
     showLoading();
 
@@ -228,35 +244,53 @@ async function createResepObat() {
             }
         }
     `;
-    const variablesResepObat = {
-        input: { pasien_id, tenaga_medis_id, obat_id, jumlah:parseInt(jumlah), aturan_pakai},
-    };
+    // const variablesResepObat = {
+    //     input: { 
+    //         pasien_id, 
+    //         tenaga_medis_id, 
+    //         obat_id, 
+    //         jumlah:parseInt(jumlah), 
+    //         aturan_pakai},
+    // };
 
     try {
-        const resResepObat = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: mutationResepObat,
-                variables: variablesResepObat,
-            }),
-        });
+        const results = await Promise.all(
+            prescriptions.map(item => {
+                // Buat variablesResepObat untuk setiap item
+                const variablesResepObat = {
+                    input: {
+                        pasien_id,
+                        tenaga_medis_id,
+                        obat_id: item.obat_id,
+                        jumlah: item.jumlah,
+                        aturan_pakai: item.aturan_pakai
+                    }
+                };
 
-        const resultResepObat = await resResepObat.json();
-        const dataResepObat = resultResepObat?.data?.createResepObat;
+                return fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        query: mutationResepObat,
+                        variables: variablesResepObat
+                    })
+                }).then(res => res.json());
+            })
+        );
 
-        if (dataResepObat) {
-            window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-resepObat" })
-            );
-            loadDataPaginate(currentPageActive, true);
-        } else {
-            console.error("GraphQL Error:", resultResepObat.errors);
-            alert("Failed to create Tenaga Medis!");
+        // Cek apakah ada error
+        const errors = results.filter(r => r.errors);
+        if (errors.length > 0) {
+            console.error("Some mutations failed:", errors);
+            alert(`${prescriptions.length - errors.length} of ${prescriptions.length} prescriptions created`);
         }
+
+        window.dispatchEvent(new CustomEvent("close-modal", { detail: "create-resepObat" }));
+        // resetCreateForm();
+        loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the user");
+        alert("An error occurred while creating prescription");
     } finally {
         hideLoading();
     }
@@ -338,34 +372,37 @@ async function updateResepObat() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const jumlahInput = document.getElementById('create-jumlah');
     const editJumlahInput = document.getElementById('edit-jumlah');
 
-    jumlahInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-        
+    // Event delegation untuk semua input jumlah di dynamic-container
+    const dynamicContainer = document.getElementById('dynamic-container');
+    
+    dynamicContainer.addEventListener("input", (e) => {
+        // Cek apakah yang di-input adalah field jumlah
+        if (e.target.name === "create-jumlah[]") {
+            let value = unformatNumber(filterAngka(e.target.value));
+            e.target.value = value ? formatNumber(value) : "";
+        }
     });
+
+    // Untuk edit modal (tetap pakai cara lama karena hanya 1 input)
     editJumlahInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-        
+        e.target.value = value ? formatNumber(value) : "";
     });
-})
+});
 
 function renderResepObatTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
-
     tbody.innerHTML = "";
+    
     const items = result.data || [];
     const pageInfo = result.paginatorInfo || {};
 
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No related data found</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -379,79 +416,108 @@ function renderResepObatTable(result, tableId, isActive) {
             : document.getElementById("nextBtnArchive");
 
         if (pageInfoEl) {
-            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
-                pageInfo.lastPage || 1
-            } (Total: 0)`;
+            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${pageInfo.lastPage || 1} (Total: 0)`;
         }
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
-
         return;
     }
 
-    items.forEach((item) => {
-        let actions = "";
-        const baseBtn = `
-        inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-md font-semibold
+    // Kelompokkan data berdasarkan pasien_id dan tenaga_medis_id
+    const grouped = items.reduce((acc, item) => {
+        const key = `${item.pasien_id}-${item.tenaga_medis_id}`;
+        
+        if (!acc[key]) {
+            acc[key] = {
+                ids: [],
+                pasien: item.pasien,
+                tenagaMedis: item.tenagaMedis,
+                obats: []
+            };
+        }
+        
+        acc[key].ids.push(item.id);
+        acc[key].obats.push({
+            id: item.id,
+            obat_id: item.obat_id,
+            nama_obat: item.obat?.nama_obat,
+            jumlah: item.jumlah,
+            aturan_pakai: item.aturan_pakai
+        });
+        
+        return acc;
+    }, {});
+
+    const baseBtn = `
+        inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
-            if (isActive) {
-                actions = `
-                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.tenaga_medis_id}', '${item.obat_id}', '${item.jumlah}', '${item.aturan_pakai}')"
-                    class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
-                    <i class='bx bx-edit-alt'></i> Edit
-                </button>
-                <button onclick="hapusResepObat(${item.id})"
-                    class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
-                    <i class='bx bx-archive'></i> Archive
-                </button>`;
-            } else {
-                actions = `
-                <button onclick="restoreResepObat(${item.id})"
-                    class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
-                    <i class='bx bx-refresh-ccw-alt'></i>  Restore
-                </button>
-                <button onclick="forceDeleteResepObat(${item.id})"
-                    class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
-                    <i class='bx bx-trash'></i> Delete
-                </button>`;
+    // Render grouped data
+    Object.values(grouped).forEach(group => {
+        // Render obat list dengan actions per baris obat
+        const obatRows = group.obats.map(obat => {
+            let obatActions = "";
+            
+            if (window.currentUserRole === "admin") {
+                if (isActive) {
+                    obatActions = `
+                        <div class="flex gap-1 flex-wrap">
+                            <button onclick="openEditModal(${obat.id}, '${group.pasien.id}', '${group.tenagaMedis.id}', '${obat.obat_id}', '${obat.jumlah}', '${obat.aturan_pakai}')"
+                                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
+                                <i class='bx bx-edit-alt'></i> Edit
+                            </button>
+                            <button onclick="hapusResepObat(${obat.id})"
+                                class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
+                                <i class='bx bx-archive'></i> Archive
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    obatActions = `
+                        <div class="flex gap-1 flex-wrap">
+                            <button onclick="restoreResepObat(${obat.id})"
+                                class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
+                                <i class='bx bx-refresh'></i> Restore
+                            </button>
+                            <button onclick="forceDeleteResepObat(${obat.id})"
+                                class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
+                                <i class='bx bx-trash'></i> Delete
+                            </button>
+                        </div>
+                    `;
+                }
             }
-        }
+
+            return `
+                <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 py-2 last:border-b-0">
+                    <div class="flex-1">
+                        <span class="font-semibold text-blue-600 dark:text-blue-400">${obat.nama_obat}</span>
+                        <span class="text-sm ml-2">Jumlah: <strong>${obat.jumlah.toLocaleString("id-ID")}</strong></span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${obat.aturan_pakai}</span>
+                    </div>
+                    ${window.currentUserRole === "admin" ? obatActions : ""}
+                </div>
+            `;
+        }).join("");
 
         tbody.innerHTML += `
-        <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50">
-            <td class="p-4 text-center font-semibold">
-                <span class="rounded-full text-white bg-green-500 py-1 px-2">${
-                    item.id
-                }</span>
-            </td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.pasien?.nama
-            }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.tenagaMedis?.profile?.nickname
-            }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.obat?.nama_obat
-            }</td>
-            <td class="p-4 text-center font-semibold capitalize">
-                ${item.jumlah.toLocaleString("id-ID")}
-            </td>
-            <td class="p-4 text-center font-semibold capitalize">
-                ${item.aturan_pakai}
-            </td>
-            ${
-                window.currentUserRole === "admin"
-                    ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
-                    : ""
-            }
-        </tr>
-    `;
+            <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50 align-top">
+                <td class="p-4 text-center font-semibold align-middle">
+                    <div class="flex flex-col gap-1 items-center">
+                        ${group.ids.map(id => `<span class="rounded-full font-bold text-green-500 py-1 px-2 ">${id}</span>`).join("")}
+                    </div>
+                </td>
+                <td class="p-4 text-center text-base border-x font-semibold align-middle">${group.pasien?.nama}</td>
+                <td class="p-4 text-center text-base border-x font-semibold align-middle">${group.tenagaMedis?.profile?.nickname}</td>
+                <td class="p-4">
+                    ${obatRows}
+                </td>
+            </tr>
+        `;
     });
 
-    // Update tombol prev/next & info halaman
+    // Update pagination info
     const pageInfoEl = isActive
         ? document.getElementById("pageInfo")
         : document.getElementById("pageInfoArchive");
@@ -463,9 +529,7 @@ function renderResepObatTable(result, tableId, isActive) {
         : document.getElementById("nextBtnArchive");
 
     if (pageInfoEl)
-        pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
-            pageInfo.lastPage || 1
-        } (Total: ${pageInfo.total || 0})`;
+        pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${pageInfo.lastPage || 1} (Total: ${pageInfo.total || 0})`;
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }

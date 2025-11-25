@@ -1,21 +1,23 @@
 type Radiologi {
     id: ID!
     pasien_id: ID!
-    tenaga_medis: ID!
+    tenaga_medis_id: ID!
     jenis_radiologi: String!
     hasil: String!
     tanggal: Date!
     biaya_radiologi: Float!
     created_at: DateTime
+
     updated_at: DateTime
     deleted_at: DateTime
 
     pasien: Pasien @belongsTo
+    tenagaMedis: TenagaMedis @belongsTo
 }
 
 input CreateRadiologiInput {
     pasien_id: ID!
-    tenaga_medis: ID!
+    tenaga_medis_id: ID!
     jenis_radiologi: String!
     hasil: String!
     tanggal: Date!
@@ -24,7 +26,6 @@ input CreateRadiologiInput {
 input UpdateRadiologiInput {
     pasien_id: ID
     tenaga_medis_id: ID
-    tenaga_medis: ID
     jenis_radiologi: String
     hasil: String
     tanggal: Date
@@ -48,14 +49,23 @@ extend type Query {
     allRadiologi: [Radiologi!]!
         @all(model: "App\\Models\\Radiologi\\Radiologi")
 
-    allRadiologiPaginator(
+    allRadiologiPaginate(
         search: String
         page: Int
         first: Int
     ): RadiologiPaginator
         @field(
             resolver: "App\\GraphQL\\Radiologi\\Queries\\RadiologiQuery@all"
-        )
+    )
+
+    allRadiologiArchive(
+        search: String
+        page: Int
+        first: Int
+    ): RadiologiPaginator
+        @field(
+            resolver: "App\\GraphQL\\Radiologi\\Queries\\RadiologiQuery@allArchive"
+    )
 
     Radiologi(id: ID! @eq(key: "id")): Radiologi
         @find(model: "App\\Models\\Radiologi\\Radiologi")

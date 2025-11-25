@@ -16,6 +16,7 @@ class RawatInapQuery
             $query->where(function ($q) use ($search) {
                 $q->where('tanggal_masuk', 'like', "%$search%")
                     ->orWhere('tanggal_keluar', 'like', "%$search%")
+                    ->orWhere('biaya_inap', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
             })
                 ->orWhereHas('pasien', function ($q) use ($search) {
@@ -52,6 +53,7 @@ class RawatInapQuery
             $query->where(function ($q) use ($search) {
                 $q->where('tanggal_masuk', 'like', "%$search%")
                     ->orWhere('tanggal_keluar', 'like', "%$search%")
+                    ->orWhere('biaya_inap', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
             })
                 ->orWhereHas('pasien', function ($q) use ($search) {
