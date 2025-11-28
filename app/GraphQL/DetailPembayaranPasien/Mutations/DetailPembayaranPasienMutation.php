@@ -37,7 +37,7 @@ class DetailPembayaranPasienMutation
         if (!$detailId || !$tipeBiaya || !$referensiId) {
             return false;
         }
-
+// 
         try {
             switch ($tipeBiaya) {
                 case 'konsultasi':
