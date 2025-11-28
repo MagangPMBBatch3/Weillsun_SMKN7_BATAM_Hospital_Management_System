@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('hasil')->nullable();
             $table->date('tanggal');
             $table->decimal('biaya_radiologi', 15, 2)->default(0);
+            $table->tinyInteger('is_paid')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

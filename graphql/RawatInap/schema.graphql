@@ -12,6 +12,7 @@ type RawatInap {
     tanggal_keluar: Date!
     biaya_inap: Float!
     status: StatusInap!
+    is_paid: Int
 
     created_at: DateTime
     updated_at: DateTime
@@ -37,6 +38,7 @@ input UpdateRawatInapInput {
     tanggal_keluar: Date
     biaya_inap: Float
     status: StatusInap
+    is_paid: Int
 }
 
 type PageInfo {
@@ -53,17 +55,14 @@ type RawatInapPaginator {
 }
 
 extend type Query {
-    allRawatInap: [RawatInap!]!
-        @all(model: "App\\Models\\RawatInap\\RawatInap")
+    allRawatInap: [RawatInap!]! @all(model: "App\\Models\\RawatInap\\RawatInap")
 
     allRawatInapPaginate(
         search: String
         page: Int
         first: Int
     ): RawatInapPaginator
-        @field(
-            resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@all"
-    )
+        @field(resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@all")
 
     allRawatInapArchive(
         search: String
@@ -72,23 +71,20 @@ extend type Query {
     ): RawatInapPaginator
         @field(
             resolver: "App\\GraphQL\\RawatInap\\Queries\\RawatInapQuery@allArchive"
-    )
+        )
 
     RawatInap(id: ID! @eq(key: "id")): RawatInap
         @find(model: "App\\Models\\RawatInap\\RawatInap")
 }
 
 extend type Mutation {
-    createRawatInap(
-        input: CreateRawatInapInput! @spread
-    ): RawatInap
+    createRawatInap(input: CreateRawatInapInput! @spread): RawatInap
         @create(model: "App\\Models\\RawatInap\\RawatInap")
 
     updateRawatInap(
         id: ID! @eq(key: "id")
         input: UpdateRawatInapInput! @spread
-    ): RawatInap
-        @update(model: "App\\Models\\RawatInap\\RawatInap")
+    ): RawatInap @update(model: "App\\Models\\RawatInap\\RawatInap")
 
     deleteRawatInap(id: ID! @eq(key: "id")): RawatInap
         @delete(model: "App\\Models\\RawatInap\\RawatInap")

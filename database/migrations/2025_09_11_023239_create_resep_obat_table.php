@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('obat_id')->constrained('obat')->cascadeOnDelete();
             $table->integer('jumlah');
             $table->string('aturan_pakai');
+            $table->tinyInteger('is_paid')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

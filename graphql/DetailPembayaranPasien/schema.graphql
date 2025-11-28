@@ -22,10 +22,19 @@ type DetailPembayaranPasien {
     pembayaranPasien: PembayaranPasien @belongsTo
 }
 
+type UnpaidCost {
+    type: String!
+    referensi_id: ID!
+    jumlah: Int!
+    harga_satuan: Float!
+    subtotal: Float!
+    label: String!
+}
+
 input CreateDetailPembayaranPasienInput {
     pembayaran_id: ID!
     tipe_biaya: Tipe!
-    referensi_id: ID!
+    referensi_id: ID
     jumlah: Int!
     harga_satuan: Float!
     subtotal: Float!
@@ -58,13 +67,27 @@ extend type Query {
             model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
         )
 
-    allDetailPembayaranPasienPaginator(
+    allDetailPembayaranPasienPaginate(
         search: String
         page: Int
         first: Int
     ): DetailPembayaranPasienPaginator
         @field(
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@all"
+        )
+
+    allDetailPembayaranPasienArchive(
+        search: String
+        page: Int
+        first: Int
+    ): DetailPembayaranPasienPaginator
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@allArchive"
+        )
+
+    getUnpaidCostsByPasien(pasien_id: ID!): [UnpaidCost!]!
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@getUnpaidCostsByPasien"
         )
 
     DetailPembayaranPasien(id: ID! @eq(key: "id")): DetailPembayaranPasien
@@ -104,5 +127,14 @@ extend type Mutation {
     forceDeleteDetailPembayaranPasien(id: ID!): DetailPembayaranPasien
         @field(
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@forceDelete"
+        )
+
+    markDetailPembayaranPasienAsPaid(
+        detail_id: ID!
+        tipe_biaya: Tipe!
+        referensi_id: ID!
+    ): Boolean!
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@markAsPaid"
         )
 }
