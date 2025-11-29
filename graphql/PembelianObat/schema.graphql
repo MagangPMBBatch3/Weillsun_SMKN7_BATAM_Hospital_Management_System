@@ -47,14 +47,23 @@ extend type Query {
     allPembelianObat: [PembelianObat!]!
         @all(model: "App\\Models\\PembelianObat\\PembelianObat")
 
-    allPembelianObatPaginator(
+    allPembelianObatPaginate(
         search: String
         page: Int
         first: Int
     ): PembelianObatPaginator
         @field(
             resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@all"
-        )
+    )
+
+    allPembelianObatArchive(
+        search: String
+        page: Int
+        first: Int
+    ): PembelianObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@allArchive"
+    )
 
     PembelianObat(id: ID! @eq(key: "id")): PembelianObat
         @find(model: "App\\Models\\PembelianObat\\PembelianObat")

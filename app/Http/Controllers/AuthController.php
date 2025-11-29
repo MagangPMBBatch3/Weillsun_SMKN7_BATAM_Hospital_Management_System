@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailPembelianObat\DetailPembelianObat;
 use App\Models\Obat\Obat;
 use App\Models\Poli\Poli;
 use Illuminate\Http\Request;
@@ -9,10 +10,12 @@ use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
 use App\Models\Kunjungan\Kunjungan;
 use App\Models\LabPemeriksaan\LabPemeriksaan;
+use App\Models\PembelianObat\PembelianObat;
 use App\Models\Radiologi\Radiologi;
 use App\Models\RawatInap\RawatInap;
 use App\Models\RekamMedis\RekamMedis;
 use App\Models\ResepObat\ResepObat;
+use App\Models\Supplier\Supplier;
 use App\Models\TenagaMedis\TenagaMedis;
 use App\Models\UsersProfile\UsersProfile;
 
@@ -83,8 +86,7 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
-            ->get();
+        $AlltenagaMedises = TenagaMedis::select('profile:,nickname')->get();
 
         return view('radiologi.index', compact('pasiens', 'AlltenagaMedises', 'Allpasiens'));
     }
@@ -177,12 +179,15 @@ class AuthController extends Controller
 
     public function supplier()
     {
+
         return view('supplier.index');
     }
 
     public function pembelianObat()
     {
-        return view('pembelianObat.index');
+        $suppliers = Supplier::select('id', 'nama_supplier')->get();
+
+        return view('pembelianObat.index', compact('suppliers'));
     }
 
     public function labPemeriksaan()
@@ -202,7 +207,16 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
-        return view('detailPembelianObat.index');
+        $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
+        $pembelians = Supplier::whereNotIn('id', $pembelianTerpakai)
+            ->select('id', 'nama_supplier')
+            ->get();
+
+        $Allpembelians = Supplier::select('id', 'nama_supplier')->get();
+
+        $Allobats = Obat::select('id', 'nama_obat')->get();
+
+        return view('detailPembelianObat.index', compact('pembelians', 'Allpembelians', 'Allobats'));
     }
 
     public function pembayaranSupplier()
