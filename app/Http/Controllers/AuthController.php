@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\DetailPembelianObat\DetailPembelianObat;
 use App\Models\Obat\Obat;
 use App\Models\Poli\Poli;
@@ -10,6 +11,7 @@ use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
 use App\Models\Kunjungan\Kunjungan;
 use App\Models\LabPemeriksaan\LabPemeriksaan;
+use App\Models\PembayaranPasien\PembayaranPasien;
 use App\Models\PembelianObat\PembelianObat;
 use App\Models\Radiologi\Radiologi;
 use App\Models\RawatInap\RawatInap;
@@ -174,7 +176,14 @@ class AuthController extends Controller
 
     public function detailPembayaranPasien()
     {
-        return view('detailPembayaranPasien.index');
+        $pasienTerpakai = DetailPembayaranPasien::withTrashed()->pluck('pembayaran_id');
+        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
+            ->select('id', 'nama')
+            ->get();
+
+        $Allpasiens = Pasien::select('id', 'nama')->get();
+
+        return view('detailPembayaranPasien.index', compact('pasiens', 'Allpasiens'));
     }
 
     public function supplier()

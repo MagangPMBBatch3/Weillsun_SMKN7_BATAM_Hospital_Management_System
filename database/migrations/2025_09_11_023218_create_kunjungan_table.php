@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('tanggal_kunjungan');
             $table->string('keluhan')->nullable();
             $table->decimal('biaya_konsultasi', 15, 2)->default(0);
+            $table->tinyInteger('is_paid')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

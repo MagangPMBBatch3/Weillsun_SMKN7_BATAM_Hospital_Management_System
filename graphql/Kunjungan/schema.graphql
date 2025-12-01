@@ -5,6 +5,7 @@ type Kunjungan {
     tanggal_kunjungan: Date!
     keluhan: String
     biaya_konsultasi: Float!
+    is_paid: Int
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
@@ -26,6 +27,7 @@ input UpdateKunjunganInput {
     tanggal_kunjungan: Date
     keluhan: String
     biaya_konsultasi: Float
+    is_paid: Int
 }
 
 type PageInfo {
@@ -49,9 +51,7 @@ extend type Query {
         page: Int
         first: Int
     ): KunjunganPaginator
-        @field(
-            resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@all"
-    )
+        @field(resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@all")
 
     allKunjunganArchive(
         search: String
@@ -60,7 +60,7 @@ extend type Query {
     ): KunjunganPaginator
         @field(
             resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@allArchive"
-    )
+        )
 
     Kunjungan(id: ID! @eq(key: "id")): Kunjungan
         @find(model: "App\\Models\\Kunjungan\\Kunjungan")

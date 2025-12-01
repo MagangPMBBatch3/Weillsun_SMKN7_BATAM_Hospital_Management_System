@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('tanggal_masuk');
             $table->date('tanggal_keluar')->nullable();
             $table->decimal('biaya_inap', 15, 2)->default(0);
+            $table->tinyInteger('is_paid')->default(0);
             $table->enum('status', ['Aktif', 'Pulang', 'Pindah_Ruangan'])->default('Aktif');
             $table->timestamps();
             $table->softDeletes();

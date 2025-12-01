@@ -6,6 +6,7 @@ type LabPemeriksaan {
     hasil: String
     tanggal: Date!
     biaya_lab: Float!
+    is_paid: Int
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
@@ -29,6 +30,7 @@ input UpdateLabPemeriksaanInput {
     hasil: String
     tanggal: Date
     biaya_lab: Float
+    is_paid: Int
 }
 
 type PageInfo {
@@ -55,7 +57,7 @@ extend type Query {
     ): LabPemeriksaanPaginator
         @field(
             resolver: "App\\GraphQL\\LabPemeriksaan\\Queries\\LabPemeriksaanQuery@all"
-    )
+        )
 
     allLabPemeriksaanArchive(
         search: String
@@ -64,7 +66,7 @@ extend type Query {
     ): LabPemeriksaanPaginator
         @field(
             resolver: "App\\GraphQL\\LabPemeriksaan\\Queries\\LabPemeriksaanQuery@allArchive"
-    )
+        )
 
     LabPemeriksaan(id: ID! @eq(key: "id")): LabPemeriksaan
         @find(model: "App\\Models\\LabPemeriksaan\\LabPemeriksaan")

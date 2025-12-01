@@ -6,6 +6,7 @@ type Radiologi {
     hasil: String!
     tanggal: Date!
     biaya_radiologi: Float!
+    is_paid: Int
     created_at: DateTime
 
     updated_at: DateTime
@@ -30,6 +31,7 @@ input UpdateRadiologiInput {
     hasil: String
     tanggal: Date
     biaya_radiologi: Float
+    is_paid: Int
 }
 
 type PageInfo {
@@ -46,17 +48,14 @@ type RadiologiPaginator {
 }
 
 extend type Query {
-    allRadiologi: [Radiologi!]!
-        @all(model: "App\\Models\\Radiologi\\Radiologi")
+    allRadiologi: [Radiologi!]! @all(model: "App\\Models\\Radiologi\\Radiologi")
 
     allRadiologiPaginate(
         search: String
         page: Int
         first: Int
     ): RadiologiPaginator
-        @field(
-            resolver: "App\\GraphQL\\Radiologi\\Queries\\RadiologiQuery@all"
-    )
+        @field(resolver: "App\\GraphQL\\Radiologi\\Queries\\RadiologiQuery@all")
 
     allRadiologiArchive(
         search: String
@@ -65,23 +64,20 @@ extend type Query {
     ): RadiologiPaginator
         @field(
             resolver: "App\\GraphQL\\Radiologi\\Queries\\RadiologiQuery@allArchive"
-    )
+        )
 
     Radiologi(id: ID! @eq(key: "id")): Radiologi
         @find(model: "App\\Models\\Radiologi\\Radiologi")
 }
 
 extend type Mutation {
-    createRadiologi(
-        input: CreateRadiologiInput! @spread
-    ): Radiologi
+    createRadiologi(input: CreateRadiologiInput! @spread): Radiologi
         @create(model: "App\\Models\\Radiologi\\Radiologi")
 
     updateRadiologi(
         id: ID! @eq(key: "id")
         input: UpdateRadiologiInput! @spread
-    ): Radiologi
-        @update(model: "App\\Models\\Radiologi\\Radiologi")
+    ): Radiologi @update(model: "App\\Models\\Radiologi\\Radiologi")
 
     deleteRadiologi(id: ID! @eq(key: "id")): Radiologi
         @delete(model: "App\\Models\\Radiologi\\Radiologi")
