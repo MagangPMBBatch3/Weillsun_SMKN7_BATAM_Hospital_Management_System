@@ -1,7 +1,7 @@
 type DetailPembelianObat {
     id: ID!
     pembelian_id: ID!
-    obat_id: Tipe!
+    obat_id: ID!
     harga_beli: ID!
     jumlah: Int!
     harga_satuan: Float!
@@ -16,15 +16,15 @@ type DetailPembelianObat {
 
 input CreateDetailPembelianObatInput {
     pembelian_id: ID!
-    obat_id: Tipe!
+    obat_id: ID!
     jumlah: Int!
-    harga_satuan: Float!
+    harga_satuan: Float!   
     harga_beli: ID!
     subtotal: Float!
 }
 input UpdateDetailPembelianObatInput {
     pembelian_id: ID!
-    obat_id: Tipe
+    obat_id: ID
     jumlah: Int
     harga_satuan: Float
     harga_beli: ID
@@ -48,14 +48,23 @@ extend type Query {
     allDetailPembelianObat: [DetailPembelianObat!]!
         @all(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
 
-    allDetailPembelianObatPaginator(
+    allDetailPembelianObatPaginate(
         search: String
         page: Int
         first: Int
     ): DetailPembelianObatPaginator
         @field(
             resolver: "App\\GraphQL\\DetailPembelianObat\\Queries\\DetailPembelianObatQuery@all"
-        )
+    )
+
+    allDetailPembelianObatArchive(
+        search: String
+        page: Int
+        first: Int
+    ): DetailPembelianObatPaginator
+        @field(
+            resolver: "App\\GraphQL\\DetailPembelianObat\\Queries\\DetailPembelianObatQuery@allArchive"
+    )
 
     DetailPembelianObat(id: ID! @eq(key: "id")): DetailPembelianObat
         @find(model: "App\\Models\\DetailPembelianObat\\DetailPembelianObat")
