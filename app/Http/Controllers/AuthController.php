@@ -216,17 +216,25 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
+        // Ambil daftar pembelian yang sudah dipakai di detail
         $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
-        $pembelians = Supplier::whereNotIn('id', $pembelianTerpakai)
-            ->select('id', 'nama_supplier')
+
+        // Ambil pembelian yang BELUM dipakai
+        $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
+            ->select('id', 'supplier_id', 'tanggal')
+            ->with('supplier:id,nama_supplier')
             ->get();
 
-        $Allpembelians = Supplier::select('id', 'nama_supplier')->get();
+        // Semua pembelian tanpa filter
+        $Allpembelians = PembelianObat::select('id', 'supplier_id','tanggal')
+            ->with('supplier:id,nama_supplier')
+            ->get();
 
-        $Allobats = Obat::select('id', 'nama_obat')->get();
-
+        $Allobats = Obat::select('id', 'nama_obat', 'harga')->get();
+        
         return view('detailPembelianObat.index', compact('pembelians', 'Allpembelians', 'Allobats'));
     }
+
 
     public function pembayaranSupplier()
     {

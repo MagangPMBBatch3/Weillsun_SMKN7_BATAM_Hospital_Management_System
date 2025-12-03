@@ -374,7 +374,8 @@ async function createDetailPembayaranPasien() {
                     jumlah: jumlah,
                     harga_satuan: harga_satuan,
                     referensi_id: row.dataset.referensiId || null,
-                    subtotal: Number(row.dataset.subtotal) || jumlah * harga_satuan,
+                    subtotal:
+                        Number(row.dataset.subtotal) || jumlah * harga_satuan,
                 };
             } catch (error) {
                 console.error("Error processing row:", error);
@@ -692,7 +693,7 @@ function renderDetailPembayaranPasienTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive

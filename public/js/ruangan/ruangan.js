@@ -143,18 +143,18 @@ async function loadDataPaginate(page = 1, isActive = true) {
 }
 
 // Format dan Unformat Number
-    function formatNumber(value) {
-            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
 
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
+function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
+    return str.replace(/[^0-9.]/g, "");
+}
 
 // Create
 async function createRuangan() {
@@ -225,7 +225,8 @@ function openEditModal(id, nama_ruangan, kapasitas, tarif_per_hari) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama_ruangan").value = nama_ruangan;
     document.getElementById("edit-kapasitas").value = formatNumber(kapasitas);
-    document.getElementById("edit-tarif_per_hari").value = formatNumber(tarif_per_hari);
+    document.getElementById("edit-tarif_per_hari").value =
+        formatNumber(tarif_per_hari);
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-ruangan" })
@@ -330,7 +331,7 @@ function renderRuanganTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive

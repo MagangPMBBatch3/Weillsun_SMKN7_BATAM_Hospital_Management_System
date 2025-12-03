@@ -147,7 +147,6 @@ async function createPoli() {
     const nama_poli = document.getElementById("create-nama_poli").value.trim();
     const deskripsi = document.getElementById("create-deskripsi").value.trim();
 
-
     if (!nama_poli || !deskripsi)
         return alert("Please fill in all required fields!");
 
@@ -253,7 +252,7 @@ function renderPoliTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="4">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="4">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -319,9 +318,7 @@ function renderPoliTable(result, tableId, isActive) {
                 item.nama_poli
             }</td>
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
-                ${
-                    item.deskripsi
-                }
+                ${item.deskripsi}
             </td>
 
             ${
@@ -351,7 +348,6 @@ function renderPoliTable(result, tableId, isActive) {
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
-
 
 // Hapus
 async function hapusPoli(id) {

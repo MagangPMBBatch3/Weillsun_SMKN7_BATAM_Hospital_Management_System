@@ -140,20 +140,20 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-    // Format dan unformat number
+// Format dan unformat number
 
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
 
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
+function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
+    return str.replace(/[^0-9.]/g, "");
+}
 
 // Create
 async function createObat() {
@@ -233,7 +233,6 @@ async function createObat() {
     }
 }
 
-
 function openEditModal(
     id,
     nama_obat,
@@ -248,7 +247,8 @@ function openEditModal(
     document.getElementById("edit-jenis_obat").value = jenis_obat;
     document.getElementById("edit-stok").value = formatNumber(stok);
     document.getElementById("edit-harga").value = formatNumber(harga);
-    document.getElementById("edit-markup_persen").value = formatNumber(markup_persen);
+    document.getElementById("edit-markup_persen").value =
+        formatNumber(markup_persen);
     document.getElementById("edit-harga_jual").value = formatNumber(harga_jual);
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-obat" })
@@ -327,7 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const editHargaJualInput = document.getElementById("edit-harga_jual");
     const editStokInput = document.getElementById("edit-stok");
 
-
     function hitungHargaJual() {
         const harga = parseFloat(unformatNumber(hargaInput.value)) || 0;
         const markup = parseFloat(unformatNumber(markupInput.value)) || 0;
@@ -375,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // EDIT
 
-       // --- EVENT UNTUK EDIT HARGA ---
+    // --- EVENT UNTUK EDIT HARGA ---
     editHargaInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         if (value) e.target.value = formatNumber(value);
@@ -417,7 +416,7 @@ function renderObatTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive

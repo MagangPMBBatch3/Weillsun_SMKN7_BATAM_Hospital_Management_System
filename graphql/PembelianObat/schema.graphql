@@ -13,13 +13,13 @@ type PembelianObat {
     updated_at: DateTime
     deleted_at: DateTime
 
-    pasien: Pasien @belongsTo
+    supplier: Supplier @belongsTo
 }
 
 input CreatePembelianObatInput {
     supplier_id: ID!
     tanggal: Date!
-    total_biaya: Float!
+    total_biaya: Float
     status: Status!
 }
 input UpdatePembelianObatInput {

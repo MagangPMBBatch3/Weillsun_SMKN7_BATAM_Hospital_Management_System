@@ -59,15 +59,20 @@
 
             <x-loading></x-loading>
 
-            {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'supplier', 'Medicine', 'amount', 'unit price', 'purchase', 'total']" :showActionHeader="false">
+            {{-- <x-table id="tableActive" :headers="['ID', 'supplier', 'Medicine', 'amount', 'unit price', 'purchase', 'total']" :showActionHeader="false">
                 <tbody id="dataDetailPembelianObatAktif"></tbody>
             </x-table>
 
-            {{-- Tabel Data Arsip --}}
             <x-table id="tableArchive" class="hidden" :headers="['ID', 'supplier', 'Medicine', 'amount', 'unit price', 'purchase', 'total']" :showActionHeader="false">
                 <tbody id="dataDetailPembelianObatArsip"></tbody>
-            </x-table>
+            </x-table> --}}
+
+            <!-- CARD ACTIVE -->
+            <div id="cardActive" class="p-6 space-y-6"></div>
+
+            <!-- CARD ARCHIVE -->
+            <div id="cardArchive" class="p-6 space-y-6 hidden"></div>
+
 
             {{-- Pagination untuk AKTIF --}}
             <x-pagination-active></x-pagination-active>
@@ -82,18 +87,18 @@
                         <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Data</h2>
 
                         <div class="space-y-3">
-                            <x-input-label>Supllier Name</x-input-label>
+                            <x-input-label>Supplier Name</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="create-supplier" id="create-supplier">
-                                <option value="" class="text-gray-500 italic">Select Supllier Name</option>
-                                @foreach ($pembelians as $pembelian)
-                                    <option value="{{ $pembelian->id }}">
-                                        {{ $pembelian->nama_supplier }}
+                                name="create-pembelian" id="create-pembelian">
+                                <option value="" class="text-gray-500 italic">Select Supplier Name</option>
+                                @foreach ($pembelians as $p)
+                                    <option value="{{ $p->id }}">
+                                        {{ $p->supplier->nama_supplier }} <span class=" text-slate-500">(
+                                            {{ $p->tanggal }} )</span>
                                     </option>
                                 @endforeach
                             </select>
-
 
 
                             <div id="dynamic-container" class="space-y-4">
@@ -103,53 +108,64 @@
                                     class="dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
                                             p-4 rounded-xl shadow-sm space-y-3 transition-all">
 
-                                    <div>
-                                        <x-input-label>Medicines</x-input-label>
-                                        <select
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            name="create-nama-obat[]" id="create-nama-obat[]">
-                                            <option value="" class="text-gray-500 italic">Select Medicines
-                                            </option>
-                                            @foreach ($Allobats as $obat)
-                                                <option value="{{ $obat->id }}">
-                                                    {{ $obat->nama_obat }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    <div class="flex justify-between gap-2 ">
+                                        <div class="w-full space-y-2">
+                                            <div>
+                                                <x-input-label>Medicines</x-input-label>
+                                                <select
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                                    name="create-nama-obat[]" id="create-nama-obat[]">
+                                                    <option value="" class="text-gray-500 italic">Select Medicines
+                                                    </option>
+                                                    @foreach ($Allobats as $obat)
+                                                        <option value="{{ $obat->id }}"
+                                                            data-harga="{{ $obat->harga }}">
+                                                            {{ $obat->nama_obat }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                                    <div>
-                                        <x-input-label>Amount</x-input-label>
-                                        <input type="text" name="create-jumlah[]"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                            <div>
+                                                <x-input-label>Amount</x-input-label>
+                                                <input type="text" name="create-jumlah[]"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
                                                 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                                            placeholder="Enter Amount">
-                                    </div>
+                                                    placeholder="Enter Amount">
+                                            </div>
+                                        </div>
 
-                                    <div>
-                                        <x-input-label>Unit Price</x-input-label>
-                                        <input type="text" name="create-harga-satuan[]"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                                            placeholder="Enter Unit Price">
-                                    </div>
+                                        <div class="w-full space-y-2">
+                                            <div>
+                                                <x-input-label>Unit Price</x-input-label>
+                                                <input type="text" name="create-harga-satuan[]" readonly
+                                                    class="mt-1 block w-full rounded-lg border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                                border-blue-500 ring-blue-500 shadow-sm"
+                                                    placeholder="0">
+                                            </div>
 
-                                    <div>
-                                        <x-input-label>Purchase Price</x-input-label>
-                                        <input type="text" name="create-harga-beli[]"
-                                            class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                            <div>
+                                                <x-input-label>Purchase Price</x-input-label>
+                                                <input type="text" name="create-harga-beli[]"
+                                                    class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
                                                 border-green-500 ring-green-500 shadow-sm"
-                                            placeholder="0">
+                                                    placeholder="0">
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <x-input-label>Subtotal</x-input-label>
+                                        <input type="text" name="create-subtotal[]"
+                                            class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                        border-green-500 ring-green-500 shadow-sm"
+                                            placeholder="0" readonly>
                                     </div>
 
                                 </div>
                             </div>
 
-                            <x-input-label>subtotal</x-input-label>
-                            <input type="text" id="create-subtotal"
-                                class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                    border-green-500 ring-green-500 shadow-sm"
-                                placeholder="0">
 
                         </div>
 
@@ -180,55 +196,66 @@
 
                         <x-text-input type="hidden" id="edit-id" />
 
-                        <div class="space-y-3">
-                            <x-input-label>New Supplier</x-input-label>
-                            <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-supplier" id="edit-supplier">
-                                <option value="" class="text-gray-500 italic">Select Supplier</option>
-                                @foreach ($Allpembelians as $pembelian)
-                                    <option value="{{ $pembelian->id }}">
-                                        {{ $pembelian->nama_supplier }}
+                        <x-input-label>New Supplier</x-input-label>
+                        <select
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            name="edit-pembelian" id="edit-pembelian">
+                            <option value="" class="text-gray-500 italic">Select Supplier</option>
+                            @foreach ($Allpembelians as $pembelian)
+                                <option value="{{ $pembelian->id }}">
+                                    {{ $pembelian->supplier->nama_supplier }} ( {{ $pembelian->tanggal }} )
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <div class="flex mt-4 justify-between gap-2 ">
+                            <div class="w-full space-y-2">
+                                <x-input-label>New Medicine</x-input-label>
+                                <select
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    name="edit-obat" id="edit-obat">
+                                    <option value="" class="text-gray-500 italic">Select Medicines
                                     </option>
-                                @endforeach
-                            </select>
+                                    @foreach ($Allobats as $obat)
+                                        <option value="{{ $obat->id }}" data-harga="{{ $obat->harga }}">
+                                            {{ $obat->nama_obat }}
+                                        </option>
+                                    @endforeach
+                                </select>
 
-                            <x-input-label>New Medicine</x-input-label>
-                            <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-obat" id="edit-obat">
-                                <option value="" class="text-gray-500 italic">Select Patient</option>
-                                @foreach ($Allobats as $obat)
-                                    <option value="{{ $obat->id }}">
-                                        {{ $obat->nama_obat }}
-                                    </option>
-                                @endforeach
-                            </select>
+                                <x-input-label>New Amount</x-input-label>
+                                <x-text-input id="edit-jumlah" type="text" placeholder="Enter Amount..."
+                                    class="border p-2 w-full rounded" />
+                            </div>
 
-                            <x-input-label>New Amount</x-input-label>
-                            <x-text-input id="edit-jumlah" type="text" placeholder="Enter Amount..."
-                                class="border p-2 w-full rounded" />
 
-                            <x-input-label>New Unit Price</x-input-label>
-                            <x-text-input id="edit-harga-satuan" type="text" placeholder="Enter Unit Price..."
-                                class="border p-2 w-full rounded" />
+                            <div class="w-full space-y-2">
+                                <x-input-label>New Unit Price</x-input-label>
+                                <x-text-input id="edit-harga-satuan" type="text" placeholder="0"
+                                    class="border p-2 w-full rounded" />
 
-                            <x-input-label>New Purchase Price</x-input-label>
-                            <x-text-input id="edit-harga-pembelian" type="text"
-                                placeholder="Enter Purchase Price..."
+                                <x-input-label>New Purchase Price</x-input-label>
+                                <x-text-input id="edit-harga-beli" type="text"
+                                    placeholder="Enter Purchase Price..."
+                                    class="border p-2 w-full border-green-500 ring-green-500 rounded" />
+
+                                </div>
+                            </div>
+
+                            <x-input-label>Subtotal</x-input-label>
+                            <x-text-input id="edit-subtotal" type="text" placeholder="0"
                                 class="border p-2 w-full border-green-500 ring-green-500 rounded" />
+                                
+                                
+                                <div class="flex justify-end mt-4">
+                                    <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                    <x-primary-button class="ml-2">Update</x-primary-button>
+                                </div>
+                            </form>
+                    </div>
+        </x-modal>
 
-                        </div>
-
-                        <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                            <x-primary-button class="ml-2">Update</x-primary-button>
-                        </div>
-                    </form>
-                </div>
-            </x-modal>
-
-        </div>
+    </div>
     </div>
 
     <script>
@@ -241,44 +268,59 @@
                 "p-4 rounded-xl shadow-sm space-y-3 transition-all transform scale-95 opacity-0";
 
             row.innerHTML = `
+                <div class="flex justify-between gap-2 ">
+                    <div class="w-full space-y-2">
+                        <div>
+                            <label>Medicines</label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                name="create-nama-obat[]" id="create-nama-obat[]">
+                                <option value="" class="text-gray-500 italic">Select Medicines
+                                </option>
+                                @foreach ($Allobats as $obat)
+                                    <option value="{{ $obat->id }}" data-harga="{{ $obat->harga }}">
+                                        {{ $obat->nama_obat }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Amount</label>
+                            <input type="text" name="create-jumlah[]"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                                placeholder="Enter Amount">
+                        </div>
+                    </div>
+
+                    <div class="w-full space-y-2">
+                        <div>
+                            <label>Unit Price</label>
+                            <input type="text" name="create-harga-satuan[]" readonly
+                                class="mt-1 block w-full rounded-lg border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            border-blue-500 ring-blue-500 shadow-sm"
+                                placeholder="0">
+                        </div>
+
+                        <div>
+                            <label>Purchase Price</label>
+                            <input type="text" name="create-harga-beli[]"
+                                class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                            border-green-500 ring-green-500 shadow-sm"
+                                placeholder="0">
+                        </div>
+
+                    </div>
+                </div>
+                
                 <div>
-                                        <x-input-label>Medicines</x-input-label>
-                                        <select
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            name="create-obat" id="create-obat">
-                                            <option value="" class="text-gray-500 italic">Select Medicines
-                                            </option>
-                                            @foreach ($Allobats as $obat)
-                                                <option value="{{ $obat->id }}">
-                                                    {{ $obat->nama_obat }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <x-input-label>Amount</x-input-label>
-                                        <input type="text" name="create-jumlah[]"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                                            placeholder="Enter Amount">
-                                    </div>
-
-                                    <div>
-                                        <x-input-label>Unit Price</x-input-label>
-                                        <input type="text" name="create-harga-satuan[]"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                                focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                                            placeholder="Enter Unit Price">
-                                    </div>
-
-                                    <div>
-                                        <x-input-label>Purchase Price</x-input-label>
-                                        <input type="text" name="create-harga-satuan[]"
-                                            class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                                border-green-500 ring-green-500 shadow-sm"
-                                            placeholder="0">
-                                    </div>
+                    <label>Subtotal</label>
+                    <input type="text" name="create-subtotal[]"
+                        class="mt-1 block w-full rounded-lg  dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                        border-green-500 ring-green-500 shadow-sm"
+                        placeholder="0">
+                </div>
             `;
 
             container.appendChild(row);
@@ -293,8 +335,8 @@
         window.currentUserRole = "{{ Auth::user()->role }}";
 
         function showTable(isActive) {
-            const tableActive = document.getElementById("tableActive");
-            const tableArchive = document.getElementById("tableArchive");
+            const cardActive = document.getElementById("cardActive");
+            const cardArchive = document.getElementById("cardArchive");
             const btnActive = document.getElementById("btnActive");
             const btnArchive = document.getElementById("btnArchive");
             const paginationActive = document.getElementById("paginationActive");
@@ -302,8 +344,8 @@
 
             if (isActive) {
                 // Tampilkan tabel & pagination aktif
-                tableActive.classList.remove("hidden");
-                tableArchive.classList.add("hidden");
+                cardActive.classList.remove("hidden");
+                cardArchive.classList.add("hidden");
                 paginationActive.classList.remove("hidden");
                 paginationArchive.classList.add("hidden");
 
@@ -314,8 +356,8 @@
                 btnArchive.classList.replace("text-white", "text-gray-600");
             } else {
                 // Tampilkan tabel & pagination arsip
-                tableActive.classList.add("hidden");
-                tableArchive.classList.remove("hidden");
+                cardActive.classList.add("hidden");
+                cardArchive.classList.remove("hidden");
                 paginationActive.classList.add("hidden");
                 paginationArchive.classList.remove("hidden");
 

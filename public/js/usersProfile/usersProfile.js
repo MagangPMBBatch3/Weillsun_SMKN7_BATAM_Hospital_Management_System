@@ -184,7 +184,7 @@ function renderUsersProfileTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <div class="col-span-full text-center py-8">
-                <p class="text-white bg-red-500 rounded-md px-6 py-2 w-fit mx-auto text-lg italic font-semibold capitalize">No related data found</p>
+                <p class="text-white bg-red-500 rounded-md px-6 py-2 w-fit mx-auto text-lg italic font-semibold capitalize">No data available.</p>
             </div>
         `;
 

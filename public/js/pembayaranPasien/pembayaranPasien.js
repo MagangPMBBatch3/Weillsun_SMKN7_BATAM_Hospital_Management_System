@@ -153,27 +153,31 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-    // Format dan unformat number
+// Format dan unformat number
 
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
 
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
+function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
+    return str.replace(/[^0-9.]/g, "");
+}
 
 // Create
 async function createPembayaranPasien() {
     const pasien_id = document.getElementById("create-nama").value;
     const total_biaya = document.getElementById("create-total-biaya").value;
-    const metode_bayar = document.getElementById("create-metode-bayar").value.trim();
-    const tanggal_bayar = document.getElementById("create-tanggal").value.trim();
+    const metode_bayar = document
+        .getElementById("create-metode-bayar")
+        .value.trim();
+    const tanggal_bayar = document
+        .getElementById("create-tanggal")
+        .value.trim();
 
     if (!pasien_id || !total_biaya || !metode_bayar || !tanggal_bayar)
         return alert("Please fill in all required fields!");
@@ -196,12 +200,7 @@ async function createPembayaranPasien() {
         }
     `;
     const variablesPembayaranPasien = {
-        input: { pasien_id,
-                 total_biaya,
-                 metode_bayar,
-                 tanggal_bayar,
-            },
-            
+        input: { pasien_id, total_biaya, metode_bayar, tanggal_bayar },
     };
 
     try {
@@ -215,11 +214,14 @@ async function createPembayaranPasien() {
         });
 
         const resultPembayaranPasien = await resPembayaranPasien.json();
-        const dataPembayaranPasien = resultPembayaranPasien?.data?.createPembayaranPasien;
+        const dataPembayaranPasien =
+            resultPembayaranPasien?.data?.createPembayaranPasien;
 
         if (dataPembayaranPasien) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-pembayaranPasien" })
+                new CustomEvent("close-modal", {
+                    detail: "create-pembayaranPasien",
+                })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
@@ -234,10 +236,17 @@ async function createPembayaranPasien() {
     }
 }
 
-function openEditModal(id, pasien_id, total_biaya, metode_bayar, tanggal_bayar) {
+function openEditModal(
+    id,
+    pasien_id,
+    total_biaya,
+    metode_bayar,
+    tanggal_bayar
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
-    document.getElementById("edit-total-biaya").value = formatNumber(total_biaya);
+    document.getElementById("edit-total-biaya").value =
+        formatNumber(total_biaya);
     document.getElementById("edit-metode-bayar").value = metode_bayar;
     document.getElementById("edit-tanggal").value = tanggal_bayar;
 
@@ -251,7 +260,9 @@ async function updatePembayaranPasien() {
     const id = document.getElementById("edit-id").value;
     const pasien_id = document.getElementById("edit-nama").value;
     const total_biaya = document.getElementById("edit-total-biaya").value;
-    const metode_bayar = document.getElementById("edit-metode-bayar").value.trim();
+    const metode_bayar = document
+        .getElementById("edit-metode-bayar")
+        .value.trim();
     const tanggal_bayar = document.getElementById("edit-tanggal").value.trim();
 
     showLoading();
@@ -278,12 +289,14 @@ async function updatePembayaranPasien() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, 
-                    input: { pasien_id,
-                             total_biaya,
-                             metode_bayar,
-                             tanggal_bayar,
-                        }
+                variables: {
+                    id,
+                    input: {
+                        pasien_id,
+                        total_biaya,
+                        metode_bayar,
+                        tanggal_bayar,
+                    },
                 },
             }),
         });
@@ -326,7 +339,7 @@ function renderPembayaranPasienTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -391,9 +404,9 @@ function renderPembayaranPasienTable(result, tableId, isActive) {
             <td class="p-4 text-center text-base font-semibold">${
                 item.pasien?.nama
             }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.total_biaya.toLocaleString("id-ID")
-            }</td>
+            <td class="p-4 text-center text-base font-semibold">${item.total_biaya.toLocaleString(
+                "id-ID"
+            )}</td>
             <td class="p-4 text-center truncate max-w-24 font-semibold capitalize">
                 ${item.metode_bayar}
             </td>

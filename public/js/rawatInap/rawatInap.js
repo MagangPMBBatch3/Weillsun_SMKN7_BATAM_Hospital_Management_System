@@ -516,7 +516,7 @@ function renderRawatInapTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -597,10 +597,13 @@ function renderRawatInapTable(result, tableId, isActive) {
             </td>
             <td class="p-4 text-center font-semibold capitalize">
                 <span class="px-3 py-1 rounded-full font-semibold
-                    ${item.status === 'Aktif' ? 'bg-green-100 text-green-700 border border-green-300' : 
-                    item.status === 'Pulang' ? 'bg-red-100 text-red-700 border border-red-300'  
-                    : 
-                    'bg-gray-200 text-gray-700 border border-gray-300'}">
+                    ${
+                        item.status === "Aktif"
+                            ? "bg-green-100 text-green-700 border border-green-300"
+                            : item.status === "Pulang"
+                            ? "bg-red-100 text-red-700 border border-red-300"
+                            : "bg-gray-200 text-gray-700 border border-gray-300"
+                    }">
                     ${item.status.replace("_", " ")}
 
                 </span>

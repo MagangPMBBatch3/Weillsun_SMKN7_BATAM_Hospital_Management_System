@@ -2,7 +2,7 @@ type DetailPembelianObat {
     id: ID!
     pembelian_id: ID!
     obat_id: ID!
-    harga_beli: ID!
+    harga_beli: Float!
     jumlah: Int!
     harga_satuan: Float!
     subtotal: Float!
@@ -19,15 +19,15 @@ input CreateDetailPembelianObatInput {
     obat_id: ID!
     jumlah: Int!
     harga_satuan: Float!   
-    harga_beli: ID!
-    subtotal: Float!
+    harga_beli: Float!
+    subtotal: Float
 }
 input UpdateDetailPembelianObatInput {
     pembelian_id: ID!
     obat_id: ID
     jumlah: Int
     harga_satuan: Float
-    harga_beli: ID
+    harga_beli: Float
     subtotal: Float
 }
 

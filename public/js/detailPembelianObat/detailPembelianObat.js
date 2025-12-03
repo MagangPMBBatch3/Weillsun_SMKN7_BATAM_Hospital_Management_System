@@ -72,6 +72,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             }
                             pembelianObat {
                                 id
+                                tanggal
                                 supplier {
                                     nama_supplier
                                 }
@@ -104,9 +105,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderDetailPembelianObatTable(
+        renderDetailPembelianObatCard(
             dataActive?.data?.allDetailPembelianObatPaginate || {},
-            "dataDetailPembelianObatAktif",
+            "cardActive",
             true
         );
 
@@ -128,6 +129,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             }
                             pembelianObat {
                                 id
+                                tanggal
                                 supplier {
                                     nama_supplier
                                 }
@@ -155,9 +157,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderDetailPembelianObatTable(
+        renderDetailPembelianObatCard(
             dataArchive?.data?.allDetailPembelianObatArchive || {},
-            "dataDetailPembelianObatArsip",
+            "cardArchive",
             false
         );
     } catch (error) {
@@ -168,44 +170,72 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-    // Format dan unformat number
+// Format dan unformat number
 
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
 
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
+function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
+    return str.replace(/[^0-9.]/g, "");
+}
 
-    
 // Create
 async function createDetailPembelianObat() {
-    const pembelian_id = document.getElementById("create-supplier").value;
-    const subtotal = document.getElementById("create-subtotal").value;
+    const pembelian_id = document.getElementById("create-pembelian").value;
 
     if (!pembelian_id) {
         return alert("Please select Supplier Name!");
     }
 
-   const rows = document.querySelectorAll('#dynamic-container .dynamic-row');
+    const rows = document.querySelectorAll("#dynamic-container .dynamic-row");
 
-    // Map rows ke array of prescription objects, lalu filter yang valid
     const prescriptions = Array.from(rows)
-        .map(row => ({
-            obat_id: row.querySelector('select[name="create-nama-obat[]"]').value,
-            jumlah: parseInt(row.querySelector('input[name="create-jumlah[]"]').value.replace(/\./g, "") || 0),
-            harga_satuan: parseInt(row.querySelector('input[name="create-harga-satuan[]"]').value.replace(/\./g, "") || 0),
-            harga_beli: parseInt(row.querySelector('input[name="create-harga-beli[]"]').value.replace(/\./g, "") || 0),
-        }))
-        .filter(item => item.obat_id && item.jumlah && item.harga_satuan && item.harga_beli);
+        .map((row) => {
+            const obat_id = row.querySelector(
+                'select[name="create-nama-obat[]"]'
+            ).value;
+            const jumlah = parseInt(
+                row
+                    .querySelector('input[name="create-jumlah[]"]')
+                    .value.replace(/\./g, "") || 0
+            );
+            const harga_satuan = parseFloat(
+                row
+                    .querySelector('input[name="create-harga-satuan[]"]')
+                    .value.replace(/\./g, "") || 0
+            );
+            const harga_beli = parseFloat(
+                row
+                    .querySelector('input[name="create-harga-beli[]"]')
+                    .value.replace(/\./g, "") || 0
+            );
+            const subtotal = parseFloat(
+                row
+                    .querySelector('input[name="create-subtotal[]"]')
+                    .value.replace(/\./g, "") || 0
+            );
 
-    
+            return {
+                obat_id,
+                jumlah,
+                harga_satuan,
+                harga_beli,
+                subtotal: jumlah * harga_beli,
+            };
+        })
+        .filter(
+            (item) =>
+                item.obat_id &&
+                item.jumlah &&
+                item.harga_satuan &&
+                item.harga_beli
+        );
 
     if (prescriptions.length === 0) {
         return alert("Please fill at least one prescription!");
@@ -226,66 +256,68 @@ async function createDetailPembelianObat() {
                 obat {
                     id
                     nama_obat
-                            }
+                }
                 pembelianObat {
                     id
-                    supplier {
-                        nama_supplier
-                    }
                 }
             }
         }
     `;
-   
 
     try {
         const results = await Promise.all(
-            prescriptions.map(item => {
-                // Buat variablesDetailPembelianObat untuk setiap item
-                const variablesDetailPembelianObat = {
-                    input: {
-                        pembelian_id,
-                        subtotal,
-                        obat_id: item.obat_id,
-                        jumlah: item.jumlah,
-                        harga_satuan: item.harga_satuan,
-                        harga_beli: item.harga_beli
-                    }
-                };
-
+            prescriptions.map((item) => {
                 return fetch(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         query: mutationDetailPembelianObat,
-                        variables: variablesDetailPembelianObat
-                    })
-                }).then(res => res.json());
+                        variables: {
+                            input: {
+                                pembelian_id,
+                                obat_id: item.obat_id,
+                                jumlah: item.jumlah,
+                                harga_satuan: item.harga_satuan,
+                                harga_beli: item.harga_beli,
+                                subtotal: item.subtotal,
+                            },
+                        },
+                    }),
+                }).then((res) => res.json());
             })
         );
 
-        // Cek apakah ada error
-        const errors = results.filter(r => r.errors);
+        const errors = results.filter((r) => r.errors);
         if (errors.length > 0) {
             console.error("Some mutations failed:", errors);
-            alert(`${prescriptions.length - errors.length} of ${prescriptions.length} prescriptions created`);
         }
 
-        window.dispatchEvent(new CustomEvent("close-modal", { detail: "create-detailPembelianObat" }));
-        // resetCreateForm();
+        window.dispatchEvent(
+            new CustomEvent("close-modal", {
+                detail: "create-detailPembelianObat",
+            })
+        );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating prescription");
+        alert("An error occurred while creating purchase details.");
     } finally {
         hideLoading();
     }
 }
 
-function openEditModal(id, pembelian_id, obat_id, jumlah, harga_satuan, harga_beli, subtotal) {
+function openEditModal(
+    id,
+    pembelian_id,
+    obat_id,
+    jumlah,
+    harga_satuan,
+    harga_beli,
+    subtotal
+) {
     document.getElementById("edit-id").value = id;
 
-    document.getElementById("edit-supplier").value = pembelian_id;
+    document.getElementById("edit-pembelian").value = pembelian_id;
     document.getElementById("edit-obat").value = obat_id;
     document.getElementById("edit-jumlah").value = formatNumber(jumlah);
     document.getElementById("edit-harga-satuan").value = formatNumber(harga_satuan);
@@ -301,12 +333,20 @@ function openEditModal(id, pembelian_id, obat_id, jumlah, harga_satuan, harga_be
 async function updateDetailPembelianObat() {
     const id = document.getElementById("edit-id").value;
 
-    const pembelian_id = document.getElementById("edit-supplier").value;
+    const pembelian_id = document.getElementById("edit-pembelian").value;
     const obat_id = document.getElementById("edit-obat").value;
-    const jumlah = document.getElementById("edit-jumlah").value.replace(/\./g, "");
-    const harga_satuan = document.getElementById("edit-harga-satuan").value.replace(/\./g, "");
-    const harga_beli = document.getElementById("edit-harga-beli").value.replace(/\./g, "");
-    const subtotal = document.getElementById("edit-subtotal").value.replace(/\./g, "");
+    const jumlah = document
+        .getElementById("edit-jumlah")
+        .value.replace(/\./g, "");
+    const harga_satuan = document
+        .getElementById("edit-harga-satuan")
+        .value.replace(/\./g, "");
+    const harga_beli = document
+        .getElementById("edit-harga-beli")
+        .value.replace(/\./g, "");
+    const subtotal = document
+        .getElementById("edit-subtotal")
+        .value.replace(/\./g, "");
 
     showLoading();
 
@@ -326,9 +366,6 @@ async function updateDetailPembelianObat() {
                 }
                 pembelianObat {
                     id
-                    supplier {
-                        nama_supplier
-                    }
                 }
             }
         }
@@ -340,21 +377,24 @@ async function updateDetailPembelianObat() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, 
-                    input: { 
+                variables: {
+                    id,
+                    input: {
                         pembelian_id,
                         obat_id,
                         jumlah: parseInt(jumlah),
                         harga_satuan: parseInt(harga_satuan),
                         harga_beli: parseInt(harga_beli),
-                        subtotal: parseInt(subtotal)
-                    }
+                        subtotal: parseInt(subtotal),
+                    },
                 },
             }),
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-detailPembelianObat" })
+            new CustomEvent("close-modal", {
+                detail: "edit-detailPembelianObat",
+            })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -366,45 +406,22 @@ async function updateDetailPembelianObat() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    
-    
-    // Event delegation untuk semua input jumlah di dynamic-container
-    const dynamicContainer = document.getElementById('dynamic-container');
-    
-    dynamicContainer.addEventListener("input", (e) => {
-        if (e.target.name === "create-jumlah[]") {
-            let value = unformatNumber(filterAngka(e.target.value));
-            e.target.value = value ? formatNumber(value) : "";
-        }
-    });
 
-    dynamicContainer.addEventListener("input", (e) => {
-        if (e.target.name === "create-harga-satuan[]") {
-            let value = unformatNumber(filterAngka(e.target.value));
-            e.target.value = value ? formatNumber(value) : "";
-        }
-    });
-    dynamicContainer.addEventListener("input", (e) => {
-        if (e.target.name === "create-harga-beli[]") {
-            let value = unformatNumber(filterAngka(e.target.value));
-            e.target.value = value ? formatNumber(value) : "";
-        }
-    });
-    dynamicContainer.addEventListener("input", (e) => {
-        if (e.target.name === "create-subtotal") {
-            let value = unformatNumber(filterAngka(e.target.value));
-            e.target.value = value ? formatNumber(value) : "";
-        }
-    });
-    
-    const editJumlahInput = document.getElementById('edit-jumlah');
-    const editHargaSatuanInput = document.getElementById('edit-harga-satuan');
-    const editHargaBeliInput = document.getElementById('edit-harga-beli');
-    const editSubtotalInput = document.getElementById('edit-subtotal');
+    // -------------------------
+    // ELEMENT EDIT FIELDS
+    // -------------------------
+    const editJumlahInput = document.getElementById("edit-jumlah");
+    const editHargaSatuanInput = document.getElementById("edit-harga-satuan");
+    const editHargaBeliInput = document.getElementById("edit-harga-beli");
+    const editSubtotalInput = document.getElementById("edit-subtotal");
 
+    // -------------------------
+    // FORMAT INPUT EDIT (TIDAK DOUBLE)
+    // -------------------------
     editJumlahInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         e.target.value = value ? formatNumber(value) : "";
+        hitungSubtotalEdit();
     });
 
     editHargaSatuanInput.addEventListener("input", (e) => {
@@ -412,72 +429,153 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.value = value ? formatNumber(value) : "";
     });
 
-    // editHargaBeliInput.addEventListener("input", (e) => {
-    //     let value = unformatNumber(filterAngka(e.target.value));
-    //     e.target.value = value ? formatNumber(value) : "";
-    // });
+    editHargaBeliInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        e.target.value = value ? formatNumber(value) : "";
+        hitungSubtotalEdit();
+    });
 
-    // editSubtotalInput.addEventListener("input", (e) => {
-    //     let value = unformatNumber(filterAngka(e.target.value));
-    //     e.target.value = value ? formatNumber(value) : "";
-    // });
+    editSubtotalInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        e.target.value = value ? formatNumber(value) : "";
+    });
 
 });
 
-function renderDetailPembelianObatTable(result, tableId, isActive) {
-    const tbody = document.getElementById(tableId);
-    tbody.innerHTML = "";
-    
+
+// ======================================================
+// AUTO SUBTOTAL — CREATE
+// ======================================================
+
+document.addEventListener("input", function (e) {
+
+    // Jika input jumlah berubah
+    if (e.target.matches('input[name="create-jumlah[]"]')) {
+        const row = e.target.closest(".dynamic-row");
+
+        e.target.value = formatNumber(unformatNumber(e.target.value));
+
+        hitungSubtotal(row);
+    }
+
+    // Jika input harga beli berubah
+    if (e.target.matches('input[name="create-harga-beli[]"]')) {
+        const row = e.target.closest(".dynamic-row");
+
+        e.target.value = formatNumber(unformatNumber(e.target.value));
+
+        hitungSubtotal(row);
+    }
+});
+
+
+function hitungSubtotal(row) {
+    const jumlahInput = row.querySelector('input[name="create-jumlah[]"]');
+    const hargaBeliInput = row.querySelector('input[name="create-harga-beli[]"]');
+    const subtotalInput = row.querySelector('input[name="create-subtotal[]"]');
+
+    const jumlah = parseInt(unformatNumber(jumlahInput.value)) || 0;
+    const hargaBeli = parseInt(unformatNumber(hargaBeliInput.value)) || 0;
+
+    const subtotal = jumlah * hargaBeli;
+
+    subtotalInput.value = formatNumber(subtotal);
+}
+
+
+
+// ======================================================
+// AUTO SUBTOTAL — EDIT
+// ======================================================
+
+function hitungSubtotalEdit() {
+    const jumlah = parseInt(unformatNumber(document.getElementById("edit-jumlah").value)) || 0;
+    const hargaBeli = parseInt(unformatNumber(document.getElementById("edit-harga-beli").value)) || 0;
+
+    const subtotalEdit = jumlah * hargaBeli;
+
+    document.getElementById("edit-subtotal").value = formatNumber(subtotalEdit);
+}
+
+
+
+// ======================================================
+// AUTO HARGA SATUAN & BELI SAAT SELECT OBAT
+// ======================================================
+
+document.addEventListener("change", function (e) {
+
+    // -------------------------
+    // CREATE MODE
+    // -------------------------
+    if (e.target.matches('select[name="create-nama-obat[]"]')) {
+        const selectedOption = e.target.selectedOptions[0];
+        const harga = selectedOption.getAttribute("data-harga");
+
+        const row = e.target.closest(".dynamic-row");
+
+        row.querySelector('input[name="create-harga-satuan[]"]').value =
+            harga ? formatNumber(parseInt(harga)) : "";
+    }
+
+
+    // -------------------------
+    // EDIT MODE
+    // -------------------------
+    if (e.target.id === "edit-obat") {
+        const selectedOption = e.target.selectedOptions[0];
+        const harga = selectedOption.getAttribute("data-harga");
+
+        document.getElementById("edit-harga-satuan").value =
+            harga ? formatNumber(parseInt(harga)) : "";
+
+        hitungSubtotalEdit();
+    }
+});
+
+
+
+function renderDetailPembelianObatCard(result, containerId, isActive) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
     const items = result.data || [];
     const pageInfo = result.paginatorInfo || {};
 
+    // Jika tidak ada data
     if (!items.length) {
-        tbody.innerHTML = `
-            <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
-            </tr>
+        container.innerHTML = `
+            <div class="text-center py-6 text-red-500 font-semibold italic">
+                No Data Available
+            </div>
         `;
-        const pageInfoEl = isActive
-            ? document.getElementById("pageInfo")
-            : document.getElementById("pageInfoArchive");
-        const prevBtn = isActive
-            ? document.getElementById("prevBtn")
-            : document.getElementById("prevBtnArchive");
-        const nextBtn = isActive
-            ? document.getElementById("nextBtn")
-            : document.getElementById("nextBtnArchive");
-
-        if (pageInfoEl) {
-            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${pageInfo.lastPage || 1} (Total: 0)`;
-        }
-        if (prevBtn) prevBtn.disabled = true;
-        if (nextBtn) nextBtn.disabled = true;
         return;
     }
 
-    // Kelompokkan data berdasarkan apa
+    // Kelompokkan berdasarkan pembelian_id
     const grouped = items.reduce((acc, item) => {
-        const key = `${item.pembelian_id_id}`;
-        
+        const key = item.pembelian_id;
+
         if (!acc[key]) {
             acc[key] = {
-                ids: [],
                 pembelian_id: item.pembelian_id,
-                obats: []
+                supplier:
+                    item.pembelianObat?.supplier?.nama_supplier || "Unknown",
+                tanggal: item.pembelianObat?.tanggal || "Unknown",
+                details: [],
             };
         }
-        
-        acc[key].ids.push(item.id);
-        acc[key].obats.push({
+
+        acc[key].details.push({
             id: item.id,
             obat_id: item.obat_id,
             nama_obat: item.obat?.nama_obat,
             jumlah: item.jumlah,
             harga_satuan: item.harga_satuan,
             harga_beli: item.harga_beli,
-            subtotal: item.subtotal
+            subtotal: item.subtotal,
         });
-        
+
         return acc;
     }, {});
 
@@ -486,72 +584,103 @@ function renderDetailPembelianObatTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-    // Render grouped data
-    Object.values(grouped).forEach(group => {
-        // Render obat list dengan actions per baris obat
-        const detailRows = group.details.map(detail => {
-            let detailActions = "";
-            
-            if (window.currentUserRole === "admin") {
-                if (isActive) {
-                    detailActions = `
-                        <div class="flex gap-1 flex-wrap">
-                            <button onclick="openEditModal(${detail.id}, '${group.pembelian.id}', '${group.obat.id}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.harga_beli}', '${detail.subtotal}')"
-                                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
-                                <i class='bx bx-edit-alt'></i> Edit
+    // Render setiap grup menjadi card
+    Object.values(grouped).forEach((group) => {
+        const totalSubtotal = group.details.reduce(
+            (sum, d) => sum + d.subtotal,
+            0
+        );
+
+        // Render rows obat dalam format grid 6 kolom
+        const detailRows = group.details
+            .map((detail) => {
+                let detailActions = "";
+
+                if (window.currentUserRole === "admin") {
+                    if (isActive) {
+                        detailActions = `
+                            <button onclick="openEditModal(${detail.id}, '${group.pembelian_id}', '${detail.obat_id}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.harga_beli}', '${detail.subtotal}')"
+                                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
+                                Edit
                             </button>
                             <button onclick="hapusDetailPembelianObat(${detail.id})"
-                                class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
-                                <i class='bx bx-archive'></i> Archive
+                                class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200">
+                                Archive
                             </button>
-                        </div>
-                    `;
-                } else {
-                    detailActions = `
-                        <div class="flex gap-1 flex-wrap">
+                        `;
+                    } else {
+                        detailActions = `
                             <button onclick="restoreDetailPembelianObat(${detail.id})"
-                                class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
-                                <i class='bx bx-refresh'></i> Restore
+                                class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
+                                Restore
                             </button>
                             <button onclick="forceDeleteDetailPembelianObat(${detail.id})"
-                                class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
-                                <i class='bx bx-trash'></i> Delete
+                                class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200">
+                                Delete
                             </button>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
-            }
 
-            return `
-                <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 py-2 last:border-b-0">
-                    <div class="flex-1">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400">${detail.nama_obat}</span>
-                        <span class="text-sm ml-2">Jumlah: <strong>${detail.jumlah.toLocaleString("id-ID")}</strong></span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${detail.harga_satuan}</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${detail.harga_beli}</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${detail.subtotal}</span>
+                return `
+                    <div class="grid grid-cols-6 py-2 text-sm border-dotted border-t-2 dark:text-gray-200">
+                        <div class="font-semibold text-blue-600 dark:text-blue-400">
+                            ${detail.nama_obat}
+                        </div>
+                        <div class="text-cyan-500">${detail.jumlah.toLocaleString("id-ID")}</div>
+                        <div class="text-gray-400">${detail.harga_satuan.toLocaleString("id-ID")}</div>
+                        <div class="text-orange-400">${detail.harga_beli.toLocaleString("id-ID")}</div>
+                        <div class="text-green-500">${detail.subtotal.toLocaleString("id-ID")}</div>
+                        <div class="flex gap-1 flex-wrap">${detailActions}</div>
                     </div>
-                    ${window.currentUserRole === "admin" ? detailActions : ""}
+                `;
+            })
+            .join("");
+
+        // CARD TEMPLATE
+        container.innerHTML += `
+            <div class="p-4 mb-4 rounded-xl shadow bg-slate-50 dark:bg-gray-800 border-dashed border-2 border-gray-200 dark:border-gray-700">
+
+                <div class="flex justify-between items-center mb-3">
+                    <div class="space-y-1">
+                        <h3 class="text-lg font-bold text-gray-500 dark:text-white">
+                            Supplier: <span class="text-orange-500">${group.supplier}</span>
+                        </h3>
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Total Items: <span class="font-semibold text-red-500">${group.details.length}</span>  
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Total: <span class="font-semibold text-green-600">Rp ${totalSubtotal.toLocaleString("id-ID")} </span>
+                        </p>
+                    </div>
+
+                    <div class="text-md tracking-widest font-semibold text-gray-500 dark:text-gray-400">
+                        ${group.tanggal.split("-").reverse().join("/")}
+                    </div>
+
                 </div>
-            `;
-        }).join("");
 
-        tbody.innerHTML += `
-            <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50 align-top">
-                <td class="p-4 text-center font-semibold align-middle">
-                    <div class="flex flex-col gap-1 items-center">
-                        ${group.ids.map(id => `<span class="rounded-full font-bold text-green-500 py-1 px-2 ">${id}</span>`).join("")}
+                <div class="w-full border-t-2 pt-3 mt-3">
+
+                    <div class="grid grid-cols-6 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                        <div>Medicine</div>
+                        <div>Qty</div>
+                        <div>Unit Price</div>
+                        <div>Purchase</div>
+                        <div>Total</div>
+                        <div>Actions</div>
                     </div>
-                </td>
-                <td class="p-4 text-center text-base border-x font-semibold align-middle">${group.pembelian?.id}</td>
-                <td class="p-4">
+
                     ${detailRows}
-                </td>
-            </tr>
+
+                </div>
+
+            </div>
         `;
     });
 
-    // Update pagination info
+    // Update Pagination
     const pageInfoEl = isActive
         ? document.getElementById("pageInfo")
         : document.getElementById("pageInfoArchive");
@@ -563,7 +692,10 @@ function renderDetailPembelianObatTable(result, tableId, isActive) {
         : document.getElementById("nextBtnArchive");
 
     if (pageInfoEl)
-        pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${pageInfo.lastPage || 1} (Total: ${pageInfo.total || 0})`;
+        pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
+            pageInfo.lastPage || 1
+        } (Total: ${pageInfo.total || 0})`;
+
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }

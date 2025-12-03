@@ -169,20 +169,20 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-    // Format dan unformat number
+// Format dan unformat number
 
-    function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function unformatNumber(value) {
-        return value.replace(/\./g, "");
-    }
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
 
-    function filterAngka(str) {
-        // hapus semua karakter selain angka dan titik
-        return str.replace(/[^0-9.]/g, "");
-    }
+function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
+    return str.replace(/[^0-9.]/g, "");
+}
 
 // Create
 async function createRadiologi() {
@@ -191,9 +191,18 @@ async function createRadiologi() {
     const jenis_radiologi = document.getElementById("create-jenis").value;
     const hasil = document.getElementById("create-hasil").value.trim();
     const tanggal = document.getElementById("create-tanggal").value.trim();
-    const biaya_radiologi = document.getElementById("create-biaya").value.replace(/\./g, "");
+    const biaya_radiologi = document
+        .getElementById("create-biaya")
+        .value.replace(/\./g, "");
 
-    if (!pasien_id || !jenis_radiologi || !biaya_radiologi || !hasil || !tenaga_medis_id || !tanggal)
+    if (
+        !pasien_id ||
+        !jenis_radiologi ||
+        !biaya_radiologi ||
+        !hasil ||
+        !tenaga_medis_id ||
+        !tanggal
+    )
         return alert("Please fill in all required fields!");
 
     showLoading();
@@ -222,14 +231,14 @@ async function createRadiologi() {
         }
     `;
     const variablesRadiologi = {
-        input: { pasien_id,
-                 tenaga_medis_id,
-                 jenis_radiologi,
-                 hasil,
-                 tanggal,
-                 biaya_radiologi: parseInt(biaya_radiologi)
-            },
-            
+        input: {
+            pasien_id,
+            tenaga_medis_id,
+            jenis_radiologi,
+            hasil,
+            tanggal,
+            biaya_radiologi: parseInt(biaya_radiologi),
+        },
     };
 
     try {
@@ -262,7 +271,15 @@ async function createRadiologi() {
     }
 }
 
-function openEditModal(id, pasien_id, tenaga_medis_id, jenis_radiologi, hasil, tanggal, biaya_radiologi) {
+function openEditModal(
+    id,
+    pasien_id,
+    tenaga_medis_id,
+    jenis_radiologi,
+    hasil,
+    tanggal,
+    biaya_radiologi
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
     document.getElementById("edit-nickname").value = tenaga_medis_id;
@@ -284,7 +301,9 @@ async function updateRadiologi() {
     const jenis_radiologi = document.getElementById("edit-jenis").value;
     const hasil = document.getElementById("edit-hasil").value.trim();
     const tanggal = document.getElementById("edit-tanggal").value.trim();
-     const biaya_radiologi = document.getElementById("edit-biaya").value.replace(/\./g, "");
+    const biaya_radiologi = document
+        .getElementById("edit-biaya")
+        .value.replace(/\./g, "");
 
     showLoading();
 
@@ -318,14 +337,16 @@ async function updateRadiologi() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, 
-                    input: { pasien_id,
-                             tenaga_medis_id,
-                             jenis_radiologi,
-                             hasil,
-                             tanggal,
-                             biaya_radiologi: parseInt(biaya_radiologi)
-                        }
+                variables: {
+                    id,
+                    input: {
+                        pasien_id,
+                        tenaga_medis_id,
+                        jenis_radiologi,
+                        hasil,
+                        tanggal,
+                        biaya_radiologi: parseInt(biaya_radiologi),
+                    },
                 },
             }),
         });
@@ -368,7 +389,7 @@ function renderRadiologiTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive

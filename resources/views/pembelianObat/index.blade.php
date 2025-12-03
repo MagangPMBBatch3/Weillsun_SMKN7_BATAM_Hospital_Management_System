@@ -60,7 +60,7 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Supplier', 'date', 'total cost', 'status']" requireRole="admin">
+            <x-table id="tableActive" :headers="['ID', 'Supplier', 'date', 'total costs', 'status']" requireRole="admin">
                 <tbody id="dataPembelianObatAktif"></tbody>
             </x-table>
 
@@ -86,7 +86,7 @@
                             <x-input-label>Supplier</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="create-nama" id="create-nama">
+                                name="create-supplier" id="create-supplier">
                                 <option value="" class="text-gray-500 italic">Select Supplier</option>
                                 @foreach ($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}">
@@ -98,10 +98,6 @@
                             <x-input-label>Date</x-input-label>
                             <x-text-input id="create-tanggal" type="date"
                                 class="border p-2 w-full rounded" required />
-
-                            <x-input-label>Total Cost</x-input-label>
-                            <x-text-input id="create-diagnosis" type="text" readonly placeholder="0"
-                                class="border p-2 w-full rounded border-green-500" required />
 
                             <x-input-label>Status</x-input-label>
                             <select
@@ -133,7 +129,7 @@
                             <x-input-label>New Supplier</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-nama" id="edit-nama">
+                                name="edit-supplier" id="edit-supplier">
                                 <option value="" class="text-gray-500 italic">Select Supplier</option>
                                 @foreach ($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}">
@@ -147,7 +143,7 @@
                                 class="border p-2 w-full rounded" />
 
                             <x-input-label>New Total Cost</x-input-label>
-                            <x-text-input id="edit-diagnosis" type="text" readonly placeholder="0"
+                            <x-text-input id="edit-total" type="text" placeholder="0"
                                 class="border p-2 w-full rounded border-green-500" />
 
                             <x-input-label>New Status</x-input-label>

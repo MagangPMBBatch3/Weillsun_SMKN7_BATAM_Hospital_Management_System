@@ -18,10 +18,10 @@ class DetailPembelianObatQuery
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
             })
-            ->whereHas('obat', function ($q) use ($search) {
+            ->orWhereHas('obat', function ($q) use ($search) {
                 $q->where('nama_obat', 'like', "%$search%");
             })
-            ->whereHas('pembelianObat.supllier', function ($q) use ($search) {
+            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
                 $q->where('nama_supplier', 'like', "%$search%");
             });
         }
@@ -55,10 +55,10 @@ class DetailPembelianObatQuery
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
             })
-            ->whereHas('obat', function ($q) use ($search) {
+            ->orWhereHas('obat', function ($q) use ($search) {
                 $q->where('nama_obat', 'like', "%$search%");
             })
-            ->whereHas('pembelianObat.supllier', function ($q) use ($search) {
+            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
                 $q->where('nama_supplier', 'like', "%$search%");
             });
         }

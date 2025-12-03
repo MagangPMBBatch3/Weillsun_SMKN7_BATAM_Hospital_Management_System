@@ -201,7 +201,7 @@ async function createRekamMedis() {
         }
     `;
     const variablesRekamMedis = {
-        input: { pasien_id, tenaga_medis_id, tanggal, diagnosis, tindakan},
+        input: { pasien_id, tenaga_medis_id, tanggal, diagnosis, tindakan },
     };
 
     try {
@@ -234,7 +234,14 @@ async function createRekamMedis() {
     }
 }
 
-function openEditModal(id, pasien_id, tenaga_medis_id, tanggal, diagnosis, tindakan) {
+function openEditModal(
+    id,
+    pasien_id,
+    tenaga_medis_id,
+    tanggal,
+    diagnosis,
+    tindakan
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
     document.getElementById("edit-nickname").value = tenaga_medis_id;
@@ -287,8 +294,15 @@ async function updateRekamMedis() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, 
-                    input: { pasien_id, tenaga_medis_id, tanggal, diagnosis, tindakan}
+                variables: {
+                    id,
+                    input: {
+                        pasien_id,
+                        tenaga_medis_id,
+                        tanggal,
+                        diagnosis,
+                        tindakan,
+                    },
                 },
             }),
         });
@@ -315,7 +329,7 @@ function renderRekamMedisTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive

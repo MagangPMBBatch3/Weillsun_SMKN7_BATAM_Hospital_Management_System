@@ -199,7 +199,14 @@ async function createPasien() {
     }
 }
 
-function openEditModal(id, nama, tanggal_lahir, jenis_kelamin, alamat, telepon) {
+function openEditModal(
+    id,
+    nama,
+    tanggal_lahir,
+    jenis_kelamin,
+    alamat,
+    telepon
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-name").value = nama;
     document.getElementById("edit-birth").value = tanggal_lahir;
@@ -240,7 +247,16 @@ async function updatePasien() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { nama, tanggal_lahir, jenis_kelamin, alamat, telepon } },
+                variables: {
+                    id,
+                    input: {
+                        nama,
+                        tanggal_lahir,
+                        jenis_kelamin,
+                        alamat,
+                        telepon,
+                    },
+                },
             }),
         });
         window.dispatchEvent(
@@ -264,7 +280,7 @@ function renderPasienTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="7">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -330,16 +346,16 @@ function renderPasienTable(result, tableId, isActive) {
                 item.nama
             }</td>
             <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.tanggal_lahir
-                }
+                ${item.tanggal_lahir}
             </td>
             
             <td class="p-4 text-center font-semibold capitalize">
                 <span class="px-3 py-1 rounded-full text-sm 
-                    ${ item.jenis_kelamin === "L"
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-pink-100 text-pink-600" }">
+                    ${
+                        item.jenis_kelamin === "L"
+                            ? "bg-blue-100 text-blue-600"
+                            : "bg-pink-100 text-pink-600"
+                    }">
 
                     ${item.jenis_kelamin}
                     
@@ -347,14 +363,10 @@ function renderPasienTable(result, tableId, isActive) {
             </td>
 
             <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.alamat
-                }
+                ${item.alamat}
             </td>
             <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.telepon
-                }
+                ${item.telepon}
             </td>
 
             ${
@@ -384,7 +396,6 @@ function renderPasienTable(result, tableId, isActive) {
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
-
 
 // Hapus
 async function hapusPasien(id) {

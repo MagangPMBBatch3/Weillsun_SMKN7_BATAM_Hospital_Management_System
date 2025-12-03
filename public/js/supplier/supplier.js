@@ -144,11 +144,12 @@ async function loadDataPaginate(page = 1, isActive = true) {
 
 // Create
 async function createSupplier() {
-    const nama_supplier = document.getElementById("create-nama_supplier").value.trim();
+    const nama_supplier = document
+        .getElementById("create-nama_supplier")
+        .value.trim();
     const alamat = document.getElementById("create-alamat").value.trim();
     const telepon = document.getElementById("create-telepon").value.trim();
     const email = document.getElementById("create-email").value.trim();
-
 
     if (!nama_supplier || !alamat || !telepon || !email)
         return alert("Please fill in all required fields!");
@@ -215,7 +216,9 @@ function openEditModal(id, nama_supplier, alamat, telepon, email) {
 // Update
 async function updateSupplier() {
     const id = document.getElementById("edit-id").value;
-    const nama_supplier = document.getElementById("edit-nama_supplier").value.trim();
+    const nama_supplier = document
+        .getElementById("edit-nama_supplier")
+        .value.trim();
     const alamat = document.getElementById("edit-alamat").value.trim();
     const telepon = document.getElementById("edit-telepon").value.trim();
     const email = document.getElementById("edit-email").value.trim();
@@ -239,7 +242,10 @@ async function updateSupplier() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { nama_supplier, alamat, telepon, email } },
+                variables: {
+                    id,
+                    input: { nama_supplier, alamat, telepon, email },
+                },
             }),
         });
         window.dispatchEvent(
@@ -263,7 +269,7 @@ function renderSupplierTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No related data found</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -329,19 +335,13 @@ function renderSupplierTable(result, tableId, isActive) {
                 item.nama_supplier
             }</td>
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
-                ${
-                    item.alamat
-                }
+                ${item.alamat}
             </td>
             <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.telepon
-                }
+                ${item.telepon}
             </td>
             <td class="p-4 text-center text-base font-semibold">
-                ${
-                    item.email
-                }
+                ${item.email}
             </td>
 
             ${
@@ -371,7 +371,6 @@ function renderSupplierTable(result, tableId, isActive) {
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
-
 
 // Hapus
 async function hapusSupplier(id) {

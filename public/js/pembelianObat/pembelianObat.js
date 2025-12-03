@@ -28,10 +28,8 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
-// ============================================================================================== \\
-
 let searchTimeout = null;
-function searchLabPemeriksaan() {
+function searchPembelianObat() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -39,7 +37,7 @@ function searchLabPemeriksaan() {
     }, 500);
 }
 
-// Load data (Aktif & Arsip sekaligus)
+// Load data User (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -58,25 +56,17 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allLabPemeriksaanPaginate(first: $first, page: $page, search: $search){
+                allPembelianObatPaginate(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            pasien_id
-                            tenaga_medis_id
-                            jenis_pemeriksaan
-                            hasil
+                            supplier_id
                             tanggal
-                            biaya_lab
-                            pasien {
+                            total_biaya
+                            status
+                            supplier {
                                 id
-                                nama
-                            }
-                            tenagaMedis {
-                                id
-                                profile {
-                                    nickname
-                                }
-                            }
+                                nama_supplier
+                            } 
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -105,34 +95,26 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderLabPemeriksaanTable(
-            dataActive?.data?.allLabPemeriksaanPaginate || {},
-            "dataLabPemeriksaanAktif",
+        renderPembelianObatTable(
+            dataActive?.data?.allPembelianObatPaginate || {},
+            "dataPembelianObatAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allLabPemeriksaanArchive(first: $first, page: $page, search: $search){
+                allPembelianObatArchive(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            pasien_id
-                            tenaga_medis_id
-                            jenis_pemeriksaan
-                            hasil
+                            supplier_id
                             tanggal
-                            biaya_lab
-                            pasien {
+                            total_biaya
+                            status
+                            supplier {
                                 id
-                                nama
-                            }
-                            tenagaMedis {
-                                id
-                                profile {
-                                    nickname
-                                }
-                            }
+                                nama_supplier
+                            } 
                         }
                     paginatorInfo { currentPage lastPage total hasMorePages }
                 }
@@ -156,9 +138,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderLabPemeriksaanTable(
-            dataArchive?.data?.allLabPemeriksaanArchive || {},
-            "dataLabPemeriksaanArsip",
+        renderPembelianObatTable(
+            dataArchive?.data?.allPembelianObatArchive || {},
+            "dataPembelianObatArsip",
             false
         );
     } catch (error) {
@@ -169,8 +151,6 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Format dan unformat number
-
 function formatNumber(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -180,91 +160,62 @@ function unformatNumber(value) {
 }
 
 function filterAngka(str) {
-    // hapus semua karakter selain angka dan titik
     return str.replace(/[^0-9.]/g, "");
 }
 
 // Create
-async function createLabPemeriksaan() {
-    const tenaga_medis_id = document.getElementById("create-nickname").value;
-    const pasien_id = document.getElementById("create-nama").value;
-    const jenis_pemeriksaan =
-        document.getElementById("create-pemeriksaan").value;
-    const hasil = document.getElementById("create-hasil").value.trim();
-    const tanggal = document.getElementById("create-tanggal").value.trim();
-    const biaya_lab = document
-        .getElementById("create-biaya")
-        .value.replace(/\./g, "");
+async function createPembelianObat() {
+    const supplier_id = document.getElementById("create-supplier").value;
+    const tanggal = document.getElementById("create-tanggal").value;
+    const status = document.getElementById("create-status").value.trim();
 
-    if (
-        !pasien_id ||
-        !jenis_pemeriksaan ||
-        !biaya_lab ||
-        !hasil ||
-        !tenaga_medis_id ||
-        !tanggal
-    )
+    if (!supplier_id || !tanggal || !status)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
-    const mutationLabPemeriksaan = `
-        mutation($input: CreateLabPemeriksaanInput!) {
-            createLabPemeriksaan(input: $input) {
+    const mutationPembelianObat = `
+        mutation($input: CreatePembelianObatInput!) {
+            createPembelianObat(input: $input) {
                 id
-                pasien_id
-                tenaga_medis_id
-                jenis_pemeriksaan
-                hasil
+                supplier_id
                 tanggal
-                biaya_lab
-                pasien {
+                total_biaya
+                status
+                supplier {
                     id
-                    nama
-                }
-                tenagaMedis {
-                    id
-                    profile {
-                        nickname
-                    }
-                }
+                    nama_supplier
+                } 
             }
         }
     `;
-    const variablesLabPemeriksaan = {
-        input: {
-            pasien_id,
-            tenaga_medis_id,
-            jenis_pemeriksaan,
-            hasil,
-            tanggal,
-            biaya_lab: parseInt(biaya_lab),
-        },
+    const variablesPembelianObat = {
+        input: { supplier_id, tanggal, status },
     };
 
     try {
-        const resLabPemeriksaan = await fetch(API_URL, {
+        const resPembelianObat = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationLabPemeriksaan,
-                variables: variablesLabPemeriksaan,
+                query: mutationPembelianObat,
+                variables: variablesPembelianObat,
             }),
         });
 
-        const resultLabPemeriksaan = await resLabPemeriksaan.json();
-        const dataLabPemeriksaan =
-            resultLabPemeriksaan?.data?.createLabPemeriksaan;
+        const resultPembelianObat = await resPembelianObat.json();
+        const dataPembelianObat =
+            resultPembelianObat?.data?.createPembelianObat;
 
-        if (dataLabPemeriksaan) {
+        if (dataPembelianObat) {
             window.dispatchEvent(
                 new CustomEvent("close-modal", {
-                    detail: "create-labPemeriksaan",
+                    detail: "create-pembelianObat",
                 })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultLabPemeriksaan.errors);
+            console.error("GraphQL Error:", resultPembelianObat.errors);
             alert("Failed to create Tenaga Medis!");
         }
     } catch (error) {
@@ -275,62 +226,45 @@ async function createLabPemeriksaan() {
     }
 }
 
-function openEditModal(
-    id,
-    pasien_id,
-    tenaga_medis_id,
-    jenis_pemeriksaan,
-    hasil,
-    tanggal,
-    biaya_lab
-) {
+function openEditModal(id, supplier_id, tanggal, total_biaya, status) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-nama").value = pasien_id;
-    document.getElementById("edit-nickname").value = tenaga_medis_id;
-    document.getElementById("edit-pemeriksaan").value = jenis_pemeriksaan;
-    document.getElementById("edit-hasil").value = hasil;
+    document.getElementById("edit-supplier").value = supplier_id;
     document.getElementById("edit-tanggal").value = tanggal;
-    document.getElementById("edit-biaya").value = formatNumber(biaya_lab);
+    document.getElementById("edit-total").value = formatNumber(total_biaya);
+    document.getElementById("edit-status").value = status;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-labPemeriksaan" })
+        new CustomEvent("open-modal", { detail: "edit-pembelianObat" })
     );
 }
 
 // Update
-async function updateLabPemeriksaan() {
+async function updatePembelianObat() {
     const id = document.getElementById("edit-id").value;
-    const pasien_id = document.getElementById("edit-nama").value;
-    const tenaga_medis_id = document.getElementById("edit-nickname").value;
-    const jenis_pemeriksaan = document.getElementById("edit-pemeriksaan").value;
-    const hasil = document.getElementById("edit-hasil").value.trim();
+    const supplier_id = document.getElementById("edit-supplier").value;
     const tanggal = document.getElementById("edit-tanggal").value.trim();
-    const biaya_lab = document
-        .getElementById("edit-biaya")
+    const total = document
+        .getElementById("edit-total")
         .value.replace(/\./g, "");
+    const status = document.getElementById("edit-status").value;
+
+    if (!id || !supplier_id || !tanggal || !status)
+        return alert("Please fill in all required fields!");
 
     showLoading();
 
     const mutation = `
-        mutation($id: ID!, $input: UpdateLabPemeriksaanInput!) {
-            updateLabPemeriksaan(id: $id, input: $input) {
+        mutation($id: ID!, $input: UpdatePembelianObatInput!) {
+            updatePembelianObat(id: $id, input: $input) {
                 id
-                pasien_id
-                tenaga_medis_id
-                jenis_pemeriksaan
-                hasil
+                supplier_id
                 tanggal
-                biaya_lab
-                pasien {
+                total_biaya
+                status
+                supplier {
                     id
-                    nama
-                }
-                tenagaMedis {
-                    id
-                    profile {
-                        nickname
-                    }
-                }
+                    nama_supplier
+                } 
             }
         }
     `;
@@ -343,20 +277,13 @@ async function updateLabPemeriksaan() {
                 query: mutation,
                 variables: {
                     id,
-                    input: {
-                        pasien_id,
-                        tenaga_medis_id,
-                        jenis_pemeriksaan,
-                        hasil,
-                        tanggal,
-                        biaya_lab: parseInt(biaya_lab),
-                    },
+                    input: { supplier_id, tanggal, total, status },
                 },
             }),
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-labPemeriksaan" })
+            new CustomEvent("close-modal", { detail: "edit-pembelianObat" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -368,22 +295,16 @@ async function updateLabPemeriksaan() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const createBiayaInput = document.getElementById("create-biaya");
-    const editBiayaInput = document.getElementById("edit-biaya");
+    const totalInput = document.getElementById("edit-total");
 
-    editBiayaInput.addEventListener("input", (e) => {
-        let value = unformatNumber(filterAngka(e.target.value));
-        if (value) e.target.value = formatNumber(value);
-        else e.target.value = "";
-    });
-
-    createBiayaInput.addEventListener("input", (e) => {
+    totalInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         if (value) e.target.value = formatNumber(value);
         else e.target.value = "";
     });
 });
-function renderLabPemeriksaanTable(result, tableId, isActive) {
+
+function renderPembelianObatTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -393,7 +314,7 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -427,21 +348,21 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.tenaga_medis_id}', '${item.jenis_pemeriksaan}', '${item.hasil}', '${item.tanggal}', '${item.biaya_lab}')"
+                <button onclick="openEditModal(${item.id}, '${item.supplier_id}', '${item.tanggal}', '${item.total_biaya}', '${item.status}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusLabPemeriksaan(${item.id})"
+                <button onclick="hapusPembelianObat(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restoreLabPemeriksaan(${item.id})"
+                <button onclick="restorePembelianObat(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeleteLabPemeriksaan(${item.id})"
+                <button onclick="forceDeletePembelianObat(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -456,24 +377,16 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.pasien?.nama
+                item.supplier?.nama_supplier || "-"
             }</td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.tenagaMedis?.profile?.nickname
+                item.tanggal
             }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.jenis_pemeriksaan
-            }</td>
-            <td class="p-4 text-center truncate max-w-24 font-semibold capitalize">
-                ${item.hasil}
-            </td>
+            <td class="p-4 text-center text-base font-semibold">Rp ${item.total_biaya.toLocaleString(
+                "id-ID"
+            )}</td>
             <td class="p-4 text-center font-semibold capitalize">
-                ${item.tanggal}
-            </td>
-            <td class="p-4 text-center font-semibold capitalize">
-                <span class="font-bold text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">
-                    Rp ${item.biaya_lab.toLocaleString("id-ID")}
-                </span>
+                ${item.status}
             </td>
             ${
                 window.currentUserRole === "admin"
@@ -504,11 +417,11 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
 }
 
 // Hapus
-async function hapusLabPemeriksaan(id) {
+async function hapusPembelianObat(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deleteLabPemeriksaan(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deletePembelianObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -524,11 +437,11 @@ async function hapusLabPemeriksaan(id) {
 }
 
 // restore
-async function restoreLabPemeriksaan(id) {
+async function restorePembelianObat(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restoreLabPemeriksaan(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restorePembelianObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -544,11 +457,11 @@ async function restoreLabPemeriksaan(id) {
 }
 
 // force delete
-async function forceDeleteLabPemeriksaan(id) {
+async function forceDeletePembelianObat(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteLabPemeriksaan(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeletePembelianObat(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
