@@ -216,14 +216,12 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
-        // Ambil daftar pembelian yang sudah dipakai di detail
-        $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
+        // $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
 
-        // Ambil pembelian yang BELUM dipakai
-        $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
-            ->select('id', 'supplier_id', 'tanggal')
-            ->with('supplier:id,nama_supplier')
-            ->get();
+        // $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
+        //     ->select('id', 'supplier_id', 'tanggal')
+        //     ->with('supplier:id,nama_supplier')
+        //     ->get();
 
         // Semua pembelian tanpa filter
         $Allpembelians = PembelianObat::select('id', 'supplier_id','tanggal')
@@ -232,7 +230,7 @@ class AuthController extends Controller
 
         $Allobats = Obat::select('id', 'nama_obat', 'harga')->get();
         
-        return view('detailPembelianObat.index', compact('pembelians', 'Allpembelians', 'Allobats'));
+        return view('detailPembelianObat.index', compact( 'Allpembelians', 'Allobats'));
     }
 
 

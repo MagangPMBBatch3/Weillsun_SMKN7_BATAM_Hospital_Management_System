@@ -14,14 +14,15 @@ class DetailPembelianObatQuery
             $search = $args['search'];
 
             $query->where(function ($q) use ($search) {
-                $q->where('pembayaran_id', 'like', "%$search%")
-                    ->orWhere('kapasitas', 'like', "%$search%")
-                    ->orWhere('tarif_per_hari', 'like', "%$search%");
+                $q->where('jumlah', 'like', "%$search%")
+                    ->orWhere('harga_satuan', 'like', "%$search%")
+                    ->orWhere('harga_beli', 'like', "%$search%")
+                    ->orWhere('subtotal', 'like', "%$search%");
             })
             ->orWhereHas('obat', function ($q) use ($search) {
                 $q->where('nama_obat', 'like', "%$search%");
             })
-            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
+            ->orWhereHas('pembelianObat.supplier', function ($q) use ($search) {
                 $q->where('nama_supplier', 'like', "%$search%");
             });
         }
@@ -51,14 +52,15 @@ class DetailPembelianObatQuery
             $search = $args['search'];
 
             $query->where(function ($q) use ($search) {
-                $q->where('pembayaran_id', 'like', "%$search%")
-                    ->orWhere('kapasitas', 'like', "%$search%")
-                    ->orWhere('tarif_per_hari', 'like', "%$search%");
+                $q->where('jumlah', 'like', "%$search%")
+                    ->orWhere('harga_satuan', 'like', "%$search%")
+                    ->orWhere('harga_beli', 'like', "%$search%")
+                    ->orWhere('subtotal', 'like', "%$search%");
             })
             ->orWhereHas('obat', function ($q) use ($search) {
                 $q->where('nama_obat', 'like', "%$search%");
             })
-            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
+            ->orWhereHas('pembelianObat.supplier', function ($q) use ($search) {
                 $q->where('nama_supplier', 'like', "%$search%");
             });
         }

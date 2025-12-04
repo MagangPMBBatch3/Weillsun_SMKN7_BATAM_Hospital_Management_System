@@ -92,7 +92,7 @@
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="create-pembelian" id="create-pembelian">
                                 <option value="" class="text-gray-500 italic">Select Supplier Name</option>
-                                @foreach ($pembelians as $p)
+                                @foreach ($Allpembelians as $p)
                                     <option value="{{ $p->id }}">
                                         {{ $p->supplier->nama_supplier }} <span class=" text-slate-500">(
                                             {{ $p->tanggal }} )</span>
