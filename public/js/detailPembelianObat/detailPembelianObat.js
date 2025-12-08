@@ -407,17 +407,11 @@ async function updateDetailPembelianObat() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // -------------------------
-    // ELEMENT EDIT FIELDS
-    // -------------------------
     const editJumlahInput = document.getElementById("edit-jumlah");
     const editHargaSatuanInput = document.getElementById("edit-harga-satuan");
     const editHargaBeliInput = document.getElementById("edit-harga-beli");
     const editSubtotalInput = document.getElementById("edit-subtotal");
 
-    // -------------------------
-    // FORMAT INPUT EDIT (TIDAK DOUBLE)
-    // -------------------------
     editJumlahInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         e.target.value = value ? formatNumber(value) : "";
@@ -442,10 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
-// ======================================================
 // AUTO SUBTOTAL — CREATE
-// ======================================================
 
 document.addEventListener("input", function (e) {
 
@@ -458,7 +449,6 @@ document.addEventListener("input", function (e) {
         hitungSubtotal(row);
     }
 
-    // Jika input harga beli berubah
     if (e.target.matches('input[name="create-harga-beli[]"]')) {
         const row = e.target.closest(".dynamic-row");
 
@@ -482,11 +472,7 @@ function hitungSubtotal(row) {
     subtotalInput.value = formatNumber(subtotal);
 }
 
-
-
-// ======================================================
 // AUTO SUBTOTAL — EDIT
-// ======================================================
 
 function hitungSubtotalEdit() {
     const jumlah = parseInt(unformatNumber(document.getElementById("edit-jumlah").value)) || 0;
@@ -497,17 +483,10 @@ function hitungSubtotalEdit() {
     document.getElementById("edit-subtotal").value = formatNumber(subtotalEdit);
 }
 
-
-
-// ======================================================
-// AUTO HARGA SATUAN & BELI SAAT SELECT OBAT
-// ======================================================
+// AUTO HARGA SATUAN 
 
 document.addEventListener("change", function (e) {
 
-    // -------------------------
-    // CREATE MODE
-    // -------------------------
     if (e.target.matches('select[name="create-nama-obat[]"]')) {
         const selectedOption = e.target.selectedOptions[0];
         const harga = selectedOption.getAttribute("data-harga");
@@ -518,10 +497,6 @@ document.addEventListener("change", function (e) {
             harga ? formatNumber(parseInt(harga)) : "";
     }
 
-
-    // -------------------------
-    // EDIT MODE
-    // -------------------------
     if (e.target.id === "edit-obat") {
         const selectedOption = e.target.selectedOptions[0];
         const harga = selectedOption.getAttribute("data-harga");
@@ -656,7 +631,7 @@ function renderDetailPembelianObatCard(result, containerId, isActive) {
                     </div>
 
                     <div class="text-md tracking-widest font-semibold text-gray-500 dark:text-gray-400">
-                        ${group.tanggal.split("-").reverse().join("/")}
+                        ${group.tanggal }
                     </div>
 
                 </div>

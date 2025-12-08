@@ -2,6 +2,7 @@
 
 namespace App\Models\DetailPembayaranPasien;
 
+use App\Models\Obat\Obat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\PembayaranPasien\PembayaranPasien;
@@ -24,4 +25,5 @@ class DetailPembayaranPasien extends Model
     {
         return $this->belongsTo(PembayaranPasien::class, 'pembayaran_id');
     }
+
 }

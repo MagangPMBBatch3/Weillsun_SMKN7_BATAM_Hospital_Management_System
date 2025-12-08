@@ -95,9 +95,9 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>Total Cost</x-input-label>
+                            {{-- <x-input-label>Total Cost</x-input-label>
                             <x-text-input id="create-total-biaya" type="number" placeholder="0"
-                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" required />
+                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" /> --}}
 
                             <x-input-label>Payment Method</x-input-label>
                             <select

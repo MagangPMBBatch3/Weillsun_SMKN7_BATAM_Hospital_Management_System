@@ -1,5 +1,5 @@
 <x-app-layout>
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 px-6 py-6 space-y-8">
+{{-- <div class="min-h-screen bg-gray-50 dark:bg-gray-900 px-6 py-6 space-y-8">
 
     <!-- HEADER -->
     <header class="flex justify-between items-center">
@@ -210,5 +210,5 @@ new Chart(document.getElementById('chartRuangan'), {
     },
     options: { responsive: true, cutout: '70%' }
 });
-</script>
+</script> --}}
 </x-app-layout>

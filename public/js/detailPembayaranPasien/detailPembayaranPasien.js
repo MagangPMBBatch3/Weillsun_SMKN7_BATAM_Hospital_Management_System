@@ -69,6 +69,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             subtotal
                             pembayaranPasien{
                                 id
+                                tanggal_bayar
                                 pasien {    
                                     id
                                     nama
@@ -104,7 +105,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         const dataActive = await resActive.json();
         renderDetailPembayaranPasienTable(
             dataActive?.data?.allDetailPembayaranPasienPaginate || {},
-            "dataDetailPembayaranPasienAktif",
+            "cardActive",
             true
         );
 
@@ -122,6 +123,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             subtotal
                             pembayaranPasien{
                                 id
+                                tanggal_bayar
                                 pasien {    
                                     id
                                     nama
@@ -152,7 +154,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         const dataArchive = await resArchive.json();
         renderDetailPembayaranPasienTable(
             dataArchive?.data?.allDetailPembayaranPasienArchive || {},
-            "dataDetailPembayaranPasienArsip",
+            "cardArchive",
             false
         );
     } catch (error) {
@@ -175,7 +177,7 @@ async function loadUnpaidCosts(pasienId) {
                 jumlah
                 harga_satuan
                 subtotal
-                label
+                
             }
         }
     `;
@@ -288,6 +290,13 @@ function populateUnpaidCostsToForm(costs) {
                         focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                     placeholder="Enter Unit Price">
             </div>
+
+            <div>
+                    <label class="text-sm font-medium">Subtotal</label>
+                    <input type="text" name="create-subtotal[]"
+                        class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
+                        placeholder="0" readonly>
+                </div>
         `;
 
         // Populate values
@@ -425,7 +434,7 @@ async function createDetailPembayaranPasien() {
                     input: {
                         pembayaran_id,
                         tipe_biaya: item.tipe_biaya,
-                        referensi_id: item.referensi_id,
+                        referensi_id: item.referensi_id, 
                         jumlah: item.jumlah,
                         harga_satuan: item.harga_satuan,
                         subtotal: item.subtotal,
@@ -501,8 +510,6 @@ async function createDetailPembayaranPasien() {
                 hideLoading();
                 return;
             }
-        } else {
-            alert("Payment details created successfully!");
         }
 
         window.dispatchEvent(
@@ -660,41 +667,39 @@ document.addEventListener("DOMContentLoaded", () => {
 // Function to calculate subtotal
 function updateSubtotal() {
     const rows = document.querySelectorAll("#dynamic-container .dynamic-row");
-    let total = 0;
 
     rows.forEach((row) => {
         const jumlahInput = row.querySelector('input[name="create-jumlah[]"]');
         const hargaInput = row.querySelector(
             'input[name="create-harga-satuan[]"]'
         );
+        const subtotalInput = row.querySelector(
+            'input[name="create-subtotal[]"]'
+        );
 
-        if (jumlahInput && hargaInput) {
-            const jumlah = parseInt(jumlahInput.value.replace(/\./g, "") || 0);
-            const harga = parseFloat(hargaInput.value.replace(/\./g, "") || 0);
-            total += jumlah * harga;
-        }
+        if (!jumlahInput || !hargaInput || !subtotalInput) return;
+
+        const jumlah = parseInt(jumlahInput.value.replace(/\./g, "")) || 0;
+        const harga = parseFloat(hargaInput.value.replace(/\./g, "")) || 0;
+
+        const subtotal = jumlah * harga;
+
+        subtotalInput.value = formatNumber(subtotal.toString());
     });
-
-    const subtotalInput = document.querySelector(
-        'input[name="create-subtotal"]'
-    );
-    if (subtotalInput) {
-        subtotalInput.value = formatNumber(total.toString());
-    }
 }
 
-function renderDetailPembayaranPasienTable(result, tableId, isActive) {
-    const tbody = document.getElementById(tableId);
-    tbody.innerHTML = "";
+function renderDetailPembayaranPasienTable(result, containerId, isActive) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
 
     const items = result.data || [];
     const pageInfo = result.paginatorInfo || {};
 
     if (!items.length) {
-        tbody.innerHTML = `
-            <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="8">No data available.</td>
-            </tr>
+        container.innerHTML = `
+            <div class="text-center py-6 text-red-500 font-semibold italic">
+                No Data Available
+            </div>
         `;
         const pageInfoEl = isActive
             ? document.getElementById("pageInfo")
@@ -716,26 +721,28 @@ function renderDetailPembayaranPasienTable(result, tableId, isActive) {
         return;
     }
 
-    // Kelompokkan data
+    // Kelompokkan berdasarkan pembayaran_id
     const grouped = items.reduce((acc, item) => {
-        const key = `${item.pembayaran_id}`;
+        const key = item.pembayaran_id;
 
         if (!acc[key]) {
             acc[key] = {
-                ids: [],
-                pasien: item.pasien,
-                tenagaMedis: item.tenagaMedis,
-                obats: [],
+                pembayaran_id: item.pembayaran_id,
+                pasien: item.pembayaranPasien?.pasien || {},
+                tanggal: item.pembayaranPasien?.tanggal_bayar || "-",
+                tenagaMedis: item.pembayaranPasien?.tenagaMedis || {},
+                details: [],
             };
         }
 
-        acc[key].ids.push(item.id);
-        acc[key].obats.push({
+        acc[key].details.push({
             id: item.id,
             tipe_biaya: item.tipe_biaya,
-            nama_obat: item.obat?.nama_obat,
+            referensi_id: item.referensi_id,
             jumlah: item.jumlah,
             harga_satuan: item.harga_satuan,
+            subtotal: item.subtotal,
+            isPaid: item.isPaid,
         });
 
         return acc;
@@ -746,81 +753,117 @@ function renderDetailPembayaranPasienTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-    // Render grouped data
+    // Render setiap grup menjadi card
     Object.values(grouped).forEach((group) => {
-        // Render obat list dengan actions per baris obat
-        const obatRows = group.obats
-            .map((obat) => {
-                let obatActions = "";
+        const totalSubtotal = group.details.reduce(
+            (sum, d) => sum + d.subtotal,
+            0
+        );
+
+        // Render rows detail dalam format grid 6 kolom
+        const detailRows = group.details
+            .map((detail) => {
+                let detailActions = "";
 
                 if (window.currentUserRole === "admin") {
                     if (isActive) {
-                        obatActions = `
-                        <div class="flex gap-1 flex-wrap">
-                            <button onclick="openEditModal(${obat.id}, '${group.pasien.id}', '${group.tenagaMedis.id}', '${obat.tipe_biaya}', '${obat.jumlah}', '${obat.harga_satuan}')"
-                                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
-                                <i class='bx bx-edit-alt'></i> Edit
+                        detailActions = `
+                            <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${detail.tipe_biaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}')"
+                                class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
+                                Edit
                             </button>
-                            <button onclick="hapusDetailPembayaranPasien(${obat.id})"
-                                class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
-                                <i class='bx bx-archive'></i> Archive
+                            <button onclick="hapusDetailPembayaranPasien(${detail.id})"
+                                class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200">
+                                Archive
                             </button>
-                        </div>
-                    `;
+                        `;
                     } else {
-                        obatActions = `
-                        <div class="flex gap-1 flex-wrap">
-                            <button onclick="restoreDetailPembayaranPasien(${obat.id})"
-                                class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
-                                <i class='bx bx-refresh'></i> Restore
+                        detailActions = `
+                            <button onclick="restoreDetailPembayaranPasien(${detail.id})"
+                                class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
+                                Restore
                             </button>
-                            <button onclick="forceDeleteDetailPembayaranPasien(${obat.id})"
-                                class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
-                                <i class='bx bx-trash'></i> Delete
+                            <button onclick="forceDeleteDetailPembayaranPasien(${detail.id})"
+                                class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200">
+                                Delete
                             </button>
-                        </div>
-                    `;
+                        `;
                     }
                 }
 
                 return `
-                <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 py-2 last:border-b-0">
-                    <div class="flex-1">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400">${
-                            obat.nama_obat
-                        }</span>
-                        <span class="text-sm ml-2">Jumlah: <strong>${obat.jumlah.toLocaleString(
+                    <div class="grid grid-cols-6 py-2 text-sm border-dotted border-t-2 dark:text-gray-200">
+                        <div class="font-semibold text-blue-600 dark:text-blue-400">
+                            ${
+                                detail.tipe_biaya === "obat"
+                                    ? detail.pasien?.resepObat?.obat?.nama_obat || "underfined"
+                                    : detail.tipe_biaya
+                                          .charAt(0)
+                                          .toUpperCase() +
+                                      detail.tipe_biaya.slice(1)
+                            }
+
+                        </div>
+                        <div class="text-cyan-500">${detail.jumlah.toLocaleString(
                             "id-ID"
-                        )}</strong></span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${
-                            obat.harga_satuan
-                        }</span>
+                        )}</div>
+                        <div class="text-gray-400">${detail.harga_satuan.toLocaleString(
+                            "id-ID"
+                        )}</div>
+                        <div class="text-orange-400">${detail.subtotal.toLocaleString(
+                            "id-ID"
+                        )}</div>
+                        <div class="flex gap-1 flex-wrap">${detailActions}</div>
                     </div>
-                    ${window.currentUserRole === "admin" ? obatActions : ""}
-                </div>
-            `;
+                `;
             })
             .join("");
 
-        tbody.innerHTML += `
-            <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50 align-top">
-                <td class="p-4 text-center font-semibold align-middle">
-                    <div class="flex flex-col gap-1 items-center">
-                        ${group.ids
-                            .map(
-                                (id) =>
-                                    `<span class="rounded-full font-bold text-green-500 py-1 px-2 ">${id}</span>`
-                            )
-                            .join("")}
+        // CARD TEMPLATE
+        container.innerHTML += `
+            <div class="p-4 mb-4 rounded-xl shadow bg-slate-50 dark:bg-gray-800 border-dashed border-2 border-gray-200 dark:border-gray-700">
+
+                <div class="flex justify-between items-center mb-3">
+                    <div class="space-y-1">
+                        <h3 class="text-lg font-bold text-gray-500 dark:text-white">
+                            Patient: <span class="text-blue-600 dark:text-blue-400">${
+                                group.pasien?.nama || "N/A"
+                            }</span>
+                        </h3>
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Total Items: <span class="font-semibold text-red-500">${
+                                group.details.length
+                            }</span>  
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Total: <span class="font-semibold text-green-600">Rp ${totalSubtotal.toLocaleString(
+                                "id-ID"
+                            )} </span>
+                        </p>
                     </div>
-                </td>
-                <td class="p-4 text-center text-base border-x font-semibold align-middle">${
-                    group.pasien?.nama
-                }</td>
-                <td class="p-4">
-                    ${obatRows}
-                </td>
-            </tr>
+
+                    <div class="text-md tracking-widest font-semibold text-gray-500 dark:text-gray-400">
+                        Date: ${group.tanggal.split("-").reverse().join("/")}
+                    </div>
+
+                </div>
+
+                <div class="w-full border-t-2 pt-3 mt-3">
+
+                    <div class="grid grid-cols-6 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                        <div>Cost Type</div>
+                        <div>Qty</div>
+                        <div>Unit Price</div>
+                        <div>Total</div>
+                        <div>Actions</div>
+                    </div>
+
+                    ${detailRows}
+
+                </div>
+
+            </div>
         `;
     });
 

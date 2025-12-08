@@ -9,7 +9,6 @@ type PembayaranPasien {
     total_biaya: Float!
     metode_bayar: Metode!
     tanggal_bayar: Date!
-    biaya_lab: Float!
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
@@ -19,10 +18,9 @@ type PembayaranPasien {
 
 input CreatePembayaranPasienInput {
     pasien_id: ID!
-    total_biaya: Float!
+    total_biaya: Float
     metode_bayar: Metode!
     tanggal_bayar: Date!
-    biaya_lab: Float!
 }
 input UpdatePembayaranPasienInput {
     pasien_id: ID
@@ -30,7 +28,7 @@ input UpdatePembayaranPasienInput {
     total_biaya: Float
     metode_bayar: Metode
     tanggal_bayar: Date
-    biaya_lab: Float
+    
 }
 
 type PageInfo {

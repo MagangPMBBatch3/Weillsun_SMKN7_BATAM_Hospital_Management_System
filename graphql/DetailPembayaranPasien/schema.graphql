@@ -129,12 +129,5 @@ extend type Mutation {
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@forceDelete"
         )
 
-    markDetailPembayaranPasienAsPaid(
-        detail_id: ID!
-        tipe_biaya: Tipe!
-        referensi_id: ID!
-    ): Boolean!
-        @field(
-            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@markAsPaid"
-        )
+
 }

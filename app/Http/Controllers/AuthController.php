@@ -131,9 +131,6 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        // $tenagaMedises = TenagaMedis::with('profile:id,nickname')
-        //     ->whereDoesntHave('rekamMedis')
-        //     ->get();
         $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
             ->get();
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pembayaran_pasien', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pasien_id')->constrained('pasien')->cascadeOnDelete();
-            $table->decimal('total_biaya', 12, 2);
+            $table->decimal('total_biaya', 12, 2)->default(0);
             $table->enum('metode_bayar', ['cash','transfer']);
             $table->date('tanggal_bayar');
             $table->timestamps();

@@ -64,7 +64,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             pasien_id
                             total_biaya
                             metode_bayar
-                            tanggal_bayar_bayar
+                            tanggal_bayar
                             pasien {
                                 id
                                 nama
@@ -112,7 +112,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             pasien_id
                             total_biaya
                             metode_bayar
-                            tanggal_bayar_bayar
+                            tanggal_bayar
                             pasien {
                                 id
                                 nama
@@ -171,7 +171,7 @@ function filterAngka(str) {
 // Create
 async function createPembayaranPasien() {
     const pasien_id = document.getElementById("create-nama").value;
-    const total_biaya = document.getElementById("create-total-biaya").value;
+    // const total_biaya = document.getElementById("create-total-biaya").value;
     const metode_bayar = document
         .getElementById("create-metode-bayar")
         .value.trim();
@@ -179,7 +179,7 @@ async function createPembayaranPasien() {
         .getElementById("create-tanggal")
         .value.trim();
 
-    if (!pasien_id || !total_biaya || !metode_bayar || !tanggal_bayar)
+    if (!pasien_id || !metode_bayar || !tanggal_bayar)
         return alert("Please fill in all required fields!");
 
     showLoading();
@@ -200,7 +200,12 @@ async function createPembayaranPasien() {
         }
     `;
     const variablesPembayaranPasien = {
-        input: { pasien_id, total_biaya, metode_bayar, tanggal_bayar },
+        input: {
+            pasien_id,
+            //  total_biaya,
+            metode_bayar,
+            tanggal_bayar,
+        },
     };
 
     try {

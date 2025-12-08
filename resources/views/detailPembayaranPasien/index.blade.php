@@ -59,15 +59,19 @@
 
             <x-loading></x-loading>
 
-            {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Patient', 'type', 'Unit Price', 'amount', 'subtotal']" :showActionHeader="false">
+            {{-- <x-table id="tableActive" :headers="['ID', 'Patient', 'type', 'Unit Price', 'amount', 'subtotal']" :showActionHeader="false">
                 <tbody id="dataDetailPembayaranPasienAktif"></tbody>
             </x-table>
 
-            {{-- Tabel Data Arsip --}}
             <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient', 'cost type', 'Unit Price', 'amount', 'subtotal']" :showActionHeader="false">
                 <tbody id="dataDetailPembayaranPasienArsip"></tbody>
-            </x-table>
+            </x-table> --}}
+
+            <!-- CARD ACTIVE -->
+            <div id="cardActive" class="p-6 space-y-6"></div>
+
+            <!-- CARD ARCHIVE -->
+            <div id="cardArchive" class="p-6 space-y-6 hidden"></div>
 
             {{-- Pagination untuk AKTIF --}}
             <x-pagination-active></x-pagination-active>
@@ -133,14 +137,15 @@
                                             placeholder="Enter Unit Price">
                                     </div>
 
+                                    <div>
+                                        <x-input-label>Subtotal</x-input-label>
+                                        <input type="text" name="create-subtotal[]"
+                                            class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
+                                            placeholder="0" readonly>
+                                    </div>
+
                                 </div>
                             </div>
-
-                            <x-input-label>Subtotal</x-input-label>
-                            <input type="text" name="create-subtotal"
-                                class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
-                                placeholder="0" readonly>
-
                         </div>
 
                         <div class="flex justify-between">
@@ -262,7 +267,14 @@
                         class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
                             focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                         placeholder="Enter Unit Price">
-                </div>      
+                </div>
+                
+                <div>
+                    <label class="text-sm font-medium">Subtotal</label>
+                    <input type="text" name="create-subtotal[]"
+                        class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
+                        placeholder="0" readonly>
+                </div>
             `;
 
             container.appendChild(row);
