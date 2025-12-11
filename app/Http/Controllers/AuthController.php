@@ -12,6 +12,7 @@ use App\Models\Ruangan\Ruangan;
 use App\Models\Kunjungan\Kunjungan;
 use App\Models\LabPemeriksaan\LabPemeriksaan;
 use App\Models\PembayaranPasien\PembayaranPasien;
+use App\Models\PembayaranSupplier\PembayaranSupplier;
 use App\Models\PembelianObat\PembelianObat;
 use App\Models\Radiologi\Radiologi;
 use App\Models\RawatInap\RawatInap;
@@ -88,7 +89,8 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        $AlltenagaMedises = TenagaMedis::select('profile:,nickname')->get();
+        $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
+            ->get();
 
         return view('radiologi.index', compact('pasiens', 'AlltenagaMedises', 'Allpasiens'));
     }
@@ -211,12 +213,6 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
-        // $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
-
-        // $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
-        //     ->select('id', 'supplier_id', 'tanggal')
-        //     ->with('supplier:id,nama_supplier')
-        //     ->get();
 
         // Semua pembelian tanpa filter
         $pembelians = PembelianObat::select('id', 'supplier_id','tanggal')
@@ -231,6 +227,10 @@ class AuthController extends Controller
 
     public function pembayaranSupplier()
     {
+        $pembayaranTerpakai = PembayaranSupplier::withTrashed()->pluck('pembelian_id');
+        $pembayarans = PembelianObat::select('id', 'supplier_id','tanggal')
+            ->with('supplier:id,nama_supplier')
+            ->get();
         return view('pembayaranSupplier.index');
     }
 }

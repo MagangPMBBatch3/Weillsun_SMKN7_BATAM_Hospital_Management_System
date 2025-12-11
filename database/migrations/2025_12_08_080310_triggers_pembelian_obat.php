@@ -32,7 +32,6 @@ return new class extends Migration
             FOR EACH ROW
             BEGIN
                 IF OLD.pembelian_id != NEW.pembelian_id THEN
-                    -- Update total_biaya pembelian lama
                     UPDATE pembelian_obat
                     SET total_biaya = COALESCE((
                         SELECT SUM(subtotal)
@@ -41,7 +40,6 @@ return new class extends Migration
                     ), 0)
                     WHERE id = OLD.pembelian_id;
 
-                    -- Update total_biaya pembelian baru
                     UPDATE pembelian_obat
                     SET total_biaya = COALESCE((
                         SELECT SUM(subtotal)
@@ -50,7 +48,6 @@ return new class extends Migration
                     ), 0)
                     WHERE id = NEW.pembelian_id;
                 ELSE
-                    -- Update total_biaya jika hanya subtotal/jumlah/harga berubah
                     UPDATE pembelian_obat
                     SET total_biaya = COALESCE((
                         SELECT SUM(subtotal)

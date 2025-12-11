@@ -103,7 +103,7 @@
 
                                 <!-- ROW PERTAMA -->
                                 <div
-                                    class="dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
+                                    class="dynamic-row bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 
                                             p-4 rounded-xl shadow-sm space-y-3 transition-all">
 
                                     <div>
@@ -244,7 +244,7 @@
 
             const row = document.createElement("div");
             row.className =
-                "dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
+                "dynamic-row bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
                 "p-4 rounded-xl shadow-sm space-y-3 transition-all transform scale-95 opacity-0";
 
             row.innerHTML = `

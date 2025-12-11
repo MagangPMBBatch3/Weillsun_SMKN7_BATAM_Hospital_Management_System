@@ -47,14 +47,23 @@ extend type Query {
     allPembayaranSupplier: [PembayaranSupplier!]!
         @all(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")
 
-    allPembayaranSupplierPaginator(
+    allPembayaranSupplierPaginate(
         search: String
         page: Int
         first: Int
     ): PembayaranSupplierPaginator
         @field(
             resolver: "App\\GraphQL\\PembayaranSupplier\\Queries\\PembayaranSupplierQuery@all"
-        )
+    )
+
+    allPembayaranSupplierArchive(
+        search: String
+        page: Int
+        first: Int
+    ): PembayaranSupplierPaginator
+        @field(
+            resolver: "App\\GraphQL\\PembayaranSupplier\\Queries\\PembayaranSupplierQuery@allArchive"
+    )
 
     PembayaranSupplier(id: ID! @eq(key: "id")): PembayaranSupplier
         @find(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")

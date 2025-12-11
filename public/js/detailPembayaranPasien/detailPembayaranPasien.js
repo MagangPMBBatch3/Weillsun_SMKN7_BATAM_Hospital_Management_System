@@ -383,7 +383,7 @@ function populateUnpaidCostsToForm(costs) {
         const cost = costs[i];
         const newRow = document.createElement("div");
         newRow.className =
-            "dynamic-row bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
+            "dynamic-row bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
             "p-4 rounded-xl shadow-sm space-y-3 transition-all";
 
         newRow.innerHTML = `
