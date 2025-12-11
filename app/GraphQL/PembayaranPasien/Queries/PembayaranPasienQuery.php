@@ -18,9 +18,9 @@ class PembayaranPasienQuery
                     ->orWhere('metode_bayar', 'like', "%$search%")
                     ->orWhere('tanggal_bayar', 'like', "%$search%");
             })
-            ->orWhereHas('pasien', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%");
-            });
+                ->orWhereHas('pasien', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -52,9 +52,9 @@ class PembayaranPasienQuery
                     ->orWhere('metode_bayar', 'like', "%$search%")
                     ->orWhere('tanggal_bayar', 'like', "%$search%");
             })
-            ->orWhereHas('pasien', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%");
-            });
+                ->orWhereHas('pasien', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -72,5 +72,23 @@ class PembayaranPasienQuery
                 'total' => $paginator->total(),
             ],
         ];
+    }
+
+    public function checkDuplicate($_, array $args)
+    {
+        $pasien_id = $args['pasien_id'];
+        $tanggal_bayar = $args['tanggal_bayar'];
+        $exclude_id = $args['exclude_id'] ?? null;
+
+        $query = PembayaranPasien::where('pasien_id', $pasien_id)
+            ->where('tanggal_bayar', $tanggal_bayar);
+
+        // Jika exclude_id diberikan (untuk update), exclude record dengan ID tersebut
+        if ($exclude_id) {
+            $query->where('id', '!=', $exclude_id);
+        }
+
+        // Return true jika data duplikat ditemukan, false jika tidak
+        return $query->exists();
     }
 }

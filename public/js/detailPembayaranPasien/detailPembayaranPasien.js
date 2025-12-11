@@ -69,11 +69,17 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             subtotal
                             pembayaranPasien{
                                 id
+                                pasien_id
                                 tanggal_bayar
                                 pasien {    
                                     id
                                     nama
+                                    
                                 }
+                            }
+                            obat{
+                                id
+                                nama_obat
                             }
                         }
                             paginatorInfo { 
@@ -123,11 +129,16 @@ async function loadDataPaginate(page = 1, isActive = true) {
                             subtotal
                             pembayaranPasien{
                                 id
+                                pasien_id
                                 tanggal_bayar
                                 pasien {    
                                     id
                                     nama
                                 }
+                            }
+                            obat{
+                                id
+                                nama_obat
                             }
                         }
                     paginatorInfo { currentPage lastPage total hasMorePages }
@@ -202,6 +213,122 @@ async function loadUnpaidCosts(pasienId) {
         alert("An error occurred while loading unpaid costs");
     } finally {
         hideLoading();
+    }
+}
+
+// Fetch obat untuk pasien (untuk edit modal)
+async function loadObatByPasien(pasienId) {
+    showLoading();
+
+    const query = `
+        query($pasien_id: ID!) {
+            resepObatByPasien(pasien_id: $pasien_id) {
+                id
+                jumlah
+                obat {
+                    id
+                    nama_obat
+                    harga_jual
+                }
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: query,
+                variables: { pasien_id: pasienId },
+            }),
+        });
+
+        const data = await res.json();
+        console.log("Resep Obat Data:", data);
+
+        if (data.errors && data.errors.length > 0) {
+            console.error("GraphQL Error:", data.errors);
+            alert("Error loading obat: " + data.errors[0].message);
+            hideLoading();
+            return;
+        }
+
+        const resepObat = data?.data?.resepObatByPasien || [];
+        console.log("Populated resepObat:", resepObat);
+        populateObatDropdown(resepObat);
+    } catch (error) {
+        console.error("Error loading obat:", error);
+        alert("Error loading obat: " + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Populate obat dropdown di edit modal
+function populateObatDropdown(resepObatList) {
+    const obatSelect = document.getElementById("edit-obat-select");
+    if (!obatSelect) {
+        console.warn("edit-obat-select not found!");
+        return;
+    }
+ 
+    console.log("Populating dropdown with:", resepObatList);
+
+    // Clear existing options
+    obatSelect.innerHTML = '<option value="">Select Obat</option>';
+
+    // Store resep obat data untuk reference
+    window.resepObatData = {};
+
+    // Add options dari resep obat
+    if (!resepObatList || resepObatList.length === 0) {
+        console.warn("No resep obat data available");
+        return;
+    }
+
+    resepObatList.forEach((resepObat) => {
+        try {
+            const option = document.createElement("option");
+            option.value = resepObat.id;
+            option.textContent = resepObat.obat?.nama_obat || "Unknown Obat";
+            obatSelect.appendChild(option);
+
+            // Store data for later use
+            window.resepObatData[resepObat.id] = {
+                jumlah: resepObat.jumlah,
+                harga_jual: resepObat.obat?.harga_jual || 0,
+                obat_id: resepObat.obat?.id || null,
+                nama_obat: resepObat.obat?.nama_obat || "Unknown",
+            };
+            console.log("Added option for:", resepObat.obat?.nama_obat);
+        } catch (e) {
+            console.error("Error adding option:", e, resepObat);
+        }
+    });
+
+    console.log("Final resepObatData:", window.resepObatData);
+
+    // Auto-select obat jika referensi_id sudah ada (edit mode)
+    if (window.currentReferensiId) {
+        // Find resep obat id based on referensi_id (obat_id)
+        for (const resepObatId in window.resepObatData) {
+            if (
+                window.resepObatData[resepObatId].obat_id ==
+                window.currentReferensiId
+            ) {
+                console.log(
+                    "Auto-selecting obat with resepObat id:",
+                    resepObatId
+                );
+                obatSelect.value = resepObatId;
+                // Trigger change event untuk auto-fill jumlah dan harga
+                obatSelect.dispatchEvent(
+                    new Event("change", { bubbles: true })
+                );
+                break;
+            }
+        }
     }
 }
 
@@ -335,7 +462,7 @@ function filterAngka(str) {
 // Create
 async function createDetailPembayaranPasien() {
     const pembayaran_id = document.getElementById("create-nama")?.value;
-    const subtotal = document.getElementById("create-subtotal")?.value;
+    // const subtotal = document.getElementById("create-subtotal")?.value;
 
     if (!pembayaran_id) {
         return alert("Please select Patient!");
@@ -360,6 +487,9 @@ async function createDetailPembayaranPasien() {
                 const hargaInput = row.querySelector(
                     'input[name="create-harga-satuan[]"]'
                 );
+                const subtotalInput = row.querySelector(
+                    'input[name="create-subtotal[]"]'
+                );
 
                 if (!tipoSelect || !jumlahInput || !hargaInput) {
                     console.warn("Missing input elements in row", row);
@@ -369,10 +499,13 @@ async function createDetailPembayaranPasien() {
                 const tipe_biaya = tipoSelect.value || "";
                 const jumlahValue = jumlahInput.value || "0";
                 const hargaValue = hargaInput.value || "0";
+                const subtotalValue = subtotalInput.value || "0";
 
                 const jumlah = parseInt(jumlahValue.replace(/\./g, "")) || 0;
                 const harga_satuan =
                     parseFloat(hargaValue.replace(/\./g, "")) || 0;
+                const subtotal =
+                    parseFloat(subtotalValue.replace(/\./g, "")) || 0;
 
                 if (!tipe_biaya || jumlah === 0 || harga_satuan === 0) {
                     return null;
@@ -382,7 +515,7 @@ async function createDetailPembayaranPasien() {
                     tipe_biaya: tipe_biaya,
                     jumlah: jumlah,
                     harga_satuan: harga_satuan,
-                    referensi_id: row.dataset.referensiId || null,
+                    referensi_id: row.dataset.referensiId,
                     subtotal:
                         Number(row.dataset.subtotal) || jumlah * harga_satuan,
                 };
@@ -420,12 +553,6 @@ async function createDetailPembayaranPasien() {
         }
     `;
 
-    const markAsPaidMutation = `
-        mutation($detail_id: ID!, $tipe_biaya: Tipe!, $referensi_id: ID!) {
-            markDetailPembayaranPasienAsPaid(detail_id: $detail_id, tipe_biaya: $tipe_biaya, referensi_id: $referensi_id)
-        }
-    `;
-
     try {
         const results = await Promise.all(
             detailPasien.map((item) => {
@@ -434,7 +561,7 @@ async function createDetailPembayaranPasien() {
                     input: {
                         pembayaran_id,
                         tipe_biaya: item.tipe_biaya,
-                        referensi_id: item.referensi_id, 
+                        referensi_id: item.referensi_id,
                         jumlah: item.jumlah,
                         harga_satuan: item.harga_satuan,
                         subtotal: item.subtotal,
@@ -449,30 +576,6 @@ async function createDetailPembayaranPasien() {
                         variables: variablesDetailPembayaranPasien,
                     }),
                 }).then((res) => res.json());
-            })
-        );
-
-        // Mark each cost as paid in their respective tables
-        const markPaidResults = await Promise.all(
-            detailPasien.map((item, index) => {
-                if (results[index]?.data?.createDetailPembayaranPasien?.id) {
-                    const detailId =
-                        results[index].data.createDetailPembayaranPasien.id;
-
-                    return fetch(API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            query: markAsPaidMutation,
-                            variables: {
-                                detail_id: detailId,
-                                tipe_biaya: item.tipe_biaya,
-                                referensi_id: item.referensi_id || null,
-                            },
-                        }),
-                    }).then((res) => res.json());
-                }
-                return null;
             })
         );
 
@@ -533,7 +636,9 @@ function openEditModal(
     tipe_biaya,
     jumlah,
     harga_satuan,
-    subtotal
+    subtotal,
+    referensi_id,
+    pasien_id
 ) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pembayaran_id;
@@ -543,14 +648,33 @@ function openEditModal(
         formatNumber(harga_satuan);
     document.getElementById("edit-subtotal").value = formatNumber(subtotal);
 
+    // Store referensi_id dan pasien_id untuk reference
+    document.getElementById("edit-id").dataset.referensiId = referensi_id;
+    document.getElementById("edit-id").dataset.pasienId = pasien_id;
+
+    // Load obat jika tipe_biaya = obat
+    if (tipe_biaya === "obat" && pasien_id) {
+        console.log("Loading obat for pasien_id:", pasien_id);
+        loadObatByPasien(pasien_id);
+        // Store referensi_id untuk auto-select setelah dropdown loaded
+        window.currentReferensiId = referensi_id;
+        document
+            .getElementById("edit-obat-container")
+            .classList.remove("hidden");
+    } else {
+        document.getElementById("edit-obat-container").classList.add("hidden");
+    }
+
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-resepObat" })
+        new CustomEvent("open-modal", { detail: "edit-detailPembayaranPasien" })
     );
 }
 
 // Update
 async function updateDetailPembayaranPasien() {
     const id = document.getElementById("edit-id").value;
+    const referensi_id =
+        document.getElementById("edit-id").dataset.referensiId || null;
 
     const pembayaran_id = document.getElementById("edit-nama").value;
     const tipe_biaya = document.getElementById("edit-tipe-biaya").value;
@@ -560,7 +684,10 @@ async function updateDetailPembayaranPasien() {
     const harga_satuan = parseFloat(
         document.getElementById("edit-harga-satuan").value.replace(/\./g, "")
     );
-    const subtotal = document.getElementById("edit-subtotal").value.trim();
+    const subtotal = document
+        .getElementById("edit-subtotal")
+        .value.replace(/\./g, "")
+        .trim();
     showLoading();
 
     const mutation = `
@@ -585,7 +712,7 @@ async function updateDetailPembayaranPasien() {
     `;
 
     try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -595,16 +722,27 @@ async function updateDetailPembayaranPasien() {
                     input: {
                         pembayaran_id,
                         tipe_biaya,
+                        referensi_id,
                         jumlah: parseInt(jumlah),
                         harga_satuan: harga_satuan,
-                        subtotal,
+                        subtotal: parseFloat(subtotal),
                     },
                 },
             }),
         });
+        const data = await res.json();
+
+        if (data.errors && data.errors.length > 0) {
+            console.error("Update failed:", data.errors);
+            alert("Failed to update: " + data.errors[0].message);
+            hideLoading();
+            return;
+        }
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-resepObat" })
+            new CustomEvent("close-modal", {
+                detail: "edit-detailPembayaranPasien",
+            })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -618,13 +756,62 @@ async function updateDetailPembayaranPasien() {
 document.addEventListener("DOMContentLoaded", () => {
     const editJumlahInput = document.getElementById("edit-jumlah");
     const pasienSelect = document.getElementById("create-nama");
+    const editPasienSelect = document.getElementById("edit-nama");
+    const editTipeBiayaSelect = document.getElementById("edit-tipe-biaya");
 
-    // Event untuk change pasien dan load unpaid costs
+    // Event untuk change pasien di create modal dan load unpaid costs
     if (pasienSelect) {
         pasienSelect.addEventListener("change", (e) => {
             const pasienId = e.target.value;
             if (pasienId) {
                 loadUnpaidCosts(pasienId);
+            }
+        });
+    }
+
+    // Event untuk change pasien di edit modal dan load obat
+    if (editPasienSelect) {
+        editPasienSelect.addEventListener("change", (e) => {
+            const pasienId = e.target.value;
+            if (pasienId) {
+                loadObatByPasien(pasienId);
+            }
+        });
+    }
+
+    // Event untuk change tipe_biaya di edit modal untuk show/hide obat dropdown
+    if (editTipeBiayaSelect) {
+        editTipeBiayaSelect.addEventListener("change", (e) => {
+            const tipeBiaya = e.target.value;
+            const obatContainer = document.getElementById(
+                "edit-obat-container"
+            );
+
+            if (tipeBiaya === "obat") {
+                obatContainer.classList.remove("hidden");
+            } else {
+                obatContainer.classList.add("hidden");
+            }
+        });
+    }
+
+    // Event untuk change obat select dan auto-fill jumlah & harga
+    const editObatSelect = document.getElementById("edit-obat-select");
+    if (editObatSelect) {
+        editObatSelect.addEventListener("change", (e) => {
+            const resepObatId = e.target.value;
+            if (
+                resepObatId &&
+                window.resepObatData &&
+                window.resepObatData[resepObatId]
+            ) {
+                const data = window.resepObatData[resepObatId];
+                document.getElementById("edit-jumlah").value = formatNumber(
+                    data.jumlah.toString()
+                );
+                document.getElementById("edit-harga-satuan").value =
+                    formatNumber(data.harga_jual.toString());
+                calculateEditSubtotal();
             }
         });
     }
@@ -660,6 +847,14 @@ document.addEventListener("DOMContentLoaded", () => {
         editHargaInput.addEventListener("input", (e) => {
             let value = unformatNumber(filterAngka(e.target.value));
             e.target.value = value ? formatNumber(value) : "";
+            calculateEditSubtotal();
+        });
+    }
+
+    // Edit modal jumlah untuk calculate subtotal (gunakan 'input' untuk real-time)
+    if (editJumlahInput) {
+        editJumlahInput.addEventListener("input", () => {
+            calculateEditSubtotal();
         });
     }
 });
@@ -686,6 +881,27 @@ function updateSubtotal() {
 
         subtotalInput.value = formatNumber(subtotal.toString());
     });
+}
+
+// Function to calculate edit subtotal
+function calculateEditSubtotal() {
+    console.log("calculateEditSubtotal called");
+    const jumlahInput = document.getElementById("edit-jumlah");
+    const hargaInput = document.getElementById("edit-harga-satuan");
+    const subtotalInput = document.getElementById("edit-subtotal");
+
+    if (!jumlahInput || !hargaInput || !subtotalInput) {
+        console.warn("Edit modal inputs not found");
+        return;
+    }
+
+    const jumlah = parseInt(jumlahInput.value.replace(/\./g, "")) || 0;
+    const harga = parseFloat(hargaInput.value.replace(/\./g, "")) || 0;
+
+    const subtotal = jumlah * harga;
+    console.log("Calculated subtotal:", jumlah, "*", harga, "=", subtotal);
+
+    subtotalInput.value = formatNumber(subtotal.toString());
 }
 
 function renderDetailPembayaranPasienTable(result, containerId, isActive) {
@@ -728,6 +944,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
         if (!acc[key]) {
             acc[key] = {
                 pembayaran_id: item.pembayaran_id,
+                pasien_id: item.pembayaranPasien?.pasien_id || null,
                 pasien: item.pembayaranPasien?.pasien || {},
                 tanggal: item.pembayaranPasien?.tanggal_bayar || "-",
                 tenagaMedis: item.pembayaranPasien?.tenagaMedis || {},
@@ -742,6 +959,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
             jumlah: item.jumlah,
             harga_satuan: item.harga_satuan,
             subtotal: item.subtotal,
+            obat: item.obat,
             isPaid: item.isPaid,
         });
 
@@ -768,7 +986,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                 if (window.currentUserRole === "admin") {
                     if (isActive) {
                         detailActions = `
-                            <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${detail.tipe_biaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}')"
+                            <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${detail.tipe_biaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}', '${detail.referensi_id}', '${group.pasien_id}')"
                                 class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
                                 Edit
                             </button>
@@ -791,17 +1009,16 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                     }
                 }
 
+                const namaBiaya =
+                    detail.tipe_biaya === "obat"
+                        ? detail.obat?.nama_obat ?? "-"
+                        : detail.tipe_biaya.charAt(0).toUpperCase() +
+                          detail.tipe_biaya.slice(1);
+
                 return `
                     <div class="grid grid-cols-6 py-2 text-sm border-dotted border-t-2 dark:text-gray-200">
                         <div class="font-semibold text-blue-600 dark:text-blue-400">
-                            ${
-                                detail.tipe_biaya === "obat"
-                                    ? detail.pasien?.resepObat?.obat?.nama_obat || "underfined"
-                                    : detail.tipe_biaya
-                                          .charAt(0)
-                                          .toUpperCase() +
-                                      detail.tipe_biaya.slice(1)
-                            }
+                            ${namaBiaya}
 
                         </div>
                         <div class="text-cyan-500">${detail.jumlah.toLocaleString(

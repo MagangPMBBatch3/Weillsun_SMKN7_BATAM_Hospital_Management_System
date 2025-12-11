@@ -28,7 +28,6 @@ input UpdatePembayaranPasienInput {
     total_biaya: Float
     metode_bayar: Metode
     tanggal_bayar: Date
-    
 }
 
 type PageInfo {
@@ -55,7 +54,7 @@ extend type Query {
     ): PembayaranPasienPaginator
         @field(
             resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@all"
-    )
+        )
 
     allPembayaranPasienArchive(
         search: String
@@ -64,10 +63,19 @@ extend type Query {
     ): PembayaranPasienPaginator
         @field(
             resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@allArchive"
-    )
+        )
 
     PembayaranPasien(id: ID! @eq(key: "id")): PembayaranPasien
         @find(model: "App\\Models\\PembayaranPasien\\PembayaranPasien")
+
+    checkDuplicatePembayaranPasien(
+        pasien_id: ID!
+        tanggal_bayar: Date!
+        exclude_id: ID
+    ): Boolean
+        @field(
+            resolver: "App\\GraphQL\\PembayaranPasien\\Queries\\PembayaranPasienQuery@checkDuplicate"
+        )
 }
 
 extend type Mutation {

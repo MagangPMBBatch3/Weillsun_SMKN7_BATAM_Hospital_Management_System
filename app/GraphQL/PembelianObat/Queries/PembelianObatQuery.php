@@ -18,9 +18,9 @@ class PembelianObatQuery
                     ->orWhere('total_biaya', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
             })
-            ->whereHas('supplier', function ($q) use ($search) {
-                $q->where('nama_supplier', 'like', "%$search%");
-            });
+                ->whereHas('supplier', function ($q) use ($search) {
+                    $q->where('nama_supplier', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -52,9 +52,9 @@ class PembelianObatQuery
                     ->orWhere('total_biaya', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%");
             })
-            ->whereHas('supplier', function ($q) use ($search) {
-                $q->where('nama_supplier', 'like', "%$search%");
-            });
+                ->whereHas('supplier', function ($q) use ($search) {
+                    $q->where('nama_supplier', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -72,5 +72,23 @@ class PembelianObatQuery
                 'total' => $paginator->total(),
             ],
         ];
+    }
+
+    public function checkDuplicate($_, array $args)
+    {
+        $supplier_id = $args['supplier_id'];
+        $tanggal = $args['tanggal'];
+        $exclude_id = $args['exclude_id'] ?? null;
+
+        $query = PembelianObat::where('supplier_id', $supplier_id)
+            ->where('tanggal', $tanggal);
+
+        // Jika exclude_id diberikan (untuk update), exclude record dengan ID tersebut
+        if ($exclude_id) {
+            $query->where('id', '!=', $exclude_id);
+        }
+
+        // Return true jika data duplikat ditemukan, false jika tidak
+        return $query->exists();
     }
 }

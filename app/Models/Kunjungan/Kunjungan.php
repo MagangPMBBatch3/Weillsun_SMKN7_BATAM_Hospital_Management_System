@@ -2,6 +2,7 @@
 
 namespace App\Models\Kunjungan;
 
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\Poli\Poli;
 use App\Models\Pasien\Pasien;
 use Illuminate\Database\Eloquent\Model;
@@ -35,5 +36,10 @@ class Kunjungan extends Model
     public function kunjunganUlang()
     {
         return $this->hasMany(KunjunganUlang::class, 'kunjungan_id');
+    }
+
+    public function detailPasien()
+    {
+        return $this->hasMany(DetailPembayaranPasien::class, 'kunjungan_id');
     }
 }

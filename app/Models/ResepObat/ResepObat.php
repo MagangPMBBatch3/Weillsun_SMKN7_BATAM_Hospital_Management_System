@@ -2,6 +2,7 @@
 
 namespace App\Models\ResepObat;
 
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\Obat\Obat;
 use App\Models\Pasien\Pasien;
 use App\Models\TenagaMedis\TenagaMedis;
@@ -34,5 +35,10 @@ class ResepObat extends Model
     public function obat()
     {
         return $this->belongsTo(Obat::class, 'obat_id');
+    }
+
+    public function detailPasien()
+    {
+        return $this->hasMany(DetailPembayaranPasien::class, 'resep_id');
     }
 }

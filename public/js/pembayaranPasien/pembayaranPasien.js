@@ -184,31 +184,61 @@ async function createPembayaranPasien() {
 
     showLoading();
 
-    const mutationPembayaranPasien = `
-        mutation($input: CreatePembayaranPasienInput!) {
-            createPembayaranPasien(input: $input) {
-                            id
-                            pasien_id
-                            total_biaya
-                            metode_bayar
-                            tanggal_bayar
-                            pasien {
-                                id
-                                nama
-                            }
-            }
+    // Check untuk duplikat data
+    const checkDuplicateQuery = `
+        query($pasien_id: ID!, $tanggal_bayar: Date!) {
+            checkDuplicatePembayaranPasien(pasien_id: $pasien_id, tanggal_bayar: $tanggal_bayar)
         }
     `;
-    const variablesPembayaranPasien = {
-        input: {
-            pasien_id,
-            //  total_biaya,
-            metode_bayar,
-            tanggal_bayar,
-        },
-    };
 
     try {
+        const checkRes = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: checkDuplicateQuery,
+                variables: {
+                    pasien_id,
+                    tanggal_bayar,
+                },
+            }),
+        });
+
+        const checkData = await checkRes.json();
+        const isDuplicate = checkData?.data?.checkDuplicatePembayaranPasien;
+
+        if (isDuplicate) {
+            hideLoading();
+            return alert(
+                "Data pembayaran untuk pasien dan tanggal ini sudah ada di database!"
+            );
+        }
+
+        // Jika tidak ada duplikat, lanjutkan create
+        const mutationPembayaranPasien = `
+            mutation($input: CreatePembayaranPasienInput!) {
+                createPembayaranPasien(input: $input) {
+                                id
+                                pasien_id
+                                total_biaya
+                                metode_bayar
+                                tanggal_bayar
+                                pasien {
+                                    id
+                                    nama
+                                }
+                }
+            }
+        `;
+        const variablesPembayaranPasien = {
+            input: {
+                pasien_id,
+                //  total_biaya,
+                metode_bayar,
+                tanggal_bayar,
+            },
+        };
+
         const resPembayaranPasien = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -272,23 +302,54 @@ async function updatePembayaranPasien() {
 
     showLoading();
 
-    const mutation = `
-        mutation($id: ID!, $input: UpdatePembayaranPasienInput!) {
-            updatePembayaranPasien(id: $id, input: $input) {
-                id
-                pasien_id
-                total_biaya
-                metode_bayar
-                tanggal_bayar
-                pasien {
-                    id
-                    nama
-                }
-            }
+    // Check untuk duplikat data (exclude current record)
+    const checkDuplicateQuery = `
+        query($pasien_id: ID!, $tanggal_bayar: Date!, $exclude_id: ID) {
+            checkDuplicatePembayaranPasien(pasien_id: $pasien_id, tanggal_bayar: $tanggal_bayar, exclude_id: $exclude_id)
         }
     `;
 
     try {
+        const checkRes = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: checkDuplicateQuery,
+                variables: {
+                    pasien_id,
+                    tanggal_bayar,
+                    exclude_id: id,
+                },
+            }),
+        });
+
+        const checkData = await checkRes.json();
+        const isDuplicate = checkData?.data?.checkDuplicatePembayaranPasien;
+
+        if (isDuplicate) {
+            hideLoading();
+            return alert(
+                "Data pembayaran untuk pasien dan tanggal ini sudah ada di database!"
+            );
+        }
+
+        // Jika tidak ada duplikat, lanjutkan update
+        const mutation = `
+            mutation($id: ID!, $input: UpdatePembayaranPasienInput!) {
+                updatePembayaranPasien(id: $id, input: $input) {
+                    id
+                    pasien_id
+                    total_biaya
+                    metode_bayar
+                    tanggal_bayar
+                    pasien {
+                        id
+                        nama
+                    }
+                }
+            }
+        `;
+
         await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },

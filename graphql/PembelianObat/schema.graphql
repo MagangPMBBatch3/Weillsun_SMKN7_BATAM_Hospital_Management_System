@@ -54,7 +54,7 @@ extend type Query {
     ): PembelianObatPaginator
         @field(
             resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@all"
-    )
+        )
 
     allPembelianObatArchive(
         search: String
@@ -63,23 +63,30 @@ extend type Query {
     ): PembelianObatPaginator
         @field(
             resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@allArchive"
-    )
+        )
 
     PembelianObat(id: ID! @eq(key: "id")): PembelianObat
         @find(model: "App\\Models\\PembelianObat\\PembelianObat")
+
+    checkDuplicatePembelianObat(
+        supplier_id: ID!
+        tanggal: Date!
+        exclude_id: ID
+    ): Boolean
+        @field(
+            resolver: "App\\GraphQL\\PembelianObat\\Queries\\PembelianObatQuery@checkDuplicate"
+        )
 }
 
 extend type Mutation {
     createPembelianObat(
         input: CreatePembelianObatInput! @spread
-    ): PembelianObat
-        @create(model: "App\\Models\\PembelianObat\\PembelianObat")
+    ): PembelianObat @create(model: "App\\Models\\PembelianObat\\PembelianObat")
 
     updatePembelianObat(
         id: ID! @eq(key: "id")
         input: UpdatePembelianObatInput! @spread
-    ): PembelianObat
-        @update(model: "App\\Models\\PembelianObat\\PembelianObat")
+    ): PembelianObat @update(model: "App\\Models\\PembelianObat\\PembelianObat")
 
     deletePembelianObat(id: ID! @eq(key: "id")): PembelianObat
         @delete(model: "App\\Models\\PembelianObat\\PembelianObat")

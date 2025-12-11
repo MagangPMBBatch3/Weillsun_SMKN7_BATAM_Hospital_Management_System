@@ -6,7 +6,7 @@
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
                 <i class='bx bx-categories text-3xl text-blue-500'></i>
-                <span class=" tracking-wider">Outpatient Department</span>
+                <span class=" tracking-wider">Clinic</span>
             </h2>
 
             <!-- Search & Buttons -->
@@ -85,10 +85,11 @@
                             <x-input-label>Clinic Name</x-input-label>
                             <x-text-input id="create-nama_poli" type="text" placeholder="Enter Clinic Name..."
                                 class="border p-2 w-full rounded" required />
-                            
+
                             <x-input-label>Description</x-input-label>
                             <textarea id="create-deskripsi" placeholder="Enter Description..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required></textarea>
+                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                required></textarea>
                         </div>
 
                         <div class="flex justify-end mt-4">
@@ -114,7 +115,8 @@
 
                             <x-input-label>New Description</x-input-label>
                             <textarea id="edit-deskripsi" placeholder="Enter Description..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required></textarea>
+                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                required></textarea>
                         </div>
 
                         <div class="flex justify-end mt-4">

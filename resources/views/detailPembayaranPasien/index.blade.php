@@ -94,7 +94,7 @@
                                 <option value="" class="text-gray-500 italic">Select Patient</option>
                                 @foreach ($pasiens as $pasien)
                                     <option value="{{ $pasien->id }}">
-                                        {{ $pasien->nama }}
+                                        {{ $pasien->pasien->nama }} - {{ $pasien->tanggal_bayar }}
                                     </option>
                                 @endforeach
                             </select>
@@ -108,7 +108,7 @@
 
                                     <div>
                                         <x-input-label>Cost Type</x-input-label>
-                                        <select name="create-tipe-biaya[]"
+                                        <select name="create-tipe-biaya[]" id="create-tipe-biaya[]"
                                             class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
                                                 focus:border-blue-500 focus:ring-blue-500 shadow-sm">
                                             <option value="">Select Cost Type</option>
@@ -181,15 +181,15 @@
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="edit-nama" id="edit-nama">
                                 <option value="" class="text-gray-500 italic">Select Patient</option>
-                                @foreach ($Allpasiens as $pasien)
+                                @foreach ($pasiens as $pasien)
                                     <option value="{{ $pasien->id }}">
-                                        {{ $pasien->nama }}
+                                        {{ $pasien->pasien->nama }} - {{ $pasien->tanggal_bayar }}
                                     </option>
                                 @endforeach
                             </select>
 
                             <x-input-label>New Cost Type</x-input-label>
-                            <select name="edit-tipe-biaya"
+                            <select id="edit-tipe-biaya"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
                                     focus:border-blue-500 focus:ring-blue-500 shadow-sm">
                                 <option value="">Select Cost Type</option>
@@ -201,6 +201,16 @@
                                 <option value="lainnya">Lainnya</option>
                             </select>
 
+                            <!-- Obat Dropdown (hanya tampil jika tipe_biaya = obat) -->
+                            <div id="edit-obat-container" class="hidden">
+                                <x-input-label>Select Obat</x-input-label>
+                                <select id="edit-obat-select"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
+                                        focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                    <option value="">Select Obat</option>
+                                </select>
+                            </div>
+
                             <x-input-label>New Amount</x-input-label>
                             <x-text-input id="edit-jumlah" type="text" placeholder="Enter Amount..."
                                 class="border p-2 w-full rounded" />
@@ -210,7 +220,7 @@
                                 class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"></textarea>
 
                             <x-input-label>New Subtotal</x-input-label>
-                            <input type="text" name="edit-subtotal"
+                            <input type="text" id="edit-subtotal"
                                 class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
                                 placeholder="0" readonly>
 
@@ -289,8 +299,8 @@
         window.currentUserRole = "{{ Auth::user()->role }}";
 
         function showTable(isActive) {
-            const tableActive = document.getElementById("tableActive");
-            const tableArchive = document.getElementById("tableArchive");
+            const cardActive = document.getElementById("cardActive");
+            const cardArchive = document.getElementById("cardArchive");
             const btnActive = document.getElementById("btnActive");
             const btnArchive = document.getElementById("btnArchive");
             const paginationActive = document.getElementById("paginationActive");
@@ -298,8 +308,8 @@
 
             if (isActive) {
                 // Tampilkan tabel & pagination aktif
-                tableActive.classList.remove("hidden");
-                tableArchive.classList.add("hidden");
+                cardActive.classList.remove("hidden");
+                cardArchive.classList.add("hidden");
                 paginationActive.classList.remove("hidden");
                 paginationArchive.classList.add("hidden");
 
@@ -310,8 +320,8 @@
                 btnArchive.classList.replace("text-white", "text-gray-600");
             } else {
                 // Tampilkan tabel & pagination arsip
-                tableActive.classList.add("hidden");
-                tableArchive.classList.remove("hidden");
+                cardActive.classList.add("hidden");
+                cardArchive.classList.remove("hidden");
                 paginationActive.classList.add("hidden");
                 paginationArchive.classList.remove("hidden");
 

@@ -14,33 +14,7 @@ return new class extends Migration
         Schema::create('detail_pembayaran_pasien', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pembayaran_id')
-            ->nullable()
                   ->constrained('pembayaran_pasien')
-                  ->onDelete('cascade');
-                  
-            $table->foreignId('kunjungan_id')
-            ->nullable()
-                  ->constrained('kunjungan')
-                  ->onDelete('cascade');
-
-            $table->foreignId('resep_id')
-            ->nullable()
-                  ->constrained('resep_obat')
-                  ->onDelete('cascade');
-
-            $table->foreignId('lab_id')
-            ->nullable()
-                  ->constrained('lab_pemeriksaan')
-                  ->onDelete('cascade');
-
-            $table->foreignId('radiologi_id')
-            ->nullable()
-                  ->constrained('radiologi')
-                  ->onDelete('cascade');
-
-            $table->foreignId('inap_id')
-            ->nullable()
-                  ->constrained('rawat_inap')
                   ->onDelete('cascade');
 
             $table->enum('tipe_biaya', [
@@ -51,6 +25,8 @@ return new class extends Migration
                 'rawat_inap', 
                 'lainnya'
             ]);
+
+            $table->unsignedBigInteger('referensi_id')->nullable();
 
             $table->integer('jumlah')->default(1);
             $table->decimal('harga_satuan', 15, 2);

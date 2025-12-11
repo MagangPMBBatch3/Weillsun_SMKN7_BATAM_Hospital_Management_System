@@ -148,7 +148,9 @@
                                 class="border border-green-500 bg-gray-100 p-2 w-full rounded" required />
 
                             <x-input-label>Payment Method</x-input-label>
-                            <select name="edit-metode-bayar" id="edit-metode-bayar">
+                            <select name="edit-metode-bayar"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                             id="edit-metode-bayar">
                                 <option value="cash">Cash</option>
                                 <option value="transfer">Transfer</option>
                             </select>

@@ -174,13 +174,11 @@ class AuthController extends Controller
     public function detailPembayaranPasien()
     {
         $pasienTerpakai = DetailPembayaranPasien::withTrashed()->pluck('pembayaran_id');
-        $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
-            ->select('id', 'nama')
+        $pasiens = PembayaranPasien::select('id', 'pasien_id','tanggal_bayar')
+            ->with('pasien:id,nama')
             ->get();
 
-        $Allpasiens = Pasien::select('id', 'nama')->get();
-
-        return view('detailPembayaranPasien.index', compact('pasiens', 'Allpasiens'));
+        return view('detailPembayaranPasien.index', compact('pasiens', ));
     }
 
     public function supplier()
@@ -213,23 +211,21 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
-        // Ambil daftar pembelian yang sudah dipakai di detail
-        $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
+        // $pembelianTerpakai = DetailPembelianObat::withTrashed()->pluck('pembelian_id');
 
-        // Ambil pembelian yang BELUM dipakai
-        $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
-            ->select('id', 'supplier_id', 'tanggal')
-            ->with('supplier:id,nama_supplier')
-            ->get();
+        // $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
+        //     ->select('id', 'supplier_id', 'tanggal')
+        //     ->with('supplier:id,nama_supplier')
+        //     ->get();
 
         // Semua pembelian tanpa filter
-        $Allpembelians = PembelianObat::select('id', 'supplier_id','tanggal')
+        $pembelians = PembelianObat::select('id', 'supplier_id','tanggal')
             ->with('supplier:id,nama_supplier')
             ->get();
 
         $Allobats = Obat::select('id', 'nama_obat', 'harga')->get();
         
-        return view('detailPembelianObat.index', compact('pembelians', 'Allpembelians', 'Allobats'));
+        return view('detailPembelianObat.index', compact( 'pembelians', 'Allobats'));
     }
 
 

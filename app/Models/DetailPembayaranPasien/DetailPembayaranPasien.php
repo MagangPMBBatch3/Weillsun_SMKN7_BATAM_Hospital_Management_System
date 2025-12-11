@@ -26,4 +26,8 @@ class DetailPembayaranPasien extends Model
         return $this->belongsTo(PembayaranPasien::class, 'pembayaran_id');
     }
 
+    public function obat()
+    {
+        return $this->belongsTo(Obat::class, 'referensi_id');
+    }
 }

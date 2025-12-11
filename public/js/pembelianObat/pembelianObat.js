@@ -174,26 +174,56 @@ async function createPembelianObat() {
 
     showLoading();
 
-    const mutationPembelianObat = `
-        mutation($input: CreatePembelianObatInput!) {
-            createPembelianObat(input: $input) {
-                id
-                supplier_id
-                tanggal
-                total_biaya
-                status
-                supplier {
-                    id
-                    nama_supplier
-                } 
-            }
+    // Check untuk duplikat data
+    const checkDuplicateQuery = `
+        query($supplier_id: ID!, $tanggal: Date!) {
+            checkDuplicatePembelianObat(supplier_id: $supplier_id, tanggal: $tanggal)
         }
     `;
-    const variablesPembelianObat = {
-        input: { supplier_id, tanggal, status },
-    };
 
     try {
+        const checkRes = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: checkDuplicateQuery,
+                variables: {
+                    supplier_id,
+                    tanggal,
+                },
+            }),
+        });
+
+        const checkData = await checkRes.json();
+        const isDuplicate = checkData?.data?.checkDuplicatePembelianObat;
+
+        if (isDuplicate) {
+            hideLoading();
+            return alert(
+                "Data pembelian untuk supplier dan tanggal ini sudah ada di database!"
+            );
+        }
+
+        // Jika tidak ada duplikat, lanjutkan create
+        const mutationPembelianObat = `
+            mutation($input: CreatePembelianObatInput!) {
+                createPembelianObat(input: $input) {
+                    id
+                    supplier_id
+                    tanggal
+                    total_biaya
+                    status
+                    supplier {
+                        id
+                        nama_supplier
+                    } 
+                }
+            }
+        `;
+        const variablesPembelianObat = {
+            input: { supplier_id, tanggal, status },
+        };
+
         const resPembelianObat = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -253,23 +283,54 @@ async function updatePembelianObat() {
 
     showLoading();
 
-    const mutation = `
-        mutation($id: ID!, $input: UpdatePembelianObatInput!) {
-            updatePembelianObat(id: $id, input: $input) {
-                id
-                supplier_id
-                tanggal
-                total_biaya
-                status
-                supplier {
-                    id
-                    nama_supplier
-                } 
-            }
+    // Check untuk duplikat data (exclude current record)
+    const checkDuplicateQuery = `
+        query($supplier_id: ID!, $tanggal: Date!, $exclude_id: ID) {
+            checkDuplicatePembelianObat(supplier_id: $supplier_id, tanggal: $tanggal, exclude_id: $exclude_id)
         }
     `;
 
     try {
+        const checkRes = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: checkDuplicateQuery,
+                variables: {
+                    supplier_id,
+                    tanggal,
+                    exclude_id: id,
+                },
+            }),
+        });
+
+        const checkData = await checkRes.json();
+        const isDuplicate = checkData?.data?.checkDuplicatePembelianObat;
+
+        if (isDuplicate) {
+            hideLoading();
+            return alert(
+                "Data pembelian untuk supplier dan tanggal ini sudah ada di database!"
+            );
+        }
+
+        // Jika tidak ada duplikat, lanjutkan update
+        const mutation = `
+            mutation($id: ID!, $input: UpdatePembelianObatInput!) {
+                updatePembelianObat(id: $id, input: $input) {
+                    id
+                    supplier_id
+                    tanggal
+                    total_biaya
+                    status
+                    supplier {
+                        id
+                        nama_supplier
+                    } 
+                }
+            }
+        `;
+
         await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },

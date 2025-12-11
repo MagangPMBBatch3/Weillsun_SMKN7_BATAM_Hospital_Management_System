@@ -2,6 +2,7 @@
 
 namespace App\Models\LabPemeriksaan;
 
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\Pasien\Pasien;
 use App\Models\TenagaMedis\TenagaMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,5 +31,10 @@ class LabPemeriksaan extends Model
     public function tenagaMedis()
     {
         return $this->belongsTo(TenagaMedis::class, 'tenaga_medis_id');
+    }
+
+    public function detailPasien()
+    {
+        return $this->hasMany(DetailPembayaranPasien::class, 'lab_id');
     }
 }

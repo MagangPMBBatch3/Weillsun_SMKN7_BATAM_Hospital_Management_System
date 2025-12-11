@@ -2,6 +2,7 @@
 
 namespace App\Models\RawatInap;
 
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
 use Illuminate\Database\Eloquent\Model;
@@ -29,5 +30,10 @@ class RawatInap extends Model
     public function ruangan()
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id');
+    }
+
+    public function detailPasien()
+    {
+        return $this->hasMany(DetailPembayaranPasien::class, 'inap_id');
     }
 }

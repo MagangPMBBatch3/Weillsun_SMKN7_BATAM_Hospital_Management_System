@@ -94,7 +94,7 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>Outpatient Department Name</x-input-label>
+                            <x-input-label>Clinic Name</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="create-poli-id" id="create-poli-id">
@@ -107,17 +107,16 @@
                             </select>
 
                             <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal-kunjungan" type="date"
-                                class="border p-2 w-full rounded" required />
+                            <x-text-input id="create-tanggal-kunjungan" type="date" class="border p-2 w-full rounded"
+                                required />
 
                             <x-input-label>Complaint</x-input-label>
                             <textarea name="create-keluhan" id="create-keluhan"
-                            class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                            ></textarea>
+                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"></textarea>
 
                             <x-input-label>Fee</x-input-label>
-                            <x-text-input id="create-biaya-konsultasi" type="text"
-                                class="border p-2 w-full rounded" required />
+                            <x-text-input id="create-biaya-konsultasi" type="text" class="border p-2 w-full rounded"
+                                required />
 
                         </div>
 
@@ -138,9 +137,10 @@
                         <x-text-input type="hidden" id="edit-id" />
 
                         <div class="space-y-3">
-                            
+
                             <x-input-label>New Patient</x-input-label>
-                            <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="edit-pasien-id" id="edit-pasien-id">
                                 <option value="" class="text-gray-500 italic">Select Patient</option>
                                 @foreach ($Allpasiens as $pasien)
@@ -151,8 +151,9 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>New Outpatient Department</x-input-label>
-                            <select class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            <x-input-label>New Clinic</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="edit-poli-id" id="edit-poli-id">
                                 <option value="" class="text-gray-500 italic">Select Cinic</option>
                                 @foreach ($Allpolies as $poli)
@@ -164,17 +165,16 @@
                             </select>
 
                             <x-input-label>New Date</x-input-label>
-                            <x-text-input id="edit-tanggal-kunjungan" type="date"
-                                class="border p-2 w-full rounded" required />
+                            <x-text-input id="edit-tanggal-kunjungan" type="date" class="border p-2 w-full rounded"
+                                required />
 
                             <x-input-label>New Complaint</x-input-label>
                             <textarea name="edit-keluhan" id="edit-keluhan"
-                            class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                            ></textarea>
+                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"></textarea>
 
                             <x-input-label>New Fee</x-input-label>
-                            <x-text-input id="edit-biaya-konsultasi" type="text"
-                                class="border p-2 w-full rounded" required />
+                            <x-text-input id="edit-biaya-konsultasi" type="text" class="border p-2 w-full rounded"
+                                required />
 
                         </div>
 

@@ -80,7 +80,7 @@
 
                                         <x-dropdown-link :href="route('poli.index')" :active="request()->routeIs('poli.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
-                                            🏩 {{ __('Outpatient Department') }}
+                                            🏩 {{ __('Clinic') }}
                                         </x-dropdown-link>
 
                                         <x-dropdown-link :href="route('ruangan.index')" :active="request()->routeIs('ruangan.index')"

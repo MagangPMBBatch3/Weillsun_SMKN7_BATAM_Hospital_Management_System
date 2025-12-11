@@ -20,6 +20,7 @@ type DetailPembayaranPasien {
     deleted_at: DateTime
 
     pembayaranPasien: PembayaranPasien @belongsTo
+    obat: Obat @belongsTo(relation: "obat")
 }
 
 type UnpaidCost {
@@ -90,6 +91,11 @@ extend type Query {
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@getUnpaidCostsByPasien"
         )
 
+    resepObatByPasien(pasien_id: ID!): [ResepObat!]!
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@resepObatByPasien"
+        )
+
     DetailPembayaranPasien(id: ID! @eq(key: "id")): DetailPembayaranPasien
         @find(
             model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
@@ -100,8 +106,8 @@ extend type Mutation {
     createDetailPembayaranPasien(
         input: CreateDetailPembayaranPasienInput! @spread
     ): DetailPembayaranPasien
-        @create(
-            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@create"
         )
 
     updateDetailPembayaranPasien(
@@ -115,8 +121,8 @@ extend type Mutation {
     deleteDetailPembayaranPasien(
         id: ID! @eq(key: "id")
     ): DetailPembayaranPasien
-        @delete(
-            model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
+        @field(
+            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@delete"
         )
 
     restoreDetailPembayaranPasien(id: ID!): DetailPembayaranPasien
@@ -128,6 +134,4 @@ extend type Mutation {
         @field(
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@forceDelete"
         )
-
-
 }

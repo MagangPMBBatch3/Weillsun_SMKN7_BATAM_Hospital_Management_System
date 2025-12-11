@@ -175,4 +175,20 @@ class DetailPembayaranPasienQuery
 
         return $costs;
     }
+
+    public function resepObatByPasien($_, array $args)
+    {
+        $pasienId = $args['pasien_id'] ?? null;
+
+        if (!$pasienId) {
+            return [];
+        }
+
+        // Ambil resep obat untuk pasien (tidak perlu filter is_paid, ambil semua)
+        $resepObat = ResepObat::where('pasien_id', $pasienId)
+            ->with('obat')
+            ->get();
+
+        return $resepObat;
+    }
 }
