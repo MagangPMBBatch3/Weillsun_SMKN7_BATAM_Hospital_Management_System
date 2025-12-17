@@ -233,7 +233,6 @@ async function createPembayaranPasien() {
         const variablesPembayaranPasien = {
             input: {
                 pasien_id,
-                //  total_biaya,
                 metode_bayar,
                 tanggal_bayar,
             },
@@ -280,8 +279,8 @@ function openEditModal(
 ) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
-    document.getElementById("edit-total-biaya").value =
-        formatNumber(total_biaya);
+    // document.getElementById("edit-total-biaya").value =
+    //     formatNumber(total_biaya);
     document.getElementById("edit-metode-bayar").value = metode_bayar;
     document.getElementById("edit-tanggal").value = tanggal_bayar;
 
@@ -294,7 +293,9 @@ function openEditModal(
 async function updatePembayaranPasien() {
     const id = document.getElementById("edit-id").value;
     const pasien_id = document.getElementById("edit-nama").value;
-    const total_biaya = document.getElementById("edit-total-biaya").value;
+    // const total_biaya = document
+    //     .getElementById("edit-total-biaya")
+    //     .value.replace(/\./g, "");
     const metode_bayar = document
         .getElementById("edit-metode-bayar")
         .value.trim();
@@ -339,7 +340,7 @@ async function updatePembayaranPasien() {
                 updatePembayaranPasien(id: $id, input: $input) {
                     id
                     pasien_id
-                    total_biaya
+                    
                     metode_bayar
                     tanggal_bayar
                     pasien {
@@ -359,7 +360,7 @@ async function updatePembayaranPasien() {
                     id,
                     input: {
                         pasien_id,
-                        total_biaya,
+                        
                         metode_bayar,
                         tanggal_bayar,
                     },
@@ -379,22 +380,32 @@ async function updatePembayaranPasien() {
     }
 }
 
+// format
 // document.addEventListener("DOMContentLoaded", () => {
-//     const createBiayaInput = document.getElementById("create-biaya");
-//     const editBiayaInput = document.getElementById("edit-biaya");
+//     const editBiayaInput = document.getElementById("edit-total-biaya");
 
 //     editBiayaInput.addEventListener("input", (e) => {
 //         let value = unformatNumber(filterAngka(e.target.value));
 //         if (value) e.target.value = formatNumber(value);
 //         else e.target.value = "";
 //     });
-
-//     createBiayaInput.addEventListener("input", (e) => {
-//         let value = unformatNumber(filterAngka(e.target.value));
-//         if (value) e.target.value = formatNumber(value);
-//         else e.target.value = "";
-//     });
 // });
+
+// auto fill input
+// document.addEventListener("change", function (e) {
+//     if (e.target.id === "edit-nama") {
+//         const selectedOption = e.target.selectedOptions[0];
+//         const biaya = selectedOption.getAttribute("data-biaya");
+
+//         document.getElementById("edit-total-biaya").value = biaya
+//             ? formatNumber(parseInt(biaya))
+//             : "";
+
+//         hitungSubtotalEdit();
+//     }
+// });
+
+// Render Table
 function renderPembayaranPasienTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
@@ -470,12 +481,22 @@ function renderPembayaranPasienTable(result, tableId, isActive) {
             <td class="p-4 text-center text-base font-semibold">${
                 item.pasien?.nama
             }</td>
-            <td class="p-4 text-center text-base font-semibold">${item.total_biaya.toLocaleString(
-                "id-ID"
-            )}</td>
-            <td class="p-4 text-center truncate max-w-24 font-semibold capitalize">
-                ${item.metode_bayar}
+            <td class="p-4 text-center text-base font-semibold">
+                <span class="text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">
+                    ${item.total_biaya.toLocaleString("id-ID")}
+                </span>
             </td>
+
+            <td class="p-4 text-center truncate max-w-24 font-semibold capitalize">
+                <span class="${
+                    item.metode_bayar === "transfer"
+                        ? "text-blue-600 bg-blue-100 border border-blue-300"
+                        : "text-rose-600 bg-rose-100 border border-rose-300"
+                } px-3 py-1 rounded-full">
+                    ${item.metode_bayar}
+                </span>
+            </td>
+
             <td class="p-4 text-center font-semibold capitalize">
                 ${item.tanggal_bayar}
             </td>

@@ -6,7 +6,7 @@
             <!-- Title -->
             <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
                 <i class='bx bx-receipt text-3xl text-blue-500'></i>
-                <span class=" tracking-wider">Drug Purchases</span>
+                <span class=" tracking-wider">Supplier Payments</span>
             </h2>
 
             <!-- Search & Buttons -->
@@ -16,19 +16,19 @@
                 <div class="relative w-full sm:w-72">
                     <input type="text" id="search" placeholder="Search..."
                         class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm px-4 py-2.5 pl-9 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition duration-200"
-                        oninput="searchPembelianObat()">
+                        oninput="searchPembayaranSupplier()">
                     <i class='bx bx-search absolute left-3 top-3 h-5 w-5 text-gray-600 '></i>
                 </div>
 
                 <!-- Tombol New User -->
                 @if (auth()->user()->role === 'admin')
                     <x-primary-button x-data=""
-                        x-on:click.prevent="$dispatch('open-modal', 'create-pembelianObat')"
+                        x-on:click.prevent="$dispatch('open-modal', 'create-pembayaranSupplier')"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        New Data
+                        New Payment
                     </x-primary-button>
                 @endif
 
@@ -60,13 +60,13 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Supplier', 'date', 'total costs', 'status']" requireRole="admin">
-                <tbody id="dataPembelianObatAktif"></tbody>
+            <x-table id="tableActive" :headers="['ID', 'supplier', 'total cost', 'payment method', 'date']" requireRole="admin">
+                <tbody id="dataPembayaranSupplierAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Supplier',  'date', 'total costs', 'status']" requireRole="admin">
-                <tbody id="dataPembelianObatArsip"></tbody>
+            <x-table id="tableArchive" class="hidden" :headers="['ID', 'supplier', 'total cost', 'payment method', 'date']" requireRole="admin">
+                <tbody id="dataPembayaranSupplierArsip"></tbody>
             </x-table>
 
             {{-- Pagination untuk AKTIF --}}
@@ -76,9 +76,9 @@
             <x-pagination-archive></x-pagination-archive>
 
             {{-- Modal CREATE --}}
-            <x-modal name="create-pembelianObat" focusable>
+            <x-modal name="create-pembayaranSupplier" focusable>
                 <div class="p-6">
-                    <form onsubmit="event.preventDefault(); createPembelianObat()">
+                    <form onsubmit="event.preventDefault(); createPembayaranSupplier()">
                         <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Data</h2>
 
                         <div class="space-y-3">
@@ -88,25 +88,30 @@
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="create-supplier" id="create-supplier">
                                 <option value="" class="text-gray-500 italic">Select Supplier</option>
-                                @foreach ($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}">
-                                        {{ $supplier->nama_supplier }}
+                                @foreach ($pembelians as $pembelian)
+
+                                    <option value="{{ $pembelian->id }}" data-jumlah="{{ $pembelian->total_biaya }}">
+                                        {{ $pembelian->supplier->nama_supplier }} - {{ date('d M Y', strtotime($pembelian->tanggal)) }}
                                     </option>
                                 @endforeach
                             </select>
 
-                            <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal" type="date"
-                                class="border p-2 w-full rounded" required />
+                            <x-input-label>Total Cost</x-input-label>
+                            <x-text-input id="create-jumlah-bayar" type="text" readonly placeholder="0"
+                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" />
 
-                            <x-input-label>Status</x-input-label>
+                            <x-input-label>Payment Method</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="create-status" id="create-status" required>
-                                <option value="" class="text-gray-500 italic">Select Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="lunas">Completed</option>
+                                name="create-metode-bayar" id="create-metode-bayar">
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Transfer</option>
                             </select>
+
+                            <x-input-label>Date</x-input-label>
+                            <x-text-input id="create-tanggal" type="date" class="border p-2 w-full rounded"
+                                required />
+
                         </div>
 
                         <div class="flex justify-end mt-4">
@@ -118,42 +123,41 @@
             </x-modal>
 
             {{-- Modal EDIT --}}
-            <x-modal name="edit-pembelianObat">
+            <x-modal name="edit-pembayaranSupplier">
                 <div class="p-6">
-                    <form onsubmit="event.preventDefault(); updatePembelianObat()">
-                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit Record</h2>
+                    <form onsubmit="event.preventDefault(); updatePembayaranSupplier()">
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit Data</h2>
 
                         <x-text-input type="hidden" id="edit-id" />
 
                         <div class="space-y-3">
+
                             <x-input-label>New Supplier</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="edit-supplier" id="edit-supplier">
                                 <option value="" class="text-gray-500 italic">Select Supplier</option>
-                                @foreach ($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}">
-                                        {{ $supplier->nama_supplier }}
+                                @foreach ($Allpembelians as $pembelian)
+                                    <option value="{{ $pembelian->id }}" data-jumlah="{{ $pembelian->total_biaya }}">
+                                        {{ $pembelian->supplier->nama_supplier }}
                                     </option>
                                 @endforeach
                             </select>
 
-                            <x-input-label>New Date</x-input-label>
-                            <x-text-input id="edit-tanggal" type="date"
-                                class="border p-2 w-full rounded" />
+                            {{-- <x-input-label>Total Cost</x-input-label>
+                            <x-text-input id="edit-jumlah-bayar" type="text" readonly placeholder="0"
+                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" required /> --}}
 
-                            {{-- <x-input-label>New Total Cost</x-input-label>
-                            <x-text-input id="edit-total" type="text" placeholder="0"
-                                class="border p-2 w-full rounded border-green-500" /> --}}
-
-                            <x-input-label>New Status</x-input-label>
-                            <select
+                            <x-input-label>Payment Method</x-input-label>
+                            <select name="edit-metode-bayar"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-status" id="edit-status">
-                                <option value="" class="text-gray-500 italic">Select Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="lunas">Completed</option>
+                                id="edit-metode-bayar">
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Transfer</option>
                             </select>
+
+                            <x-input-label>Date</x-input-label>
+                            <x-text-input id="edit-tanggal" type="date" class="border p-2 w-full rounded" required />
                         </div>
 
                         <div class="flex justify-end mt-4">
@@ -207,7 +211,7 @@
         }
     </script>
     {{-- JS --}}
-    <script src="{{ asset('js/pembelianObat/pembelianObat.js') }}"></script>
+    <script src="{{ asset('js/pembayaranSupplier/pembayaranSupplier.js') }}"></script>
     <script></script>
 
 </x-app-layout>

@@ -28,8 +28,10 @@ function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
+// ============================================================================================== \\
+
 let searchTimeout = null;
-function searchPembelianObat() {
+function searchPembayaranSupplier() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         loadDataPaginate(1, true);
@@ -37,7 +39,7 @@ function searchPembelianObat() {
     }, 500);
 }
 
-// Load data User (Aktif & Arsip sekaligus)
+// Load data (Aktif & Arsip sekaligus)
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -56,17 +58,21 @@ async function loadDataPaginate(page = 1, isActive = true) {
         // --- Query data Aktif ---
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
-                allPembelianObatPaginate(first: $first, page: $page, search: $search){
+                allPembayaranSupplierPaginate(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            supplier_id
-                            tanggal
-                            total_biaya
-                            status
-                            supplier {
+                            pembelian_id
+                            jumlah_bayar
+                            metode_bayar
+                            tanggal_bayar
+                            pembelianObat {
                                 id
-                                nama_supplier
-                            } 
+                                total_biaya
+                                supplier {
+                                    id
+                                    nama_supplier
+                                }
+                            }
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -95,30 +101,39 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
-        renderPembelianObatTable(
-            dataActive?.data?.allPembelianObatPaginate || {},
-            "dataPembelianObatAktif",
+        renderPembayaranSupplierTable(
+            dataActive?.data?.allPembayaranSupplierPaginate || {},
+            "dataPembayaranSupplierAktif",
             true
         );
 
         // --- Query data Arsip ---
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
-                allPembelianObatArchive(first: $first, page: $page, search: $search){
+                allPembayaranSupplierArchive(first: $first, page: $page, search: $search){
                     data { 
                             id
-                            supplier_id
-                            tanggal
-                            total_biaya
-                            status
-                            supplier {
+                            pembelian_id
+                            jumlah_bayar
+                            metode_bayar
+                            tanggal_bayar
+                            pembelianObat {
                                 id
-                                nama_supplier
-                            } 
+                                total_biaya
+                                supplier {
+                                    id
+                                    nama_supplier
+                                }
+                            }
                         }
-                    paginatorInfo { currentPage lastPage total hasMorePages }
+                            paginatorInfo { 
+                                currentPage 
+                                lastPage 
+                                total 
+                                hasMorePages 
+                        }
+                    }
                 }
-            }
         `;
         const variablesArchive = {
             first: parseInt(
@@ -138,9 +153,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataArchive = await resArchive.json();
-        renderPembelianObatTable(
-            dataArchive?.data?.allPembelianObatArchive || {},
-            "dataPembelianObatArsip",
+        renderPembayaranSupplierTable(
+            dataArchive?.data?.allPembayaranSupplierArchive || {},
+            "dataPembayaranSupplierArsip",
             false
         );
     } catch (error) {
@@ -151,6 +166,8 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
+// Format dan unformat number
+
 function formatNumber(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -160,24 +177,26 @@ function unformatNumber(value) {
 }
 
 function filterAngka(str) {
+    // hapus semua karakter selain angka dan titik
     return str.replace(/[^0-9.]/g, "");
 }
 
 // Create
-async function createPembelianObat() {
-    const supplier_id = document.getElementById("create-supplier").value;
-    const tanggal = document.getElementById("create-tanggal").value;
-    const status = document.getElementById("create-status").value.trim();
+async function createPembayaranSupplier() {
+    const pembelian_id = document.getElementById("create-supplier").value;
+    const jumlah_bayar = document.getElementById("create-jumlah-bayar").value.replace(/\./g, "");
+    const metode_bayar = document.getElementById("create-metode-bayar").value.trim();
+    const tanggal_bayar = document.getElementById("create-tanggal").value.trim();
 
-    if (!supplier_id || !tanggal || !status)
+    if (!pembelian_id || !metode_bayar || !tanggal_bayar)
         return alert("Please fill in all required fields!");
 
     showLoading();
 
     // Check untuk duplikat data
     const checkDuplicateQuery = `
-        query($supplier_id: ID!, $tanggal: Date!) {
-            checkDuplicatePembelianObat(supplier_id: $supplier_id, tanggal: $tanggal)
+        query($pembelian_id: ID!, $tanggal_bayar: Date!) {
+            checkDuplicatePembayaranSupplier(pembelian_id: $pembelian_id, tanggal_bayar: $tanggal_bayar)
         }
     `;
 
@@ -188,65 +207,76 @@ async function createPembelianObat() {
             body: JSON.stringify({
                 query: checkDuplicateQuery,
                 variables: {
-                    supplier_id,
-                    tanggal,
+                    pembelian_id,
+                    jumlah_bayar,
+                    metode_bayar,
+                    tanggal_bayar,
                 },
             }),
         });
 
         const checkData = await checkRes.json();
-        const isDuplicate = checkData?.data?.checkDuplicatePembelianObat;
+        const isDuplicate = checkData?.data?.checkDuplicatePembayaranSupplier;
 
         if (isDuplicate) {
             hideLoading();
             return alert(
-                "Data pembelian untuk supplier dan tanggal ini sudah ada di database!"
+                "Data pembayaran untuk supplier dan tanggal ini sudah ada!"
             );
         }
 
         // Jika tidak ada duplikat, lanjutkan create
-        const mutationPembelianObat = `
-            mutation($input: CreatePembelianObatInput!) {
-                createPembelianObat(input: $input) {
-                    id
-                    supplier_id
-                    tanggal
-                    total_biaya
-                    status
-                    supplier {
-                        id
-                        nama_supplier
-                    } 
+        const mutationPembayaranSupplier = `
+            mutation($input: CreatePembayaranSupplierInput!) {
+                createPembayaranSupplier(input: $input) {
+                            id
+                            pembelian_id
+                            jumlah_bayar
+                            metode_bayar
+                            tanggal_bayar
+                            pembelianObat {
+                                id
+                                total_biaya
+                                supplier {
+                                    id
+                                    nama_supplier
+                                }
+                            }
                 }
             }
         `;
-        const variablesPembelianObat = {
-            input: { supplier_id, tanggal, status },
+        const variablesPembayaranSupplier = {
+            input: {
+                pembelian_id,
+                jumlah_bayar: parseInt(jumlah_bayar),
+                metode_bayar,
+                tanggal_bayar,
+            },
         };
 
-        const resPembelianObat = await fetch(API_URL, {
+        const resPembayaranSupplier = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: mutationPembelianObat,
-                variables: variablesPembelianObat,
+                query: mutationPembayaranSupplier,
+                variables: variablesPembayaranSupplier,
             }),
         });
 
-        const resultPembelianObat = await resPembelianObat.json();
-        const dataPembelianObat =
-            resultPembelianObat?.data?.createPembelianObat;
+        const resultPembayaranSupplier = await resPembayaranSupplier.json();
+        const dataPembayaranSupplier =
+            resultPembayaranSupplier?.data?.createPembayaranSupplier;
 
-        if (dataPembelianObat) {
+        if (dataPembayaranSupplier) {
             window.dispatchEvent(
                 new CustomEvent("close-modal", {
-                    detail: "create-pembelianObat",
+                    detail: "create-pembayaranSupplier",
                 })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
-            console.error("GraphQL Error:", resultPembelianObat.errors);
-            alert("Failed to create Tenaga Medis!");
+            console.error("GraphQL Error:", resultPembayaranSupplier.errors);
+            alert("Failed to create data!");
         }
     } catch (error) {
         console.error("Error:", error);
@@ -256,37 +286,35 @@ async function createPembelianObat() {
     }
 }
 
-function openEditModal(id, supplier_id, tanggal, total_biaya, status) {
+function openEditModal(
+    id,
+    pembelian_id,
+    metode_bayar,
+    tanggal_bayar
+) {
     document.getElementById("edit-id").value = id;
-    document.getElementById("edit-supplier").value = supplier_id;
-    document.getElementById("edit-tanggal").value = tanggal;
-    // document.getElementById("edit-total").value = formatNumber(total_biaya);
-    document.getElementById("edit-status").value = status;
+    document.getElementById("edit-supplier").value = pembelian_id;
+    document.getElementById("edit-metode-bayar").value = metode_bayar;
+    document.getElementById("edit-tanggal").value = tanggal_bayar;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-pembelianObat" })
+        new CustomEvent("open-modal", { detail: "edit-pembayaranSupplier" })
     );
 }
 
 // Update
-async function updatePembelianObat() {
+async function updatePembayaranSupplier() {
     const id = document.getElementById("edit-id").value;
-    const supplier_id = document.getElementById("edit-supplier").value;
-    const tanggal = document.getElementById("edit-tanggal").value.trim();
-    // const total = document
-    //     .getElementById("edit-total")
-    //     .value.replace(/\./g, "");
-    const status = document.getElementById("edit-status").value;
-
-    if (!id || !supplier_id || !tanggal || !status)
-        return alert("Please fill in all required fields!");
+    const pembelian_id = document.getElementById("edit-supplier").value;
+    const metode_bayar = document.getElementById("edit-metode-bayar").value.trim();
+    const tanggal_bayar = document.getElementById("edit-tanggal").value.trim();
 
     showLoading();
 
     // Check untuk duplikat data (exclude current record)
     const checkDuplicateQuery = `
-        query($supplier_id: ID!, $tanggal: Date!, $exclude_id: ID) {
-            checkDuplicatePembelianObat(supplier_id: $supplier_id, tanggal: $tanggal, exclude_id: $exclude_id)
+        query($pembelian_id: ID!, $tanggal_bayar: Date!, $exclude_id: ID) {
+            checkDuplicatePembayaranSupplier(pembelian_id: $pembelian_id, tanggal_bayar: $tanggal_bayar, exclude_id: $exclude_id)
         }
     `;
 
@@ -297,36 +325,40 @@ async function updatePembelianObat() {
             body: JSON.stringify({
                 query: checkDuplicateQuery,
                 variables: {
-                    supplier_id,
-                    tanggal,
+                    pembelian_id,
+                    tanggal_bayar,
                     exclude_id: id,
                 },
             }),
         });
 
         const checkData = await checkRes.json();
-        const isDuplicate = checkData?.data?.checkDuplicatePembelianObat;
+        const isDuplicate = checkData?.data?.checkDuplicatePembayaranSupplier;
 
         if (isDuplicate) {
             hideLoading();
             return alert(
-                "Data pembelian untuk supplier dan tanggal ini sudah ada di database!"
+                "Data pembayaran untuk supplier dan tanggal ini sudah ada!"
             );
         }
 
         // Jika tidak ada duplikat, lanjutkan update
         const mutation = `
-            mutation($id: ID!, $input: UpdatePembelianObatInput!) {
-                updatePembelianObat(id: $id, input: $input) {
+            mutation($id: ID!, $input: UpdatePembayaranSupplierInput!) {
+                updatePembayaranSupplier(id: $id, input: $input) {
                     id
-                    supplier_id
-                    tanggal
-                    
-                    status
-                    supplier {
-                        id
-                        nama_supplier
-                    } 
+                            pembelian_id
+                            
+                            metode_bayar
+                            tanggal_bayar
+                            pembelianObat {
+                                id
+                                total_biaya
+                                supplier {
+                                    id
+                                    nama_supplier
+                                }
+                            }
                 }
             }
         `;
@@ -338,13 +370,17 @@ async function updatePembelianObat() {
                 query: mutation,
                 variables: {
                     id,
-                    input: { supplier_id, tanggal, status },
+                    input: {
+                        pembelian_id,
+                        metode_bayar,
+                        tanggal_bayar
+                    },
                 },
             }),
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-pembelianObat" })
+            new CustomEvent("close-modal", { detail: "edit-pembayaranSupplier" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
@@ -355,17 +391,45 @@ async function updatePembelianObat() {
     }
 }
 
-// document.addEventListener("DOMContentLoaded", () => {
-//     const totalInput = document.getElementById("edit-total");
+document.addEventListener("change", function (e) {
 
-//     totalInput.addEventListener("input", (e) => {
-//         let value = unformatNumber(filterAngka(e.target.value));
-//         if (value) e.target.value = formatNumber(value);
-//         else e.target.value = "";
-//     });
-// });
+    if (e.target.id === "create-supplier") {
+        const selectedOption = e.target.selectedOptions[0];
+        const bayar = selectedOption.getAttribute("data-jumlah");
 
-function renderPembelianObatTable(result, tableId, isActive) {
+
+        document.getElementById("create-jumlah-bayar").value =
+            bayar ? formatNumber(parseInt(bayar)) : "";
+    }
+
+    // if (e.target.id === "edit-supplier") {
+    //     const selectedOption = e.target.selectedOptions[0];
+    //     const bayar = selectedOption.getAttribute("data-jumlah");
+
+    //     document.getElementById("edit-jumlah-bayar").value =
+    //         bayar ? formatNumber(parseInt(bayar)) : "";
+
+    // }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const createJumlahBayarInput = document.getElementById("create-jumlah-bayar");
+    // const editJumlahBayarInput = document.getElementById("edit-jumlah-bayar");
+
+    // editJumlahBayarInput.addEventListener("input", (e) => {
+    //     let value = unformatNumber(filterAngka(e.target.value));
+    //     if (value) e.target.value = formatNumber(value);
+    //     else e.target.value = "";
+    // });
+
+    createJumlahBayarInput.addEventListener("input", (e) => {
+        let value = unformatNumber(filterAngka(e.target.value));
+        if (value) e.target.value = formatNumber(value);
+        else e.target.value = "";
+    });
+});
+
+function renderPembayaranSupplierTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
 
     tbody.innerHTML = "";
@@ -409,21 +473,21 @@ function renderPembelianObatTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.supplier_id}', '${item.tanggal}', '${item.total_biaya}', '${item.status}')"
+                <button onclick="openEditModal(${item.id}, '${item.pembelian_id}', '${item.metode_bayar}', '${item.tanggal_bayar}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
-                <button onclick="hapusPembelianObat(${item.id})"
+                <button onclick="hapusPembayaranSupplier(${item.id})"
                     class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
                     <i class='bx bx-archive'></i> Archive
                 </button>`;
             } else {
                 actions = `
-                <button onclick="restorePembelianObat(${item.id})"
+                <button onclick="restorePembayaranSupplier(${item.id})"
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeletePembelianObat(${item.id})"
+                <button onclick="forceDeletePembayaranSupplier(${item.id})"
                     class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
                     <i class='bx bx-trash'></i> Delete
                 </button>`;
@@ -438,22 +502,22 @@ function renderPembelianObatTable(result, tableId, isActive) {
                 }</span>
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.supplier?.nama_supplier || "-"
+                item.pembelianObat?.supplier?.nama_supplier || "-"
             }</td>
-            <td class="p-4 text-center text-base font-semibold">${
-                item.tanggal
-            }</td>
-            <td class="p-4 text-center text-base font-semibold">Rp ${item.total_biaya.toLocaleString(
+            <td class="p-4 text-center text-base font-semibold">${item.jumlah_bayar.toLocaleString(
                 "id-ID"
             )}</td>
-            <td class="p-4 text-center font-semibold capitalize">
+            <td class="p-4 text-center truncate max-w-24 font-semibold capitalize">
                 <span class="${
-                    item.status === "pending"
-                        ? "text-gray-600 bg-gray-100 border border-gray-300"
-                        : "text-blue-600 bg-blue-100 border border-blue-300"
+                    item.metode_bayar === "transfer"
+                        ? "text-blue-600 bg-blue-100 border border-blue-300"
+                        : "text-rose-600 bg-rose-100 border border-rose-300"
                 } px-3 py-1 rounded-full">
-                    ${item.status}
+                    ${item.metode_bayar}
                 </span>
+            </td>
+            <td class="p-4 text-center font-semibold capitalize">
+                ${item.tanggal_bayar}
             </td>
             ${
                 window.currentUserRole === "admin"
@@ -484,11 +548,11 @@ function renderPembelianObatTable(result, tableId, isActive) {
 }
 
 // Hapus
-async function hapusPembelianObat(id) {
+async function hapusPembayaranSupplier(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ deletePembelianObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ deletePembayaranSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -504,11 +568,11 @@ async function hapusPembelianObat(id) {
 }
 
 // restore
-async function restorePembelianObat(id) {
+async function restorePembayaranSupplier(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ restorePembelianObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ restorePembayaranSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -524,11 +588,11 @@ async function restorePembelianObat(id) {
 }
 
 // force delete
-async function forceDeletePembelianObat(id) {
+async function forceDeletePembayaranSupplier(id) {
     if (!confirm("Are you sure you want to delete this data??")) return;
 
     showLoading();
-    const mutation = `mutation($id: ID!){ forceDeletePembelianObat(id: $id){ id } }`;
+    const mutation = `mutation($id: ID!){ forceDeletePembayaranSupplier(id: $id){ id } }`;
     try {
         await fetch(API_URL, {
             method: "POST",

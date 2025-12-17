@@ -18,12 +18,12 @@ class DetailPembelianObatQuery
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
             })
-            ->orWhereHas('obat', function ($q) use ($search) {
-                $q->where('nama_obat', 'like', "%$search%");
-            })
-            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
-                $q->where('nama_supplier', 'like', "%$search%");
-            });
+                ->orWhereHas('obat', function ($q) use ($search) {
+                    $q->where('nama_obat', 'like', "%$search%");
+                })
+                ->orWhereHas('pembelianObat.supplier', function ($q) use ($search) {
+                    $q->where('nama_supplier', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -55,12 +55,12 @@ class DetailPembelianObatQuery
                     ->orWhere('kapasitas', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
             })
-            ->orWhereHas('obat', function ($q) use ($search) {
-                $q->where('nama_obat', 'like', "%$search%");
-            })
-            ->orWhereHas('pembelianObat.supllier', function ($q) use ($search) {
-                $q->where('nama_supplier', 'like', "%$search%");
-            });
+                ->orWhereHas('obat', function ($q) use ($search) {
+                    $q->where('nama_obat', 'like', "%$search%");
+                })
+                ->orWhereHas('pembelianObat.supplier', function ($q) use ($search) {
+                    $q->where('nama_supplier', 'like', "%$search%");
+                });
         }
 
         $perPage = $args['first'] ?? 10;

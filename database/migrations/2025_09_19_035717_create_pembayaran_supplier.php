@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pembayaran_supplier', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pembelian_id')->constrained('pembelian_obat')->onDelete('cascade');
-            $table->decimal('jumlah_bayar', 15, 2);
+            $table->decimal('jumlah_bayar', 15, 2)->default(0);
             $table->enum('metode_bayar', ['cash', 'transfer']);
             $table->date('tanggal_bayar');
             $table->softDeletes();

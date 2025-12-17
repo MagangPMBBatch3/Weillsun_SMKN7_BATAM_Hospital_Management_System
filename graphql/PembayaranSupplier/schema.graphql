@@ -18,7 +18,7 @@ type PembayaranSupplier {
 
 input CreatePembayaranSupplierInput {
     pembelian_id: ID!
-    jumlah_bayar: Float!
+    jumlah_bayar: Float
     metode_bayar: Metode!
     tanggal_bayar: Date!
 }
@@ -64,6 +64,15 @@ extend type Query {
         @field(
             resolver: "App\\GraphQL\\PembayaranSupplier\\Queries\\PembayaranSupplierQuery@allArchive"
     )
+
+    checkDuplicatePembayaranSupplier(
+        pasien_id: ID!
+        tanggal_bayar: Date!
+        exclude_id: ID
+    ): Boolean
+        @field(
+            resolver: "App\\GraphQL\\PembayaranSupplier\\Queries\\PembayaranSupplierQuery@checkDuplicate"
+        )
 
     PembayaranSupplier(id: ID! @eq(key: "id")): PembayaranSupplier
         @find(model: "App\\Models\\PembayaranSupplier\\PembayaranSupplier")

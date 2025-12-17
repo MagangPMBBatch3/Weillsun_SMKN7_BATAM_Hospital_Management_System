@@ -95,10 +95,6 @@
                                 @endforeach
                             </select>
 
-                            {{-- <x-input-label>Total Cost</x-input-label>
-                            <x-text-input id="create-total-biaya" type="number" placeholder="0"
-                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" /> --}}
-
                             <x-input-label>Payment Method</x-input-label>
                             <select
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
@@ -143,9 +139,9 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>Total Cost</x-input-label>
-                            <x-text-input id="edit-total-biaya" type="number" placeholder="0"
-                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" required />
+                            {{-- <x-input-label>Total Cost</x-input-label>
+                            <x-text-input id="edit-total-biaya" type="text" placeholder="0" readonly
+                                class="border border-green-500 bg-gray-100 p-2 w-full rounded" required /> --}}
 
                             <x-input-label>Payment Method</x-input-label>
                             <select name="edit-metode-bayar"

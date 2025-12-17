@@ -66,12 +66,13 @@ class AuthController extends Controller
 
     public function pembayaranPasien()
     {
-        $pasienTerpakai = Radiologi::withTrashed()->pluck('pasien_id');
+        $pasienTerpakai = PembayaranPasien::withTrashed()->pluck('pasien_id');
         $pasiens = Pasien::whereNotIn('id', $pasienTerpakai)
             ->select('id', 'nama')
             ->get();
 
-        $Allpasiens = Pasien::select('id', 'nama')->get();
+        $Allpasiens = Pasien::select('id', 'nama')
+        ->get();
         return view('pembayaranPasien.index', compact('pasiens', 'Allpasiens'));
     }
 
@@ -176,11 +177,11 @@ class AuthController extends Controller
     public function detailPembayaranPasien()
     {
         $pasienTerpakai = DetailPembayaranPasien::withTrashed()->pluck('pembayaran_id');
-        $pasiens = PembayaranPasien::select('id', 'pasien_id','tanggal_bayar')
+        $pasiens = PembayaranPasien::select('id', 'pasien_id', 'tanggal_bayar')
             ->with('pasien:id,nama')
             ->get();
 
-        return view('detailPembayaranPasien.index', compact('pasiens', ));
+        return view('detailPembayaranPasien.index', compact('pasiens',));
     }
 
     public function supplier()
@@ -213,24 +214,32 @@ class AuthController extends Controller
 
     public function detailPembelianObat()
     {
-
         // Semua pembelian tanpa filter
-        $pembelians = PembelianObat::select('id', 'supplier_id','tanggal')
+        $pembelians = PembelianObat::select('id', 'supplier_id', 'tanggal')
             ->with('supplier:id,nama_supplier')
             ->get();
 
         $Allobats = Obat::select('id', 'nama_obat', 'harga')->get();
-        
-        return view('detailPembelianObat.index', compact( 'pembelians', 'Allobats'));
+
+        return view('detailPembelianObat.index', compact('pembelians', 'Allobats'));
     }
 
 
     public function pembayaranSupplier()
     {
-        $pembayaranTerpakai = PembayaranSupplier::withTrashed()->pluck('pembelian_id');
-        $pembayarans = PembelianObat::select('id', 'supplier_id','tanggal')
+        $pembelianTerpakai = PembayaranSupplier::withTrashed()->pluck('pembelian_id');
+
+        $pembelians = PembelianObat::whereNotIn('id', $pembelianTerpakai)
+            ->select('id', 'supplier_id', 'total_biaya', 'tanggal')
             ->with('supplier:id,nama_supplier')
             ->get();
-        return view('pembayaranSupplier.index');
+
+
+        $Allpembelians = PembelianObat::select('id', 'supplier_id', 'total_biaya')
+            ->with('supplier:id,nama_supplier')
+            ->get();
+
+
+        return view('pembayaranSupplier.index', compact('pembelians', 'Allpembelians'));
     }
 }

@@ -73,4 +73,22 @@ class PembayaranSupplierQuery
             ],
         ];
     }
+
+    public function checkDuplicate($_, array $args)
+    {
+        $pembelian_id = $args['pembelian_id'];
+        $tanggal_bayar = $args['tanggal_bayar'];
+        $exclude_id = $args['exclude_id'] ?? null;
+
+        $query = PembayaranSupplier::where('pambelian_id', $pembelian_id)
+            ->where('tanggal_bayar', $tanggal_bayar);
+
+        // Jika exclude_id diberikan (untuk update), exclude record dengan ID tersebut
+        if ($exclude_id) {
+            $query->where('id', '!=', $exclude_id);
+        }
+
+        // Return true jika data duplikat ditemukan, false jika tidak
+        return $query->exists();
+    }
 }

@@ -216,8 +216,8 @@
                                 class="border p-2 w-full rounded" />
 
                             <x-input-label>New Unit Price</x-input-label>
-                            <textarea id="edit-harga-satuan" placeholder="Enter Unit Price..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"></textarea>
+                            <x-text-input id="edit-harga-satuan" type="text" placeholder="Enter Unit Price..."
+                                class="border p-2 w-full rounded" />
 
                             <x-input-label>New Subtotal</x-input-label>
                             <input type="text" id="edit-subtotal"

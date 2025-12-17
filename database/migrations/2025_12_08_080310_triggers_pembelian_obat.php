@@ -58,7 +58,7 @@ return new class extends Migration
                 END IF;
             END;
         ");
-
+        
         // Trigger AFTER DELETE
         DB::unprepared("
             CREATE TRIGGER trg_after_delete_detail_pembelian
