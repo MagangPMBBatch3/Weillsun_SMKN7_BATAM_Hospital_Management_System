@@ -160,6 +160,7 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
+                    
                     {{-- Transaction --}}
                     <div class="flex items-center">
                         <x-dropdown align="right" width="60">
@@ -211,6 +212,44 @@
                                         <x-dropdown-link :href="route('pembayaranSupplier.index')" :active="request()->routeIs('pembayaranSupplier.index')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
                                             🏦 {{ __('Supplier Payments') }}
+                                        </x-dropdown-link>
+
+                                    </div>
+                                </div>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
+
+                    {{-- Schedule --}}
+                    <div class="flex items-center">
+                        <x-dropdown align="right" width="60">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                                    <span class="mr-2">Schedule</span>
+                                    <svg class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </x-slot>
+
+                            {{-- Dropdown Content --}}
+                            <x-slot name="content">
+                                <div
+                                    class="py-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-60 transition-all duration-200">
+
+                                    <div class="flex flex-col py-1">
+                                        <x-dropdown-link :href="route('kunjunganUlang.index')" :active="request()->routeIs('kunjunganUlang.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            🔁 {{ __('Return Visits') }}
+                                        </x-dropdown-link>
+
+                                        <x-dropdown-link :href="route('jadwalTenagaMedis.index')" :active="request()->routeIs('jadwalTenagaMedis.index')"
+                                            class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                            📅 {{ __("Doctor's Schedule") }}
                                         </x-dropdown-link>
 
                                     </div>

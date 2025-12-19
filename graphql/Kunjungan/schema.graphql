@@ -60,7 +60,7 @@ extend type Query {
     ): KunjunganPaginator
         @field(
             resolver: "App\\GraphQL\\Kunjungan\\Queries\\KunjunganQuery@allArchive"
-        )
+    )
 
     Kunjungan(id: ID! @eq(key: "id")): Kunjungan
         @find(model: "App\\Models\\Kunjungan\\Kunjungan")

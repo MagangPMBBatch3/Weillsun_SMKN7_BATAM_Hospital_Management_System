@@ -41,14 +41,21 @@ extend type Query {
     allKunjunganUlang: [KunjunganUlang!]!
         @all(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")
 
-    allKunjunganUlangPaginator(
+    allKunjunganUlangPaginate(
+        search: String
+        page: Int
+        first: Int
+    ): KunjunganUlangPaginator
+        @field(resolver: "App\\GraphQL\\KunjunganUlang\\Queries\\KunjunganUlangQuery@all")
+
+    allKunjunganUlangArchive(
         search: String
         page: Int
         first: Int
     ): KunjunganUlangPaginator
         @field(
-            resolver: "App\\GraphQL\\KunjunganUlang\\Queries\\KunjunganUlangQuery@all"
-        )
+            resolver: "App\\GraphQL\\KunjunganUlang\\Queries\\KunjunganUlangQuery@allArchive"
+    )
 
     KunjunganUlang(id: ID! @eq(key: "id")): KunjunganUlang
         @find(model: "App\\Models\\KunjunganUlang\\KunjunganUlang")

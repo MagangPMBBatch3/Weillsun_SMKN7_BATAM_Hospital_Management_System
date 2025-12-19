@@ -186,6 +186,36 @@
                 </div>
             </x-modal>
 
+            <x-modal name="create-kunjunganUlang" focusable>
+                <div class="p-6">
+                    <form onsubmit="event.preventDefault(); createKunjunganUlang()">
+                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Return Visit</h2>
+
+                        <div class="space-y-3">
+
+                            <input type="hidden" id="create-kunjungan-id" />
+
+                            <x-input-label>Date</x-input-label>
+                            <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" />
+
+                            <x-input-label>Time</x-input-label>
+                            <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+
+                            <x-input-label>Note</x-input-label>
+                            <textarea id="create-catatan" placeholder="Enter Note..."
+                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                required></textarea>
+
+                        </div>
+
+                        <div class="flex justify-end mt-4">
+                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                            <x-primary-button class="ml-2">Save</x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            </x-modal>
+
         </div>
     </div>
 

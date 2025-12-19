@@ -41,14 +41,21 @@ extend type Query {
     allJadwalTenagaMedis: [JadwalTenagaMedis!]!
         @all(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
 
-    allJadwalTenagaMedisPaginator(
+    allJadwalTenagaMedisPaginate(
+        search: String
+        page: Int
+        first: Int
+    ): JadwalTenagaMedisPaginator
+        @field(resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all")
+
+    allJadwalTenagaMedisArchive(
         search: String
         page: Int
         first: Int
     ): JadwalTenagaMedisPaginator
         @field(
-            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all"
-        )
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@allArchive"
+    )
 
     JadwalTenagaMedis(id: ID! @eq(key: "id")): JadwalTenagaMedis
         @find(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")

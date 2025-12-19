@@ -33,7 +33,9 @@ class AuthController extends Controller
 
     public function jadwalTenagaMedis()
     {
-        return view('jadwalTenagaMedis.index');
+        $dokters = TenagaMedis::with('profile:id,nickname')
+            ->get();
+        return view('jadwalTenagaMedis.index', compact('dokters'));
     }
 
     public function kunjungan()
@@ -171,7 +173,10 @@ class AuthController extends Controller
 
     public function kunjunganUlang()
     {
-        return view('kunjunganUlang.index');
+        $pasiens = Kunjungan::select('id', 'pasien_id')
+            ->with('pasien:id,nama')
+            ->get();
+        return view('kunjunganUlang.index', compact('pasiens'));
     }
 
     public function detailPembayaranPasien()
@@ -186,7 +191,6 @@ class AuthController extends Controller
 
     public function supplier()
     {
-
         return view('supplier.index');
     }
 
