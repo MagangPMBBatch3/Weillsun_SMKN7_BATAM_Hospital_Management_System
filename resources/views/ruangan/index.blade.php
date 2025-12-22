@@ -60,12 +60,12 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'room Name', 'capacity', 'rate per day']" requireRole="admin">
+            <x-table id="tableActive" :headers="['ID', 'room Name', 'capacity', 'status', 'rate per day']" requireRole="admin">
                 <tbody id="dataRuanganAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'room Name', 'capacity', 'rate per day']" requireRole="admin">
+            <x-table id="tableArchive" class="hidden" :headers="['ID', 'room Name', 'capacity', 'status', 'rate per day']" requireRole="admin">
                 <tbody id="dataRuanganArsip"></tbody>
             </x-table>
 
@@ -119,6 +119,12 @@
                             <x-input-label>New Capacity</x-input-label>
                             <x-text-input id="edit-kapasitas" type="text" placeholder="Enter Capacity..."
                                 class="border p-2 w-full rounded" required />
+
+                            <x-input-label>New Status</x-input-label>
+                            <select id="edit-status" class="border p-2 w-full rounded">
+                                <option value="tersedia">Available</option>
+                                <option value="tidak_tersedia">Not Available</option>
+                            </select>
 
                             <x-input-label>New Rate per Day</x-input-label>
                             <x-text-input id="edit-tarif_per_hari" type="text" placeholder="Enter Rate per Day..."

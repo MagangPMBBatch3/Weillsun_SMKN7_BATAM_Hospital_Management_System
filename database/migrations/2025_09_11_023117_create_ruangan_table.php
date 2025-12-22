@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_ruangan');
             $table->integer('kapasitas');
             $table->decimal('tarif_per_hari', 15, 2)->default(0);
+            $table->enum('status', ['tersedia', 'tidak_tersedia'])->default('tersedia');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -16,7 +16,8 @@ class RuanganQuery
             $query->where(function ($q) use ($search) {
                 $q->where('nama_ruangan', 'like', "%$search%")
                     ->orWhere('kapasitas', 'like', "%$search%")
-                    ->orWhere('tarif_per_hari', 'like', "%$search%");
+                    ->orWhere('tarif_per_hari', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%");
             });
         }
 
@@ -47,6 +48,7 @@ class RuanganQuery
             $query->where(function ($q) use ($search) {
                 $q->where('nama_ruangan', 'like', "%$search%")
                     ->orWhere('kapasitas', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
                     ->orWhere('tarif_per_hari', 'like', "%$search%");
             });
         }

@@ -386,6 +386,21 @@ async function createRawatInap() {
     }
 }
 
+const statusSelect = document.getElementById('edit-status');
+const roomSelect   = document.getElementById('edit-ruangan');
+
+function toggleRoomSelect() {
+    if (statusSelect.value === 'Pindah_Ruangan') {
+        roomSelect.disabled = false;
+        roomSelect.classList.remove('cursor-not-allowed');
+    } else {
+        roomSelect.disabled = true;
+        roomSelect.classList.add('cursor-not-allowed');
+    }
+}
+
+statusSelect.addEventListener('change', toggleRoomSelect);
+
 function openEditModal(
     id,
     pasien_id,
@@ -414,6 +429,8 @@ function openEditModal(
     } else {
         document.getElementById("edit-biaya-inap").value = "0";
     }
+
+    toggleRoomSelect();
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-rawatInap" })

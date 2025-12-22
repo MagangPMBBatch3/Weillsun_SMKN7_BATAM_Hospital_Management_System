@@ -162,10 +162,28 @@
                                 @endforeach
                             </select>
 
+
+                            <x-input-label>New Status</x-input-label>
+                            <select
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
+                                        focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
+                                        rounded-md shadow-sm"
+                                name="edit-status" id="edit-status">
+
+                                <option value="" class="text-gray-500 italic">Select Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Pulang">Pulang</option>
+                                <option value="Pindah_Ruangan">Pindah Ruangan</option>
+                            </select>
+
+
                             <x-input-label>New Room</x-input-label>
                             <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-ruangan" id="edit-ruangan">
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
+                                        focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
+                                        rounded-md shadow-sm disabled:cursor-not-allowed"
+                                name="edit-ruangan" id="edit-ruangan" disabled>
+
                                 <option value="" class="text-gray-500 italic">Select Room</option>
                                 @foreach ($ruangan as $room)
                                     <option value="{{ $room->id }}">
@@ -174,26 +192,19 @@
                                 @endforeach
                             </select>
 
+
                             <x-input-label>New Entry Date</x-input-label>
                             <x-text-input id="edit-tanggal-masuk" type="date" class="border p-2 w-full rounded" />
 
                             <x-input-label>New Exit Date</x-input-label>
-                            <x-text-input id="edit-tanggal-keluar" type="date" class="border p-2 w-full rounded" />
+                            <x-text-input id="edit-tanggal-keluar" type="date"
+                                class="border p-2 w-full rounded" />
 
                             <x-input-label>New Fee</x-input-label>
                             <x-text-input id="edit-biaya-inap" type="text" placeholder="0" readonly
                                 class="border-2 border-green-600 p-2 w-full rounded bg-gray-100 font-semibold" />
 
 
-                            <x-input-label>New Status</x-input-label>
-                            <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                name="edit-status" id="edit-status">
-                                <option value="" class="text-gray-500 italic">Select Status</option>
-                                <option value="Aktif">Aktif</option>
-                                <option value="Pulang">Pulang</option>
-                                <option value="Pindah_Ruangan">Pindah Ruangan</option>
-                            </select>
                         </div>
 
                         <div class="flex justify-end mt-4">
@@ -209,6 +220,7 @@
 
     <script>
         window.currentUserRole = "{{ Auth::user()->role }}";
+
 
         function showTable(isActive) {
             const tableActive = document.getElementById("tableActive");

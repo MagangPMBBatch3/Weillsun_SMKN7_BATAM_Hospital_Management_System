@@ -12,7 +12,7 @@ class Ruangan extends Model
 
     protected $table = 'ruangan';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama_ruangan', 'kapasitas', 'tarif_per_hari'];
+    protected $fillable = ['nama_ruangan', 'kapasitas', 'tarif_per_hari', 'status'];
 
     protected $casts = [
         'created_at' => 'datetime',

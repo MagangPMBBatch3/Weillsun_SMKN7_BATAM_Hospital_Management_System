@@ -60,7 +60,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             query($first: Int, $page: Int, $search: String) {
                 allRuanganPaginate(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_ruangan kapasitas tarif_per_hari
+                            id nama_ruangan kapasitas status tarif_per_hari
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -100,7 +100,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             query($first: Int, $page: Int, $search: String) {
                 allRuanganArchive(first: $first, page: $page, search: $search){
                     data { 
-                            id nama_ruangan kapasitas tarif_per_hari
+                            id nama_ruangan kapasitas status tarif_per_hari
                         }
                     paginatorInfo { 
                             currentPage 
@@ -221,10 +221,12 @@ async function createRuangan() {
     }
 }
 
-function openEditModal(id, nama_ruangan, kapasitas, tarif_per_hari) {
+
+function openEditModal(id, nama_ruangan, kapasitas, status, tarif_per_hari) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama_ruangan").value = nama_ruangan;
     document.getElementById("edit-kapasitas").value = formatNumber(kapasitas);
+    document.getElementById("edit-status").value = status;
     document.getElementById("edit-tarif_per_hari").value =
         formatNumber(tarif_per_hari);
 
@@ -239,6 +241,9 @@ async function updateRuangan() {
     const nama_ruangan = document
         .getElementById("edit-nama_ruangan")
         .value.trim();
+    const status = document
+        .getElementById("edit-status")
+        .value;
     const kapasitas = document
         .getElementById("edit-kapasitas")
         .value.replace(/\./g, "");
@@ -246,7 +251,7 @@ async function updateRuangan() {
         .getElementById("edit-tarif_per_hari")
         .value.replace(/\./g, "");
 
-    if (!nama_ruangan || !kapasitas || !tarif_per_hari)
+    if (!nama_ruangan || !kapasitas || !tarif_per_hari || !status)
         return alert("Please fill in all required fields!");
     showLoading();
 
@@ -255,6 +260,7 @@ async function updateRuangan() {
                             id 
                             nama_ruangan 
                             kapasitas
+                            status
                             tarif_per_hari
                         } 
                     }`;
@@ -269,6 +275,7 @@ async function updateRuangan() {
                     input: {
                         nama_ruangan,
                         kapasitas: parseInt(kapasitas),
+                        status,
                         tarif_per_hari: parseFloat(tarif_per_hari),
                     },
                 },
@@ -331,7 +338,7 @@ function renderRuanganTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No data available.</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -365,7 +372,7 @@ function renderRuanganTable(result, tableId, isActive) {
         if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.nama_ruangan}', '${item.kapasitas}', '${item.tarif_per_hari}')"
+                <button onclick="openEditModal(${item.id}, '${item.nama_ruangan}', '${item.kapasitas}', '${item.status}', '${item.tarif_per_hari}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
@@ -399,11 +406,15 @@ function renderRuanganTable(result, tableId, isActive) {
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
                 ${item.kapasitas.toLocaleString("id-ID")}
             </td>
+            <td class="p-4 text-center text-base font-semibold">${
+                item.status
+            }</td>
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
                 <span class="font-bold text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">
                     Rp${item.tarif_per_hari.toLocaleString("id-ID")}
                 </span>
             </td>
+            
 
             ${
                 window.currentUserRole === "admin"
