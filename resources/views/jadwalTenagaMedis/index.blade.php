@@ -1,26 +1,25 @@
 <x-app-layout>
     <x-slot name="header">
         <div
-            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-gray-900/60 rounded-2xl p-5 shadow-md border border-gray-200/50 dark:border-gray-700/50">
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-gray-900/60 rounded-2xl p-5 shadow-md border">
 
-            <!-- Title -->
-            <h2 class="text-2xl font-extrabold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                <i class='bx bx-repeat text-3xl text-blue-500'></i>
-                <span class=" tracking-wider">Doctors Schedule</span>
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-3">
+                <i class='bx bx-calendar text-3xl text-blue-500'></i>
+                Doctors Schedule
             </h2>
 
-            <!-- Search & Buttons -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
-
-                <!-- Search Bar -->
+            <div class="flex gap-3 w-full lg:w-auto">
                 <div class="relative w-full sm:w-72">
-                    <input type="text" id="search" placeholder="Search..."
-                        class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm px-4 py-2.5 pl-9 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition duration-200"
-                        oninput="searchJadwalTenagaMedis()">
-                    <i class='bx bx-search absolute left-3 top-3 h-5 w-5 text-gray-600 '></i>
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search doctor..."
+                        oninput="searchJadwalTenagaMedis()"
+                        class="w-full rounded-xl border px-4 py-2 pl-9 text-sm"
+                    >
+                    <i class='bx bx-search absolute left-3 top-3'></i>
                 </div>
 
-                <!-- Tombol New Patient -->
                 @if (auth()->user()->role === 'admin')
                     <x-primary-button x-data=""
                         x-on:click.prevent="$dispatch('open-modal', 'create-kunjunganUlang')"
@@ -31,115 +30,148 @@
                         New Schedule
                     </x-primary-button>
                 @endif
-
-
-                <!-- Tombol Aktif / Arsip -->
-                @if (auth()->user()->role === 'admin')
-                    <div class="flex items-center gap-2 justify-center">
-                        <button id="btnActive"
-                            class="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95"
-                            onclick="showTable(true)">
-                            Active
-                        </button>
-                        <button id="btnArchive"
-                            class="px-5 py-2.5 rounded-xl bg-gray-300 text-gray-600 font-semibold shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95"
-                            onclick="showTable(false)">
-                            Archive
-                        </button>
-                    </div>
-                @endif
-
             </div>
         </div>
     </x-slot>
 
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
 
-    <div class="px-4 sm:px-6 lg:px-8 mb-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+            <x-loading />
 
-            <x-loading></x-loading>
-
-            {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['doctor', 'monday', 'Tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']" requireRole="admin">
+            {{-- TABLE --}}
+            <x-table
+                id="tableActive"
+                :headers="[
+                    'Doctor',
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday'
+                ]"
+                requireRole=false
+            >
                 <tbody id="dataJadwalTenagaMedisAktif"></tbody>
             </x-table>
 
-            {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['doctor', 'monday', 'Tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']" requireRole="admin">
-                <tbody id="dataJadwalTenagaMedisArsip"></tbody>
-            </x-table>
+            <x-pagination-active />
 
-            {{-- Pagination untuk AKTIF --}}
-            <x-pagination-active></x-pagination-active>
-
-            {{-- Pagination untuk ARSIP --}}
-            <x-pagination-archive></x-pagination-archive>
-
-            {{-- Modal CREATE --}}
+            {{-- ================= MODAL CREATE DOCTOR ================= --}}
             <x-modal name="create-kunjunganUlang" focusable>
                 <div class="p-6">
                     <form onsubmit="event.preventDefault(); createJadwalTenagaMedis()">
-                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Schedule</h2>
+                        <h2 class="text-xl font-bold mb-4">Add Doctor</h2>
 
-                        <div class="space-y-3">
+                        <x-input-label>Doctor</x-input-label>
+                        <select
+                            id="create-dokter_id"
+                            class="border p-2 w-full rounded"
+                            required
+                        >
+                            <option value="" disabled selected>Select Doctor</option>
+                            @foreach ($dokters as $d)
+                                <option value="{{ $d->id }}">
+                                    {{ $d->profile->nickname }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                            <x-input-label>Doctor</x-input-label>
-                            <select name="doktr_id" id="create-doktr_id" class="border p-2 w-full rounded" required>
-                                <option value="" disabled selected>Select Doctor</option>
-                                @foreach ($dokters as $d)
-                                    <option value="{{ $d->id }}">{{ $d->profile->nickname }}</option>
-                                @endforeach
-                            </select>
-
-                            <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal" type="date" class="border p-2 w-full rounded" />
-
-                            <x-input-label>Start</x-input-label>
-                            <x-text-input id="create-jam_mulai" type="time" class="border p-2 w-full rounded" />
-
-                            <x-input-label>End</x-input-label>
-                            <x-text-input id="create-jam_selesai" type="time" class="border p-2 w-full rounded" />
-
-                        </div>
-
-                        <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                            <x-primary-button class="ml-2">Save</x-primary-button>
+                        <div class="flex justify-end mt-6 gap-2">
+                            <x-secondary-button x-on:click="$dispatch('close')">
+                                Cancel
+                            </x-secondary-button>
+                            <x-primary-button>
+                                Save
+                            </x-primary-button>
                         </div>
                     </form>
                 </div>
             </x-modal>
 
-            {{-- Modal EDIT --}}
-            <x-modal name="edit-kunjunganUlang">
+            {{-- ================= MODAL CREATE JAM ================= --}}
+            <x-modal name="create-jam" focusable>
                 <div class="p-6">
-                    <form onsubmit="event.preventDefault(); updateJadwalTenagaMedis()">
-                        <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Edit Return Visit</h2>
+                    <form onsubmit="event.preventDefault(); createJam()">
+                        <h2 class="text-xl font-bold mb-4">Add Schedule</h2>
 
-                        <x-text-input type="hidden" id="edit-id" />
+                        {{-- Hidden --}}
+                        <input type="hidden" id="jam-tenaga_medis_id">
+                        <input type="hidden" id="jam-hari">
 
                         <div class="space-y-3">
-                            <x-input-label>New Patient Name</x-input-label>
-                            <select name="doktr_id" id="edit-doktr_id" class="border p-2 w-full rounded" required>
-                                <option value="" disabled selected>Select Doctor</option>
-                                @foreach ($dokters as $d)
-                                    <option value="{{ $d->id }}">{{ $d->profile->nickname }}</option>
-                                @endforeach
-                            </select>
+                            <div>
+                                <x-input-label>Start Time</x-input-label>
+                                <x-text-input
+                                    type="time"
+                                    id="jam-mulai"
+                                    class="w-full"
+                                    required
+                                />
+                            </div>
 
-                            <x-input-label>New Date</x-input-label>
-                            <x-text-input id="edit-tanggal" type="date" class="border p-2 w-full rounded" />
-
-                            <x-input-label>Start</x-input-label>
-                            <x-text-input id="edit-jam_mulai" type="time" class="border p-2 w-full rounded" />
-
-                            <x-input-label>End</x-input-label>
-                            <x-text-input id="edit-jam_selesai" type="time" class="border p-2 w-full rounded" />
+                            <div>
+                                <x-input-label>End Time</x-input-label>
+                                <x-text-input
+                                    type="time"
+                                    id="jam-selesai"
+                                    class="w-full"
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        <div class="flex justify-end mt-4">
-                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                            <x-primary-button class="ml-2">Update</x-primary-button>
+                        <div class="flex justify-end mt-6 gap-2">
+                            <x-secondary-button x-on:click="$dispatch('close')">
+                                Cancel
+                            </x-secondary-button>
+                            <x-primary-button>
+                                Save
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            </x-modal>
+
+            {{-- ================= MODAL EDIT JAM ================= --}}
+            <x-modal name="edit-kunjunganUlang" focusable>
+                <div class="p-6">
+                    <form onsubmit="event.preventDefault(); updateJadwalTenagaMedis()">
+                        <h2 class="text-xl font-bold mb-4">Edit Schedule</h2>
+
+                        <input type="hidden" id="edit-id">
+
+                        <div class="space-y-3">
+                            <div>
+                                <x-input-label>Start Time</x-input-label>
+                                <x-text-input
+                                    type="time"
+                                    id="edit-jam_mulai"
+                                    class="w-full"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <x-input-label>End Time</x-input-label>
+                                <x-text-input
+                                    type="time"
+                                    id="edit-jam_selesai"
+                                    class="w-full"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-6 gap-2">
+                            <x-secondary-button x-on:click="$dispatch('close')">
+                                Cancel
+                            </x-secondary-button>
+                            <x-primary-button>
+                                Update
+                            </x-primary-button>
                         </div>
                     </form>
                 </div>
@@ -148,45 +180,11 @@
         </div>
     </div>
 
+    {{-- ROLE --}}
     <script>
         window.currentUserRole = "{{ Auth::user()->role }}";
-
-        function showTable(isActive) {
-            const tableActive = document.getElementById("tableActive");
-            const tableArchive = document.getElementById("tableArchive");
-            const btnActive = document.getElementById("btnActive");
-            const btnArchive = document.getElementById("btnArchive");
-            const paginationActive = document.getElementById("paginationActive");
-            const paginationArchive = document.getElementById("paginationArchive");
-
-            if (isActive) {
-                // Tampilkan tabel & pagination aktif
-                tableActive.classList.remove("hidden");
-                tableArchive.classList.add("hidden");
-                paginationActive.classList.remove("hidden");
-                paginationArchive.classList.add("hidden");
-
-                // Style button
-                btnActive.classList.replace("bg-gray-300", "bg-blue-500");
-                btnActive.classList.replace("text-gray-600", "text-white");
-                btnArchive.classList.replace("bg-blue-500", "bg-gray-300");
-                btnArchive.classList.replace("text-white", "text-gray-600");
-            } else {
-                // Tampilkan tabel & pagination arsip
-                tableActive.classList.add("hidden");
-                tableArchive.classList.remove("hidden");
-                paginationActive.classList.add("hidden");
-                paginationArchive.classList.remove("hidden");
-
-                // Style button
-                btnArchive.classList.replace("bg-gray-300", "bg-blue-500");
-                btnArchive.classList.replace("text-gray-600", "text-white");
-                btnActive.classList.replace("bg-blue-500", "bg-gray-300");
-                btnActive.classList.replace("text-white", "text-gray-600");
-            }
-
-        }
     </script>
+
     {{-- JS --}}
     <script src="{{ asset('js/jadwalTenagaMedis/jadwalTenagaMedis.js') }}"></script>
 </x-app-layout>

@@ -18,4 +18,15 @@ class JadwalTenagaMedisMutation {
         }
         return null;
     }
+
+    public function forceDeleteByTenagaMedis($_, array $args)
+    {
+        JadwalTenagaMedis::where(
+            'tenaga_medis_id',
+            $args['tenaga_medis_id']
+        )->forceDelete();
+
+        return true;
+    }
+
 }

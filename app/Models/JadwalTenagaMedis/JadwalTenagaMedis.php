@@ -13,7 +13,7 @@ class JadwalTenagaMedis extends Model
 
     protected $table = 'jadwal_tenaga_medis';
     protected $primaryKey = 'id';
-    protected $fillable = ['tenaga_medis_id','tanggal','jam_mulai','jam_selesai'];
+    protected $fillable = ['tenaga_medis_id', 'hari', 'jam_mulai', 'jam_selesai'];
 
     protected $casts = [
         'created_at' => 'datetime',

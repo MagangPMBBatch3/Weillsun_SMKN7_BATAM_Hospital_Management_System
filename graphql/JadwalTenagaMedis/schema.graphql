@@ -1,7 +1,8 @@
 type JadwalTenagaMedis {
     id: ID!
     tenaga_medis_id: ID!
-    tanggal: Date!
+    hari: Int
+    tanggal: Date
     jam_mulai: String
     jam_selesai: String!
     created_at: DateTime
@@ -13,13 +14,13 @@ type JadwalTenagaMedis {
 
 input CreateJadwalTenagaMedisInput {
     tenaga_medis_id: ID!
-    tanggal: Date!
+    hari: Int!
     jam_mulai: String!
     jam_selesai: String!
 }
 input UpdateJadwalTenagaMedisInput {
     tenaga_medis_id: ID
-    tanggal: Date
+    hari: Int
     jam_mulai: String
     jam_selesai: String
 }
@@ -46,7 +47,9 @@ extend type Query {
         page: Int
         first: Int
     ): JadwalTenagaMedisPaginator
-        @field(resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all")
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all"
+        )
 
     allJadwalTenagaMedisArchive(
         search: String
@@ -55,7 +58,7 @@ extend type Query {
     ): JadwalTenagaMedisPaginator
         @field(
             resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@allArchive"
-    )
+        )
 
     JadwalTenagaMedis(id: ID! @eq(key: "id")): JadwalTenagaMedis
         @find(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
@@ -84,5 +87,10 @@ extend type Mutation {
     forceDeleteJadwalTenagaMedis(id: ID!): JadwalTenagaMedis
         @field(
             resolver: "App\\GraphQL\\JadwalTenagaMedis\\Mutations\\JadwalTenagaMedisMutation@forceDelete"
+        )
+
+    forceDeleteJadwalByTenagaMedis(tenaga_medis_id: ID!): Boolean
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Mutations\\JadwalTenagaMedisMutation@forceDeleteByTenagaMedis"
         )
 }
