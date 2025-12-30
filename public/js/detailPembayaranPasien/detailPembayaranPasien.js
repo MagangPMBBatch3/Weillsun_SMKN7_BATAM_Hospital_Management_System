@@ -983,7 +983,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
             .map((detail) => {
                 let detailActions = "";
 
-                if (window.currentUserRole === "admin") {
+                if (window.currentUserRole === "admin" || window.currentUserRole === "cashier") {
                     if (isActive) {
                         detailActions = `
                             <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${detail.tipe_biaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}', '${detail.referensi_id}', '${group.pasien_id}')"

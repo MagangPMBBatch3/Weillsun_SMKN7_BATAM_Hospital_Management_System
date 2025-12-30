@@ -571,7 +571,7 @@ function renderDetailPembelianObatCard(result, containerId, isActive) {
             .map((detail) => {
                 let detailActions = "";
 
-                if (window.currentUserRole === "admin") {
+                if (window.currentUserRole === "admin" || window.currentUserRole === "cashier") {
                     if (isActive) {
                         detailActions = `
                             <button onclick="openEditModal(${detail.id}, '${group.pembelian_id}', '${detail.obat_id}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.harga_beli}', '${detail.subtotal}')"

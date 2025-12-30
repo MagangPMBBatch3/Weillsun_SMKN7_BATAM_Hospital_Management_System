@@ -406,7 +406,7 @@ function renderPembelianObatTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "cashier") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.supplier_id}', '${item.tanggal}', '${item.total_biaya}', '${item.status}')"
@@ -456,7 +456,7 @@ function renderPembelianObatTable(result, tableId, isActive) {
                 </span>
             </td>
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "cashier"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

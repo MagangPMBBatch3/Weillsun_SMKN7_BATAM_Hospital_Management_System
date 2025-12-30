@@ -2,7 +2,6 @@ const API_URL = "/graphql";
 let currentPageActive = 1;
 let existingDoctorIds = [];
 
-
 /* ======================================================
    LOADING
 ====================================================== */
@@ -90,9 +89,9 @@ async function loadDataPaginate(page = 1) {
                 variables: {
                     first: parseInt(perPage),
                     page: currentPageActive,
-                    search: searchValue
-                }
-            })
+                    search: searchValue,
+                },
+            }),
         });
 
         const json = await res.json();
@@ -100,7 +99,6 @@ async function loadDataPaginate(page = 1) {
             json?.data?.allJadwalTenagaMedisPaginate || {},
             "dataJadwalTenagaMedisAktif"
         );
-
     } catch (error) {
         console.error(error);
         alert("Failed load data");
@@ -112,22 +110,18 @@ async function loadDataPaginate(page = 1) {
 /* ======================================================
    GROUP DATA BY DOCTOR
 ====================================================== */
-/*
-  Kenapa ini penting?
-  - 1 dokter = 1 row
-  - jadwal disimpan per hari (1–7)
-*/
+
 function groupByDoctor(items) {
     const grouped = {};
 
-    items.forEach(item => {
+    items.forEach((item) => {
         const dokterId = item.tenagaMedis.id;
 
         if (!grouped[dokterId]) {
             grouped[dokterId] = {
                 tenaga_medis_id: dokterId,
                 dokter: item.tenagaMedis.profile.nickname,
-                jadwal: {}
+                jadwal: {},
             };
         }
 
@@ -138,7 +132,9 @@ function groupByDoctor(items) {
 }
 
 async function createJam() {
-    const tenaga_medis_id = document.getElementById("jam-tenaga_medis_id").value;
+    const tenaga_medis_id = document.getElementById(
+        "jam-tenaga_medis_id"
+    ).value;
     const hari = document.getElementById("jam-hari").value;
     const jam_mulai = document.getElementById("jam-mulai").value;
     const jam_selesai = document.getElementById("jam-selesai").value;
@@ -169,10 +165,10 @@ async function createJam() {
                         tenaga_medis_id: parseInt(tenaga_medis_id),
                         hari: parseInt(hari),
                         jam_mulai,
-                        jam_selesai
-                    }
-                }
-            })
+                        jam_selesai,
+                    },
+                },
+            }),
         });
 
         // tutup modal
@@ -182,7 +178,6 @@ async function createJam() {
 
         // reload table
         loadDataPaginate(currentPageActive);
-
     } catch (error) {
         console.error(error);
         alert("Failed create schedule");
@@ -190,7 +185,6 @@ async function createJam() {
         hideLoading();
     }
 }
-
 
 /* ======================================================
    RENDER TABLE
@@ -214,47 +208,61 @@ function renderJadwalTenagaMedisTable(result, tableId) {
     }
 
     const grouped = groupByDoctor(items);
-    existingDoctorIds = []; 
-        grouped.forEach(row => { 
-        existingDoctorIds.push(String(row.tenaga_medis_id)); 
+    existingDoctorIds = [];
+    grouped.forEach((row) => {
+        existingDoctorIds.push(String(row.tenaga_medis_id));
     });
 
-    grouped.forEach(row => {
+    grouped.forEach((row) => {
         let cells = "";
 
         // LOOP HARI (1 = Senin, 7 = Minggu)
         for (let hari = 1; hari <= 7; hari++) {
             if (row.jadwal[hari]) {
                 const j = row.jadwal[hari];
+
                 cells += `
-                    <td class="text-center p-4">
-                        <div class="font-semibold">
-                            ${j.jam_mulai} - ${j.jam_selesai}
-                        </div>
-                        <div class="flex justify-center gap-2 mt-1">
-                            <button
-                                onclick="openEditJamModal(${j.id}, '${j.jam_mulai}', '${j.jam_selesai}')"
-                                class="text-indigo-500">
-                                ✏️
-                            </button>
-                            <button
-                                onclick="deleteJadwal(${j.id})"
-                                class="text-red-500">
-                                🗑
-                            </button>
-                        </div>
-                    </td>
-                `;
+            <td class="text-center p-4">
+                <div class="font-semibold">
+                    ${j.jam_mulai} - ${j.jam_selesai}
+                </div>
+
+                ${
+                    currentUserRole === "admin"
+                        ? `
+                            <div class="flex justify-center gap-2 mt-1">
+                                <button
+                                    onclick="openEditJamModal(${j.id}, '${j.jam_mulai}', '${j.jam_selesai}')"
+                                    class="text-indigo-500">
+                                    ✏️
+                                </button>
+                                <button
+                                    onclick="deleteJadwal(${j.id})"
+                                    class="text-red-500">
+                                    🗑
+                                </button>
+                            </div>
+                        `
+                        : ``
+                }
+            </td>
+        `;
             } else {
                 cells += `
-                    <td class="text-center">
-                        <button
-                            onclick="openCreateJamModal(${row.tenaga_medis_id}, ${hari})"
-                            class="text-green-600 text-xl font-bold">
-                            +
-                        </button>
-                    </td>
-                `;
+            <td class="text-center">
+                ${
+                    currentUserRole === "admin"
+                        ? `
+                            <button
+                                onclick="openCreateJamModal(${row.tenaga_medis_id}, ${hari})"
+                                class="text-green-600 text-xl font-bold">
+                                +
+                            </button>
+                        `
+                        : `-`
+                }
+            </td>
+        `;
             }
         }
 
@@ -276,8 +284,9 @@ function renderJadwalTenagaMedisTable(result, tableId) {
     });
 
     // Pagination info
-    document.getElementById("pageInfo").innerText =
-        `Page ${pageInfo.currentPage} of ${pageInfo.lastPage} (Total ${pageInfo.total})`;
+    document.getElementById(
+        "pageInfo"
+    ).innerText = `Page ${pageInfo.currentPage} of ${pageInfo.lastPage} (Total ${pageInfo.total})`;
 
     document.getElementById("prevBtn").disabled = pageInfo.currentPage <= 1;
     document.getElementById("nextBtn").disabled = !pageInfo.hasMorePages;
@@ -321,10 +330,10 @@ async function createJadwalTenagaMedis() {
                         tenaga_medis_id,
                         hari: 1,
                         jam_mulai: "00:00",
-                        jam_selesai: "00:00"
-                    }
-                }
-            })
+                        jam_selesai: "00:00",
+                    },
+                },
+            }),
         });
 
         window.dispatchEvent(
@@ -383,7 +392,7 @@ async function deleteJadwal(id) {
     await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: mutation, variables: { id } })
+        body: JSON.stringify({ query: mutation, variables: { id } }),
     });
 
     loadDataPaginate(currentPageActive);
@@ -408,14 +417,13 @@ async function forceDeleteDokter(tenaga_medis_id) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             query: mutation,
-            variables: { id: tenaga_medis_id }
-        })
+            variables: { id: tenaga_medis_id },
+        }),
     });
 
     hideLoading();
     loadDataPaginate(1);
 }
-
 
 /* ======================================================
    INIT

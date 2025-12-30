@@ -311,7 +311,7 @@ function renderPasienTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "receptionist") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.nama}', '${item.tanggal_lahir}', '${item.jenis_kelamin}', '${item.alamat}', '${item.telepon}')"
@@ -370,7 +370,7 @@ function renderPasienTable(result, tableId, isActive) {
             </td>
 
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "receptionist"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

@@ -189,6 +189,50 @@ function filterAngka(str) {
     return str.replace(/[^0-9.]/g, "");
 }
 
+function getSelectedStok(selectEl) {
+    if (!selectEl) return 0;
+    const option = selectEl.options[selectEl.selectedIndex];
+    return parseInt(option?.dataset?.stok || 0);
+}
+
+function updateObatOptions() {
+    const selects = document.querySelectorAll(
+        '#dynamic-container select[name="create-nama-obat[]"]'
+    );
+
+    // Ambil semua obat yang sedang dipilih
+    const selectedValues = Array.from(selects)
+        .map((s) => s.value)
+        .filter((v) => v !== "");
+
+    selects.forEach((select) => {
+        const currentValue = select.value;
+
+        Array.from(select.options).forEach((option) => {
+            if (!option.value) return;
+
+            // Disable jika dipilih di select lain
+            if (
+                selectedValues.includes(option.value) &&
+                option.value !== currentValue
+            ) {
+                option.disabled = true;
+                option.hidden = true; // optional (lebih rapi)
+            } else {
+                option.disabled = false;
+                option.hidden = false;
+            }
+        });
+    });
+}
+
+document.addEventListener("change", (e) => {
+    if (e.target.name === "create-nama-obat[]") {
+        updateObatOptions();
+    }
+});
+
+
 // Create
 async function createResepObat() {
     const tenaga_medis_id = document.getElementById("create-nickname").value;
@@ -200,21 +244,35 @@ async function createResepObat() {
 
     const rows = document.querySelectorAll("#dynamic-container .dynamic-row");
 
-    // Map rows ke array of prescription objects, lalu filter yang valid
-    const prescriptions = Array.from(rows)
-        .map((row) => ({
-            obat_id: row.querySelector('select[name="create-nama-obat[]"]')
-                .value,
-            jumlah: parseInt(
-                row
-                    .querySelector('input[name="create-jumlah[]"]')
-                    .value.replace(/\./g, "") || 0
-            ),
-            aturan_pakai: row
-                .querySelector('textarea[name="create-aturan-pakai[]"]')
-                .value.trim(),
-        }))
-        .filter((item) => item.obat_id && item.jumlah && item.aturan_pakai);
+    const prescriptions = [];
+
+    for (const row of rows) {
+        const selectObat = row.querySelector(
+            'select[name="create-nama-obat[]"]'
+        );
+        const inputJumlah = row.querySelector('input[name="create-jumlah[]"]');
+        const aturan = row
+            .querySelector('textarea[name="create-aturan-pakai[]"]')
+            .value.trim();
+
+        const obat_id = selectObat.value;
+        const stok = getSelectedStok(selectObat);
+        const jumlah = parseInt(inputJumlah.value.replace(/\./g, "") || 0);
+
+        if (!obat_id || !jumlah || !aturan) continue;
+
+        if (jumlah > stok) {
+            alert(`Jumlah melebihi stok tersedia (${stok})`);
+            inputJumlah.focus();
+            return; // STOP submit
+        }
+
+        prescriptions.push({
+            obat_id,
+            jumlah,
+            aturan_pakai: aturan,
+        });
+    }
 
     if (prescriptions.length === 0) {
         return alert("Please fill at least one prescription!");
@@ -341,6 +399,15 @@ async function updateResepObat() {
         .value.trim();
     showLoading();
 
+    const selectObat = document.getElementById("edit-nama-obat");
+    const stok = getSelectedStok(selectObat);
+
+    if (parseInt(jumlah) > stok) {
+        alert(`Jumlah melebihi stok tersedia (${stok})`);
+        hideLoading();
+        return;
+    }
+
     const mutation = `
         mutation($id: ID!, $input: UpdateResepObatInput!) {
             updateResepObat(id: $id, input: $input) {
@@ -406,12 +473,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const dynamicContainer = document.getElementById("dynamic-container");
 
     dynamicContainer.addEventListener("input", (e) => {
-        // Cek apakah yang di-input adalah field jumlah
-        if (e.target.name === "create-jumlah[]") {
-            let value = unformatNumber(filterAngka(e.target.value));
-            e.target.value = value ? formatNumber(value) : "";
+    if (e.target.name === "create-jumlah[]") {
+        let value = unformatNumber(filterAngka(e.target.value));
+        e.target.value = value ? formatNumber(value) : "";
+
+        const row = e.target.closest(".dynamic-row");
+        const selectObat = row.querySelector('select[name="create-nama-obat[]"]');
+        const stok = getSelectedStok(selectObat);
+
+        if (parseInt(value || 0) > stok) {
+            alert(`Stok maksimal: ${stok}`);
+            e.target.value = formatNumber(stok);
         }
-    });
+    }
+});
+;
 
     // Untuk edit modal (tetap pakai cara lama karena hanya 1 input)
     editJumlahInput.addEventListener("input", (e) => {
@@ -490,7 +566,7 @@ function renderResepObatTable(result, tableId, isActive) {
             .map((obat) => {
                 let obatActions = "";
 
-                if (window.currentUserRole === "admin") {
+                if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
                     if (isActive) {
                         obatActions = `
                         <div class="flex gap-1 flex-wrap">
@@ -533,7 +609,7 @@ function renderResepObatTable(result, tableId, isActive) {
                             obat.aturan_pakai
                         }</span>
                     </div>
-                    ${window.currentUserRole === "admin" ? obatActions : ""}
+                    ${window.currentUserRole === "admin" || window.currentUserRole === "doctor" ? obatActions : ""}
                 </div>
             `;
             })

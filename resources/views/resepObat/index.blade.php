@@ -21,7 +21,7 @@
                 </div>
 
                 <!-- Tombol New User -->
-                @if (auth()->user()->role === 'admin')
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'doctor')
                     <x-primary-button x-data=""
                         x-on:click.prevent="$dispatch('open-modal', 'create-resepObat')"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
@@ -34,7 +34,7 @@
 
 
                 <!-- Tombol Aktif / Arsip -->
-                @if (auth()->user()->role === 'admin')
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'doctor')
                     <div class="flex items-center gap-2 justify-center">
                         <button id="btnActive"
                             class="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95"
@@ -120,7 +120,7 @@
                                                 focus:border-blue-500 focus:ring-blue-500 shadow-sm">
                                             <option value="">Select Medicine</option>
                                             @foreach ($obats as $obat)
-                                                <option value="{{ $obat->id }}">{{ $obat->nama_obat }}</option>
+                                                <option value="{{ $obat->id }}" data-stok="{{ $obat->stok }}">{{ $obat->nama_obat }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -200,11 +200,11 @@
 
                             <x-input-label>New Medicine</x-input-label>
                             <select
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                class=" mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                 name="edit-nama-obat" id="edit-nama-obat">
                                 <option value="" class="text-gray-500 italic">Select Medicine</option>
                                 @foreach ($obats as $obat)
-                                    <option value="{{ $obat->id }}">
+                                    <option value="{{ $obat->id }}" data-stok="{{ $obat->stok }}">
                                         {{ $obat->nama_obat }}
                                     </option>
                                 @endforeach
@@ -249,7 +249,7 @@
                             focus:border-blue-500 focus:ring-blue-500 shadow-sm">
                         <option value="">Select Medicine</option>
                         @foreach ($obats as $obat)
-                            <option value="{{ $obat->id }}">{{ $obat->nama_obat }}</option>
+                            <option value="{{ $obat->id }}" data-stok="{{ $obat->stok }}">{{ $obat->nama_obat }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -272,6 +272,7 @@
             `;
 
             container.appendChild(row);
+            updateObatOptions();
 
             // Animasi masuk
             setTimeout(() => {

@@ -21,7 +21,7 @@
                 </div>
 
                 <!-- Tombol New User -->
-                @if (auth()->user()->role === 'admin')
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'cashier')
                     <x-primary-button x-data=""
                         x-on:click.prevent="$dispatch('open-modal', 'create-detailPembelianObat')"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
@@ -34,7 +34,7 @@
 
 
                 <!-- Tombol Aktif / Arsip -->
-                @if (auth()->user()->role === 'admin')
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'cashier')
                     <div class="flex items-center gap-2 justify-center">
                         <button id="btnActive"
                             class="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95"

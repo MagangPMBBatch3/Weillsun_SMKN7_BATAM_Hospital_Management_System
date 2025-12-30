@@ -2,10 +2,16 @@
 
 @php
     $hasPermission = true;
+
     if ($requireRole) {
-        $hasPermission = auth()->check() && auth()->user()->role === $requireRole;
+        $hasPermission = auth()->check() && (
+            is_array($requireRole)
+                ? in_array(auth()->user()->role, $requireRole)
+                : auth()->user()->role === $requireRole
+        );
     }
 @endphp
+
 
 <div class="overflow-x-auto">
     <table {{ $attributes->merge(['class' => 'min-w-full overflow-x-scroll text-sm rounded-t-2xl border-b-4 border-dashed text-gray-700 dark:text-gray-200']) }}>

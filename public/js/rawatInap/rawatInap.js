@@ -564,7 +564,7 @@ function renderRawatInapTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "receptionist") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.ruangan_id}', '${item.tanggal_masuk}', '${item.tanggal_keluar}', '${item.status}', ${item.biaya_inap})"
@@ -627,7 +627,7 @@ function renderRawatInapTable(result, tableId, isActive) {
             </td>
 
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "receptionist"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

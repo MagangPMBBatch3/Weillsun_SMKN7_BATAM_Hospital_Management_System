@@ -139,7 +139,7 @@ class AuthController extends Controller
         $AlltenagaMedises = TenagaMedis::with('profile:id,nickname')
             ->get();
 
-        $obats = Obat::select('id', 'nama_obat')->get();
+        $obats = Obat::select('id', 'nama_obat', 'stok')->get();
 
         return view('resepobat.index', compact('pasiens', 'Allpasiens', 'AlltenagaMedises', 'obats'));
     }

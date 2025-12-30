@@ -91,6 +91,7 @@
                 </div>
             </x-modal>
 
+            @if (auth()->user()->role === 'admin')
             {{-- ================= MODAL CREATE JAM ================= --}}
             <x-modal name="create-jam" focusable>
                 <div class="p-6">
@@ -176,6 +177,7 @@
                     </form>
                 </div>
             </x-modal>
+            @endif
 
         </div>
     </div>

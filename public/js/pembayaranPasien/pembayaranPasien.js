@@ -447,7 +447,7 @@ function renderPembayaranPasienTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "cashier") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.pasien_id}', '${item.total_biaya}', '${item.metode_bayar}', '${item.tanggal_bayar}')"
@@ -501,7 +501,7 @@ function renderPembayaranPasienTable(result, tableId, isActive) {
                 ${item.tanggal_bayar}
             </td>
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "cashier"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

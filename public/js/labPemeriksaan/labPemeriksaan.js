@@ -424,7 +424,7 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.tenaga_medis_id}', '${item.jenis_pemeriksaan}', '${item.hasil}', '${item.tanggal}', '${item.biaya_lab}')"
@@ -476,7 +476,7 @@ function renderLabPemeriksaanTable(result, tableId, isActive) {
                 </span>
             </td>
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "doctor"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

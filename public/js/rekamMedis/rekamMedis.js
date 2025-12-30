@@ -360,7 +360,7 @@ function renderRekamMedisTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin") {
+        if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.tenaga_medis_id}', '${item.tanggal}', '${item.diagnosis}', '${item.tindakan}')"
@@ -407,7 +407,7 @@ function renderRekamMedisTable(result, tableId, isActive) {
                 ${item.tindakan}
             </td>
             ${
-                window.currentUserRole === "admin"
+                window.currentUserRole === "admin" || window.currentUserRole === "doctor"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }
