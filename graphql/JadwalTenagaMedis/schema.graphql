@@ -1,6 +1,7 @@
 type JadwalTenagaMedis {
     id: ID!
     tenaga_medis_id: ID!
+    poli_id:ID!
     hari: Int
     tanggal: Date
     jam_mulai: String
@@ -10,16 +11,19 @@ type JadwalTenagaMedis {
     deleted_at: DateTime
 
     tenagaMedis: TenagaMedis @belongsTo
+    poli: Poli @belongsTo
 }
 
 input CreateJadwalTenagaMedisInput {
     tenaga_medis_id: ID!
+    poli_id:ID
     hari: Int!
     jam_mulai: String!
     jam_selesai: String!
 }
 input UpdateJadwalTenagaMedisInput {
     tenaga_medis_id: ID
+    poli_id:ID
     hari: Int
     jam_mulai: String
     jam_selesai: String

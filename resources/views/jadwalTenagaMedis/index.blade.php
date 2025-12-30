@@ -22,7 +22,7 @@
 
                 @if (auth()->user()->role === 'admin')
                     <x-primary-button x-data=""
-                        x-on:click.prevent="$dispatch('open-modal', 'create-kunjunganUlang')"
+                        x-on:click.prevent="$dispatch('open-modal', 'create-jadwal')"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -60,7 +60,7 @@
             <x-pagination-active />
 
             {{-- ================= MODAL CREATE DOCTOR ================= --}}
-            <x-modal name="create-kunjunganUlang" focusable>
+            <x-modal name="create-jadwal" focusable>
                 <div class="p-6">
                     <form onsubmit="event.preventDefault(); createJadwalTenagaMedis()">
                         <h2 class="text-xl font-bold mb-4">Add Doctor</h2>
@@ -68,13 +68,26 @@
                         <x-input-label>Doctor</x-input-label>
                         <select
                             id="create-dokter_id"
-                            class="border p-2 w-full rounded"
+                            class="border mb-2 p-2 w-full rounded"
                             required
                         >
                             <option value="" disabled selected>Select Doctor</option>
                             @foreach ($dokters as $d)
                                 <option value="{{ $d->id }}">
                                     {{ $d->profile->nickname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-input-label>Poli</x-input-label>
+                        <select
+                            id="create-poli_id"
+                            class="border p-2 w-full rounded"
+                            required
+                        >
+                            <option value="" disabled selected>Select Poli</option>
+                            @foreach ($poli as $p)
+                                <option value="{{ $p->id }}">
+                                    {{ $p->nama_poli }}
                                 </option>
                             @endforeach
                         </select>
@@ -101,6 +114,7 @@
                         {{-- Hidden --}}
                         <input type="hidden" id="jam-tenaga_medis_id">
                         <input type="hidden" id="jam-hari">
+                        <input type="hidden" id="poli">
 
                         <div class="space-y-3">
                             <div>
@@ -137,7 +151,7 @@
             </x-modal>
 
             {{-- ================= MODAL EDIT JAM ================= --}}
-            <x-modal name="edit-kunjunganUlang" focusable>
+            <x-modal name="edit-jadwal" focusable>
                 <div class="p-6">
                     <form onsubmit="event.preventDefault(); updateJadwalTenagaMedis()">
                         <h2 class="text-xl font-bold mb-4">Edit Schedule</h2>

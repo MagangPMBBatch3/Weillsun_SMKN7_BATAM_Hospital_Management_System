@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('jadwal_tenaga_medis', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenaga_medis_id')->constrained('tenaga_medis')->cascadeOnDelete();
+            $table->foreignId('poli_id')->constrained('poli')->cascadeOnDelete();
             $table->integer('hari');
             $table->time('jam_mulai');
             $table->time('jam_selesai');

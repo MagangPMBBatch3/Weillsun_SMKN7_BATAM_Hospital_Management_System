@@ -64,6 +64,10 @@ async function loadDataPaginate(page = 1) {
                         hari
                         jam_mulai
                         jam_selesai
+                        poli_id
+                        poli {
+                        nama_poli
+                        }
                         tenagaMedis {
                             id
                             profile {
@@ -121,6 +125,8 @@ function groupByDoctor(items) {
             grouped[dokterId] = {
                 tenaga_medis_id: dokterId,
                 dokter: item.tenagaMedis.profile.nickname,
+                poli: item.poli.nama_poli,
+                poli_id: item.poli_id,
                 jadwal: {},
             };
         }
@@ -131,15 +137,67 @@ function groupByDoctor(items) {
     return Object.values(grouped);
 }
 
+async function updateJadwalTenagaMedis() {
+    const id = document.getElementById("edit-id").value;
+    const jam_mulai = document.getElementById("edit-jam_mulai").value;
+    const jam_selesai = document.getElementById("edit-jam_selesai").value;
+    
+    if (!jam_mulai || !jam_selesai) {
+        alert("Please complete all fields");
+        return;
+    }
+
+    showLoading();
+    
+    const mutation = `
+        mutation ($id: ID!, $input: UpdateJadwalTenagaMedisInput!) {
+            updateJadwalTenagaMedis(id: $id, input: $input) {
+                id
+            }
+        }
+    `;
+
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: mutation,
+                variables: {
+                    id: parseInt(id),
+                    input: {
+                        jam_mulai,
+                        jam_selesai,
+                    },
+                },
+            }),
+        });
+
+        // tutup modal
+        window.dispatchEvent(
+            new CustomEvent("close-modal", { detail: "edit-jadwal" })
+        );
+
+        // reload table
+        loadDataPaginate(currentPageActive);
+    } catch (error) {
+        console.error(error);
+        alert("Failed update schedule");
+    } finally {
+        hideLoading();
+    }
+}
+
 async function createJam() {
     const tenaga_medis_id = document.getElementById(
         "jam-tenaga_medis_id"
     ).value;
     const hari = document.getElementById("jam-hari").value;
+    const poli_id = document.getElementById("poli").value;
     const jam_mulai = document.getElementById("jam-mulai").value;
     const jam_selesai = document.getElementById("jam-selesai").value;
 
-    if (!tenaga_medis_id || !hari || !jam_mulai || !jam_selesai) {
+    if (!tenaga_medis_id || !hari || !poli_id || !jam_mulai || !jam_selesai) {
         alert("Please complete all fields");
         return;
     }
@@ -164,6 +222,7 @@ async function createJam() {
                     input: {
                         tenaga_medis_id: parseInt(tenaga_medis_id),
                         hari: parseInt(hari),
+                        poli_id: parseInt(poli_id),
                         jam_mulai,
                         jam_selesai,
                     },
@@ -254,7 +313,7 @@ function renderJadwalTenagaMedisTable(result, tableId) {
                     currentUserRole === "admin"
                         ? `
                             <button
-                                onclick="openCreateJamModal(${row.tenaga_medis_id}, ${hari})"
+                                onclick="openCreateJamModal(${row.tenaga_medis_id}, ${hari}, ${row.poli_id})"
                                 class="text-green-600 text-xl font-bold">
                                 +
                             </button>
@@ -270,6 +329,7 @@ function renderJadwalTenagaMedisTable(result, tableId) {
             <tr>
                 <td class="font-semibold p-4">
                     ${row.dokter}
+                    <div class="text-blue-500">Clinic: <span class="italic text-blue-600">${row.poli}</span></div>
                     <div>
                         <button
                             onclick="forceDeleteDokter(${row.tenaga_medis_id})"
@@ -297,9 +357,10 @@ function renderJadwalTenagaMedisTable(result, tableId) {
 ====================================================== */
 async function createJadwalTenagaMedis() {
     const tenaga_medis_id = document.getElementById("create-dokter_id").value;
+    const poli_id = document.getElementById("create-poli_id").value;
 
-    if (!tenaga_medis_id) {
-        alert("Doctor required");
+    if (!tenaga_medis_id || !poli_id) {
+        alert("Doctor and Poli required");
         return;
     }
 
@@ -315,6 +376,7 @@ async function createJadwalTenagaMedis() {
         mutation ($input: CreateJadwalTenagaMedisInput!) {
             createJadwalTenagaMedis(input: $input) {
                 id
+                poli_id
             }
         }
     `;
@@ -328,6 +390,7 @@ async function createJadwalTenagaMedis() {
                 variables: {
                     input: {
                         tenaga_medis_id,
+                        poli_id,
                         hari: 1,
                         jam_mulai: "00:00",
                         jam_selesai: "00:00",
@@ -337,7 +400,7 @@ async function createJadwalTenagaMedis() {
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "create-kunjunganUlang" })
+            new CustomEvent("close-modal", { detail: "create-jadwal" })
         );
 
         loadDataPaginate(1);
@@ -351,9 +414,10 @@ async function createJadwalTenagaMedis() {
 /* ======================================================
    CREATE JAM
 ====================================================== */
-function openCreateJamModal(tenaga_medis_id, hari) {
+function openCreateJamModal(tenaga_medis_id, hari, poli_id) {
     document.getElementById("jam-tenaga_medis_id").value = tenaga_medis_id;
     document.getElementById("jam-hari").value = hari;
+    document.getElementById("poli").value = poli_id;
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "create-jam" })
@@ -369,7 +433,7 @@ function openEditJamModal(id, jam_mulai, jam_selesai) {
     document.getElementById("edit-jam_selesai").value = jam_selesai;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-kunjunganUlang" })
+        new CustomEvent("open-modal", { detail: "edit-jadwal" })
     );
 }
 
@@ -425,9 +489,7 @@ async function forceDeleteDokter(tenaga_medis_id) {
     loadDataPaginate(1);
 }
 
-/* ======================================================
-   INIT
-====================================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
     loadDataPaginate(1);
 });

@@ -20,6 +20,9 @@ class JadwalTenagaMedisQuery
             })
             ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
                     $q->where('nickname', 'like', "%$search%");
+            })
+            ->orWhereHas('poli', function ($q) use ($search) {
+                    $q->where('nama_poli', 'like', "%$search%");
             });
         }
 

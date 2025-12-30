@@ -2,6 +2,7 @@
 
 namespace App\Models\JadwalTenagaMedis;
 
+use App\Models\Poli\Poli;
 use App\Models\TenagaMedis\TenagaMedis;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,7 +14,7 @@ class JadwalTenagaMedis extends Model
 
     protected $table = 'jadwal_tenaga_medis';
     protected $primaryKey = 'id';
-    protected $fillable = ['tenaga_medis_id', 'hari', 'jam_mulai', 'jam_selesai'];
+    protected $fillable = ['tenaga_medis_id','poli_id', 'hari', 'jam_mulai', 'jam_selesai'];
 
     protected $casts = [
         'created_at' => 'datetime',
@@ -24,5 +25,10 @@ class JadwalTenagaMedis extends Model
     public function tenagaMedis()
     {
         return $this->belongsTo(TenagaMedis::class, 'tenaga_medis_id');
+    }
+
+    public function poli()
+    {
+        return $this->belongsTo(Poli::class, 'poli_id');
     }
 }

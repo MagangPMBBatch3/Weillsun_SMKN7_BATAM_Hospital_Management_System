@@ -35,7 +35,9 @@ class AuthController extends Controller
     {
         $dokters = TenagaMedis::with('profile:id,nickname')
             ->get();
-        return view('jadwalTenagaMedis.index', compact('dokters'));
+
+        $poli = Poli::select('id', 'nama_poli')->get();
+        return view('jadwalTenagaMedis.index', compact('dokters', 'poli'));
     }
 
     public function kunjungan()
