@@ -30,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/upload-foto', [ProfileController::class, 'uploadFoto'])->name('upload.foto');
+
+    Route::get('liburTenagaMedis', [AuthController::class, 'liburTenagaMedis'])->name('liburTenagaMedis');
+    
 });
 
 //  USER & MASTER DATA (ADMIN ONLY)

@@ -10,12 +10,12 @@ class RawatInapMutation {
         : null;
     }
 
-    public function forceDelete($_, array $args): ?RawatInap{
-        $RawatInap = RawatInap::withTrashed()->find($args['id']);
-        if ($RawatInap) {
-            $RawatInap->forceDelete();
-            return $RawatInap;
-        }
-        return null;
-    }
+    // public function forceDelete($_, array $args): ?RawatInap{
+    //     $RawatInap = RawatInap::withTrashed()->find($args['id']);
+    //     if ($RawatInap) {
+    //         $RawatInap->forceDelete();
+    //         return $RawatInap;
+    //     }
+    //     return null;
+    // }
 }

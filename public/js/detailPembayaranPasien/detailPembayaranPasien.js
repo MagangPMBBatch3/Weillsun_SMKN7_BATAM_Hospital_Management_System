@@ -1015,6 +1015,8 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                         : detail.tipe_biaya.charAt(0).toUpperCase() +
                           detail.tipe_biaya.slice(1);
 
+                        console.log("Rendering detail:", detail, "with namaBiaya:", namaBiaya);
+
                 return `
                     <div class="grid grid-cols-6 py-2 text-sm border-dotted border-t-2 dark:text-gray-200">
                         <div class="font-semibold text-blue-600 dark:text-blue-400">

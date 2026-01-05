@@ -270,7 +270,7 @@
                         </div>
                     @endif
 
-                    @if (auth()->user()->role !== 'cashier')
+                    {{-- @if (auth()->user()->role !== 'cashier') --}}
                         {{-- Schedule --}}
                         <div class="flex items-center">
                             <x-dropdown align="right" width="60">
@@ -300,19 +300,24 @@
                                                 </x-dropdown-link>
                                             @endif
 
-                                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'doctor')
+                                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'doctor' || auth()->user()->role === 'receptionist')
                                                 <x-dropdown-link :href="route('jadwalTenagaMedis.index')" :active="request()->routeIs('jadwalTenagaMedis.index')"
                                                     class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
-                                                    📅 {{ __("Doctor's Schedule") }}
+                                                    📅 {{ __("Staff Schedule") }}
                                                 </x-dropdown-link>
                                             @endif
+
+                                            <x-dropdown-link :href="route('liburTenagaMedis')" :active="request()->routeIs('liburTenagaMedis')"
+                                                    class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700  transition-colors duration-150">
+                                                    🚶‍♂️ {{ __("Staff Leave") }}
+                                            </x-dropdown-link>
 
                                         </div>
                                     </div>
                                 </x-slot>
                             </x-dropdown>
                         </div>
-                    @endif
+                    {{-- @endif --}}
 
                 </div>
             </div>

@@ -185,7 +185,7 @@
                                 name="edit-ruangan" id="edit-ruangan" disabled>
 
                                 <option value="" class="text-gray-500 italic">Select Room</option>
-                                @foreach ($ruangan as $room)
+                                @foreach ($allRuangan as $room)
                                     <option value="{{ $room->id }}">
                                         {{ $room->nama_ruangan }}
                                     </option>
@@ -200,7 +200,7 @@
                             <x-text-input id="edit-tanggal-keluar" type="date"
                                 class="border p-2 w-full rounded" />
 
-                            <x-input-label>New Fee</x-input-label>
+                            <x-input-label>Fee</x-input-label>
                             <x-text-input id="edit-biaya-inap" type="text" placeholder="0" readonly
                                 class="border-2 border-green-600 p-2 w-full rounded bg-gray-100 font-semibold" />
 

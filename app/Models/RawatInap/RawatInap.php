@@ -2,12 +2,13 @@
 
 namespace App\Models\RawatInap;
 
-use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
+use App\Models\LogRuangan\LogRuangan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 
 class RawatInap extends Model
 {
@@ -36,4 +37,10 @@ class RawatInap extends Model
     {
         return $this->hasMany(DetailPembayaranPasien::class, 'inap_id');
     }
+
+    public function logRuangan()
+{
+    return $this->hasMany(LogRuangan::class, 'rawat_inap_id');
+}
+
 }

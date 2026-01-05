@@ -1,0 +1,99 @@
+enum Jenis {
+    libur
+    sakit
+    izin
+}
+
+type LiburTenagaMedis {
+    id: ID!
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    jenis: Jenis!
+    keterangan: String!
+
+    created_at: DateTime
+    updated_at: DateTime
+    deleted_at: DateTime
+
+    tenagaMedis: TenagaMedis @belongsTo
+
+}
+
+input CreateLiburTenagaMedisInput {
+    tenaga_medis_id: ID!
+    tanggal: Date!
+    jenis: Jenis!
+    keterangan: String!
+
+}
+input UpdateLiburTenagaMedisInput {
+    tenaga_medis_id: ID
+    tanggal: Date
+    jenis: Jenis
+    keterangan: String
+}
+
+type PageInfo {
+    hasMorePages: Boolean!
+    currentPage: Int!
+    lastPage: Int!
+    perPage: Int!
+    total: Int!
+}
+
+type LiburTenagaMedisPaginator {
+    data: [LiburTenagaMedis!]!
+    paginatorInfo: PageInfo!
+}
+
+extend type Query {
+    allLiburTenagaMedis: [LiburTenagaMedis!]!
+        @all(model: "App\\Models\\LiburTenagaMedis\\LiburTenagaMedis")
+
+    allLiburTenagaMedisPaginate(
+        search: String
+        page: Int
+        first: Int
+    ): LiburTenagaMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\LiburTenagaMedis\\Queries\\LiburTenagaMedisQuery@all"
+    )
+
+    allLiburTenagaMedisArchive(
+        search: String
+        page: Int
+        first: Int
+    ): LiburTenagaMedisPaginator
+        @field(
+            resolver: "App\\GraphQL\\LiburTenagaMedis\\Queries\\LiburTenagaMedisQuery@allArchive"
+    )
+
+    LiburTenagaMedis(id: ID! @eq(key: "id")): LiburTenagaMedis
+        @find(model: "App\\Models\\LiburTenagaMedis\\LiburTenagaMedis")
+}
+
+extend type Mutation {
+    createLiburTenagaMedis(
+        input: CreateLiburTenagaMedisInput! @spread
+    ): LiburTenagaMedis
+        @create(model: "App\\Models\\LiburTenagaMedis\\LiburTenagaMedis")
+
+    updateLiburTenagaMedis(
+        id: ID! @eq(key: "id")
+        input: UpdateLiburTenagaMedisInput! @spread
+    ): LiburTenagaMedis
+        @update(model: "App\\Models\\LiburTenagaMedis\\LiburTenagaMedis")
+
+    deleteLiburTenagaMedis(id: ID! @eq(key: "id")): LiburTenagaMedis
+        @delete(model: "App\\Models\\LiburTenagaMedis\\LiburTenagaMedis")
+
+    restoreLiburTenagaMedis(id: ID!): LiburTenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\LiburTenagaMedis\\Mutations\\LiburTenagaMedisMutation@restore"
+        )
+
+    forceDeleteLiburTenagaMedis(id: ID!): LiburTenagaMedis
+        @field(
+            resolver: "App\\GraphQL\\LiburTenagaMedis\\Mutations\\LiburTenagaMedisMutation@forceDelete"
+        )
+}

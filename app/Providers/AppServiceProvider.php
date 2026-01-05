@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\RawatInap\RawatInap;
 use App\Observers\UserObserver;
+use App\Observers\RawatInapObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //  User::observe(UserObserver::class);
+        RawatInap::observe(RawatInapObserver::class);
     }
 }

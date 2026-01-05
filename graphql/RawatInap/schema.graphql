@@ -94,8 +94,8 @@ extend type Mutation {
             resolver: "App\\GraphQL\\RawatInap\\Mutations\\RawatInapMutation@restore"
         )
 
-    forceDeleteRawatInap(id: ID!): RawatInap
-        @field(
-            resolver: "App\\GraphQL\\RawatInap\\Mutations\\RawatInapMutation@forceDelete"
-        )
+    # forceDeleteRawatInap(id: ID!): RawatInap
+    #     @field(
+    #         resolver: "App\\GraphQL\\RawatInap\\Mutations\\RawatInapMutation@forceDelete"
+    #     )
 }

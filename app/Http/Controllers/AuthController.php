@@ -40,6 +40,14 @@ class AuthController extends Controller
         return view('jadwalTenagaMedis.index', compact('dokters', 'poli'));
     }
 
+    public function liburTenagaMedis()
+    {
+        $dokters = TenagaMedis::with('profile:id,nickname')
+            ->get();
+
+        return view('liburTenagaMedis.index', compact('dokters'));
+    }
+
     public function kunjungan()
     {
         $pasienTerpakai = Kunjungan::withTrashed()->pluck('pasien_id');
@@ -109,9 +117,15 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        $ruangan = Ruangan::select('id', 'nama_ruangan')->get();
+        $ruanganTerpakai = RawatInap::withTrashed()->pluck('ruangan_id');
+        $ruangan = Ruangan::whereNotIn('id', $ruanganTerpakai)
+        ->select('id', 'nama_ruangan')
+        ->get();
 
-        return view('rawatInap.index', compact('pasiens', 'Allpasiens', 'ruangan'));
+
+        $allRuangan = Ruangan::select('id', 'nama_ruangan')->get();
+
+        return view('rawatInap.index', compact('pasiens', 'Allpasiens', 'ruangan', 'allRuangan'));
     }
 
     public function rekamMedis()

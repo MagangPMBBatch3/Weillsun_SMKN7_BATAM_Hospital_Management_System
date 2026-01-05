@@ -28,7 +28,8 @@ return new class extends Migration
                 'MASUK',
                 'PULANG',
                 'PINDAH_MASUK',
-                'PINDAH_KELUAR'
+                'PINDAH_KELUAR',
+                'RESTORE'
             ]);
 
             $table->timestamp('waktu')->useCurrent();
@@ -39,34 +40,72 @@ return new class extends Migration
          * TRIGGER MASUK RAWAT INAP
          * =========================
          */
-        DB::unprepared("
-            CREATE TRIGGER after_insert_rawat_inap
-            AFTER INSERT ON rawat_inap
-            FOR EACH ROW
-            BEGIN
-                INSERT INTO log_ruangan (
-                    ruangan_id,
-                    rawat_inap_id,
-                    pasien_id,
-                    status_sebelum,
-                    status_sesudah,
-                    aksi,
-                    waktu
-                ) VALUES (
-                    NEW.ruangan_id,
-                    NEW.id,
-                    NEW.pasien_id,
-                    'tersedia',
-                    'tidak_tersedia',
-                    'MASUK',
-                    NOW()
-                );
+        // DB::unprepared("
+        //     CREATE TRIGGER after_insert_rawat_inap
+        //     AFTER INSERT ON rawat_inap
+        //     FOR EACH ROW
+        //     BEGIN
+        //         INSERT INTO log_ruangan (
+        //             ruangan_id,
+        //             rawat_inap_id,
+        //             pasien_id,
+        //             status_sebelum,
+        //             status_sesudah,
+        //             aksi,
+        //             waktu
+        //         ) VALUES (
+        //             NEW.ruangan_id,
+        //             NEW.id,
+        //             NEW.pasien_id,
+        //             'tersedia',
+        //             'tidak_tersedia',
+        //             'MASUK',
+        //             NOW()
+        //         );
 
-                UPDATE ruangan
-                SET status = 'tidak_tersedia'
-                WHERE id = NEW.ruangan_id;
-            END
-        ");
+        //         UPDATE ruangan
+        //         SET status = 'tidak_tersedia'
+        //         WHERE id = NEW.ruangan_id;
+        //     END
+        // ");
+
+        /**
+         * =========================
+         * TRIGGER after (aktif)
+         * =========================
+         */
+        // DB::unprepared("
+        //     CREATE TRIGGER after_update_rawat_inap_aktif
+        //     AFTER UPDATE ON rawat_inap
+        //     FOR EACH ROW
+        //     BEGIN
+        //         IF NEW.status = 'Aktif' THEN
+
+        //             INSERT INTO log_ruangan (
+        //                 ruangan_id,
+        //                 rawat_inap_id,
+        //                 pasien_id,
+        //                 status_sebelum,
+        //                 status_sesudah,
+        //                 aksi,
+        //                 waktu
+        //             ) VALUES (
+        //                 OLD.ruangan_id,
+        //                 OLD.id,
+        //                 OLD.pasien_id,
+        //                 'tersedia',
+        //                 'tidak_tersedia',
+        //                 'MASUK',
+        //                 NOW()
+        //             );
+
+        //             UPDATE ruangan
+        //             SET status = 'tidak_tersedia'
+        //             WHERE id = OLD.ruangan_id;
+
+        //         END IF;
+        //     END
+        // ");
 
         /**
          * =========================
@@ -78,7 +117,7 @@ return new class extends Migration
             AFTER UPDATE ON rawat_inap
             FOR EACH ROW
             BEGIN
-                IF OLD.status = 'Aktif' AND NEW.status = 'Pulang' THEN
+                IF NEW.status = 'Pulang' THEN
 
                     INSERT INTO log_ruangan (
                         ruangan_id,

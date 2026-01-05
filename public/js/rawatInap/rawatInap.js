@@ -572,8 +572,8 @@ function renderRawatInapTable(result, tableId, isActive) {
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
                 <button onclick="hapusRawatInap(${item.id})"
-                    class="${baseBtn} bg-rose-100 text-rose-700 hover:bg-rose-200 focus:ring-rose-300">
-                    <i class='bx bx-archive'></i> Archive
+                    class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
+                    <i class='bx bx-trash'></i> Delete
                 </button>`;
             } else {
                 actions = `
@@ -581,10 +581,7 @@ function renderRawatInapTable(result, tableId, isActive) {
                     class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                     <i class='bx bx-refresh-ccw-alt'></i>  Restore
                 </button>
-                <button onclick="forceDeleteRawatInap(${item.id})"
-                    class="${baseBtn} bg-red-100 text-red-700 hover:bg-red-200 focus:ring-red-300">
-                    <i class='bx bx-trash'></i> Delete
-                </button>`;
+                `;
             }
         }
 
@@ -695,24 +692,24 @@ async function restoreRawatInap(id) {
 }
 
 // force delete
-async function forceDeleteRawatInap(id) {
-    if (!confirm("Are you sure you want to delete this data??")) return;
+// async function forceDeleteRawatInap(id) {
+//     if (!confirm("Are you sure you want to delete this data??")) return;
 
-    showLoading();
-    const mutation = `mutation($id: ID!){ forceDeleteRawatInap(id: $id){ id } }`;
-    try {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: mutation, variables: { id } }),
-        });
-        loadDataPaginate(currentPageArchive, false);
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to delete permanent data");
-        hideLoading();
-    }
-}
+//     showLoading();
+//     const mutation = `mutation($id: ID!){ forceDeleteRawatInap(id: $id){ id } }`;
+//     try {
+//         await fetch(API_URL, {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ query: mutation, variables: { id } }),
+//         });
+//         loadDataPaginate(currentPageArchive, false);
+//     } catch (error) {
+//         console.error("Error:", error);
+//         alert("Failed to delete permanent data");
+//         hideLoading();
+//     }
+// }
 
 document.addEventListener("DOMContentLoaded", () => {
     loadDataPaginate(1, true);
