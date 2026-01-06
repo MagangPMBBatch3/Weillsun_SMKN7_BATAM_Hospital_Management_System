@@ -48,6 +48,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('ruangan', [AuthController::class, 'ruangan'])->name('ruangan.index');
 
     Route::get('supplier', [AuthController::class, 'supplier'])->name('supplier.index');
+
+    Route::get('logRuangan', [AuthController::class, 'logRuangan'])->name('logRuangan.index');
+    Route::get('logStokObat', [AuthController::class, 'logStokObat'])->name('logStokObat.index');
     
 });
 

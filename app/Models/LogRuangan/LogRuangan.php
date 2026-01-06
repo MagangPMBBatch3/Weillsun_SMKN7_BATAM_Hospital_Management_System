@@ -2,6 +2,8 @@
 
 namespace App\Models\LogRuangan;
 
+use App\Models\Pasien\Pasien;
+use App\Models\Ruangan\Ruangan;
 use App\Models\RawatInap\RawatInap;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,5 +30,15 @@ class LogRuangan extends Model
     public function rawatInap()
     {
         return $this->belongsTo(RawatInap::class, 'rawat_inap_id');
+    }
+
+    public function ruangan()
+    {
+        return $this->belongsTo(Ruangan::class, 'ruangan_id');
+    }
+
+    public function pasien()
+    {
+        return $this->belongsTo(Pasien::class, 'pasien_id');
     }
 }

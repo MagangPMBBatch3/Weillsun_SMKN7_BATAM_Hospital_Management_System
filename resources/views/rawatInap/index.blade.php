@@ -30,6 +30,8 @@
                         </svg>
                         New Data
                     </x-primary-button>
+
+                    
                 @endif
 
 
@@ -47,6 +49,12 @@
                             Archive
                         </button>
                     </div>
+                @endif
+
+                @if (auth()->user()->role === 'admin')
+                        <a href="{{ route('logRuangan.index') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2.5 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95 flex items-center justify-center">
+                            <i class="bx bx-note text-xl"></i>
+                        </a>
                 @endif
 
             </div>
@@ -185,7 +193,7 @@
                                 name="edit-ruangan" id="edit-ruangan" disabled>
 
                                 <option value="" class="text-gray-500 italic">Select Room</option>
-                                @foreach ($allRuangan as $room)
+                                @foreach ($ruangan as $room)
                                     <option value="{{ $room->id }}">
                                         {{ $room->nama_ruangan }}
                                     </option>

@@ -4,9 +4,11 @@ namespace App\Models\LiburTenagaMedis;
 
 use App\Models\TenagaMedis\TenagaMedis;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LiburTenagaMedis extends Model
 {
+    use SoftDeletes;
     protected $table = 'libur_tenaga_medis';
     protected $primaryKey = 'id';
 

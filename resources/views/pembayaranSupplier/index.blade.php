@@ -89,9 +89,9 @@
                                 name="create-supplier" id="create-supplier">
                                 <option value="" class="text-gray-500 italic">Select Supplier</option>
                                 @foreach ($pembelians as $pembelian)
-
                                     <option value="{{ $pembelian->id }}" data-jumlah="{{ $pembelian->total_biaya }}">
-                                        {{ $pembelian->supplier->nama_supplier }} - {{ date('d M Y', strtotime($pembelian->tanggal)) }}
+                                        {{ $pembelian->supplier->nama_supplier }} -
+                                        {{ date('d M Y', strtotime($pembelian->tanggal)) }}
                                     </option>
                                 @endforeach
                             </select>

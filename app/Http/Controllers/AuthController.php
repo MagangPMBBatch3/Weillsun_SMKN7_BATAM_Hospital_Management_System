@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
-use App\Models\DetailPembelianObat\DetailPembelianObat;
 use App\Models\Obat\Obat;
 use App\Models\Poli\Poli;
 use Illuminate\Http\Request;
 use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
+use App\Models\Supplier\Supplier;
 use App\Models\Kunjungan\Kunjungan;
+use App\Models\Radiologi\Radiologi;
+use App\Models\RawatInap\RawatInap;
+use App\Models\ResepObat\ResepObat;
+use App\Models\LogRuangan\LogRuangan;
+use App\Models\RekamMedis\RekamMedis;
+use App\Models\LogStokObat\LogStokObat;
+use App\Models\TenagaMedis\TenagaMedis;
+use App\Models\UsersProfile\UsersProfile;
+use App\Models\PembelianObat\PembelianObat;
 use App\Models\LabPemeriksaan\LabPemeriksaan;
 use App\Models\PembayaranPasien\PembayaranPasien;
 use App\Models\PembayaranSupplier\PembayaranSupplier;
-use App\Models\PembelianObat\PembelianObat;
-use App\Models\Radiologi\Radiologi;
-use App\Models\RawatInap\RawatInap;
-use App\Models\RekamMedis\RekamMedis;
-use App\Models\ResepObat\ResepObat;
-use App\Models\Supplier\Supplier;
-use App\Models\TenagaMedis\TenagaMedis;
-use App\Models\UsersProfile\UsersProfile;
+use App\Models\DetailPembelianObat\DetailPembelianObat;
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 
 class AuthController extends Controller
 {
@@ -84,7 +86,7 @@ class AuthController extends Controller
             ->get();
 
         $Allpasiens = Pasien::select('id', 'nama')
-        ->get();
+            ->get();
         return view('pembayaranPasien.index', compact('pasiens', 'Allpasiens'));
     }
 
@@ -117,10 +119,12 @@ class AuthController extends Controller
 
         $Allpasiens = Pasien::select('id', 'nama')->get();
 
-        $ruanganTerpakai = RawatInap::withTrashed()->pluck('ruangan_id');
-        $ruangan = Ruangan::whereNotIn('id', $ruanganTerpakai)
-        ->select('id', 'nama_ruangan')
-        ->get();
+        $ruangan = Ruangan::query()
+            ->where('status', 'tersedia')
+            ->whereNull('deleted_at')
+            ->select('id', 'nama_ruangan')
+            ->get();
+
 
 
         $allRuangan = Ruangan::select('id', 'nama_ruangan')->get();
@@ -261,5 +265,24 @@ class AuthController extends Controller
 
 
         return view('pembayaranSupplier.index', compact('pembelians', 'Allpembelians'));
+    }
+
+    public function logRuangan()
+    {
+        $logs = LogRuangan::with(['ruangan:id,nama_ruangan', 'rawatInap:id,tanggal_masuk,tanggal_keluar', 'pasien:id,nama'])
+            ->latest('waktu')
+            ->paginate(5);
+
+        return view('logRuangan.index', compact('logs'));
+    }
+
+    public function logStokObat()
+    {
+        $logs = LogStokObat::with(
+            ['obat:id,nama_obat', 'pembelianObat:id,supplier_id,tanggal', 'pembelianObat.supplier:id,nama_supplier'])
+            ->latest()
+            ->paginate(5);
+
+        return view('logStokObat.index', compact('logs'));
     }
 }

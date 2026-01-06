@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->foreignId('ruangan_id')->constrained('ruangan');
             $table->foreignId('rawat_inap_id')->constrained('rawat_inap');
-            $table->unsignedBigInteger('pasien_id');
+            $table->foreignId('pasien_id')->constrained('pasien');
 
             $table->enum('status_sebelum', ['tersedia', 'tidak_tersedia']);
             $table->enum('status_sesudah', ['tersedia', 'tidak_tersedia']);
@@ -74,38 +74,38 @@ return new class extends Migration
          * TRIGGER after (aktif)
          * =========================
          */
-        // DB::unprepared("
-        //     CREATE TRIGGER after_update_rawat_inap_aktif
-        //     AFTER UPDATE ON rawat_inap
-        //     FOR EACH ROW
-        //     BEGIN
-        //         IF NEW.status = 'Aktif' THEN
+        DB::unprepared("
+            CREATE TRIGGER after_update_rawat_inap_aktif
+            AFTER UPDATE ON rawat_inap
+            FOR EACH ROW
+            BEGIN
+                IF NEW.status = 'Aktif' THEN
 
-        //             INSERT INTO log_ruangan (
-        //                 ruangan_id,
-        //                 rawat_inap_id,
-        //                 pasien_id,
-        //                 status_sebelum,
-        //                 status_sesudah,
-        //                 aksi,
-        //                 waktu
-        //             ) VALUES (
-        //                 OLD.ruangan_id,
-        //                 OLD.id,
-        //                 OLD.pasien_id,
-        //                 'tersedia',
-        //                 'tidak_tersedia',
-        //                 'MASUK',
-        //                 NOW()
-        //             );
+                    INSERT INTO log_ruangan (
+                        ruangan_id,
+                        rawat_inap_id,
+                        pasien_id,
+                        status_sebelum,
+                        status_sesudah,
+                        aksi,
+                        waktu
+                    ) VALUES (
+                        OLD.ruangan_id,
+                        OLD.id,
+                        OLD.pasien_id,
+                        'tersedia',
+                        'tidak_tersedia',
+                        'MASUK',
+                        NOW()
+                    );
 
-        //             UPDATE ruangan
-        //             SET status = 'tidak_tersedia'
-        //             WHERE id = OLD.ruangan_id;
+                    UPDATE ruangan
+                    SET status = 'tidak_tersedia'
+                    WHERE id = OLD.ruangan_id;
 
-        //         END IF;
-        //     END
-        // ");
+                END IF;
+            END
+        ");
 
         /**
          * =========================
