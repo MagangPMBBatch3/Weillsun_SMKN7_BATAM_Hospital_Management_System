@@ -192,8 +192,8 @@
                                         rounded-md shadow-sm disabled:cursor-not-allowed"
                                 name="edit-ruangan" id="edit-ruangan" disabled>
 
-                                <option value="" class="text-gray-500 italic">Select Room</option>
-                                @foreach ($ruangan as $room)
+                                <option value="" selected class="text-gray-500 italic">Select Room</option>
+                                @foreach ($ruanganAll as $room)
                                     <option value="{{ $room->id }}">
                                         {{ $room->nama_ruangan }}
                                     </option>
@@ -202,7 +202,8 @@
 
 
                             <x-input-label>New Entry Date</x-input-label>
-                            <x-text-input id="edit-tanggal-masuk" type="date" class="border p-2 w-full rounded" />
+                            <x-text-input id="edit-tanggal-masuk" type="date" 
+                                class="border p-2 w-full rounded" />
 
                             <x-input-label>New Exit Date</x-input-label>
                             <x-text-input id="edit-tanggal-keluar" type="date"
@@ -228,7 +229,7 @@
 
     <script>
         window.currentUserRole = "{{ Auth::user()->role }}";
-
+        const RUANGAN_ALL = @json($ruanganAll);
 
         function showTable(isActive) {
             const tableActive = document.getElementById("tableActive");

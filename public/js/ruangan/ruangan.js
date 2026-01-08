@@ -407,7 +407,7 @@ function renderRuanganTable(result, tableId, isActive) {
                 ${item.kapasitas.toLocaleString("id-ID")}
             </td>
             <td class="p-4 text-center text-base font-semibold">${
-                item.status
+                item.status === 'tersedia' ? '<span class="text-green-600 font-bold capitalize">Available</span>' : '<span class="text-red-600 font-bold capitalize">Not Available</span>'
             }</td>
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
                 <span class="font-bold text-green-600 bg-green-100 border border-green-300 px-3 py-1 rounded-full">

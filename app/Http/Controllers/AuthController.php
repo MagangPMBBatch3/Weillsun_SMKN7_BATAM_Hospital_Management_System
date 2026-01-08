@@ -125,11 +125,12 @@ class AuthController extends Controller
             ->select('id', 'nama_ruangan')
             ->get();
 
+        $ruanganAll = Ruangan::whereNull('deleted_at')
+            ->select('id', 'nama_ruangan', 'status')
+            ->get();
 
 
-        $allRuangan = Ruangan::select('id', 'nama_ruangan')->get();
-
-        return view('rawatInap.index', compact('pasiens', 'Allpasiens', 'ruangan', 'allRuangan'));
+        return view('rawatInap.index', compact('pasiens', 'Allpasiens', 'ruangan', 'ruanganAll'));
     }
 
     public function rekamMedis()
@@ -279,7 +280,8 @@ class AuthController extends Controller
     public function logStokObat()
     {
         $logs = LogStokObat::with(
-            ['obat:id,nama_obat', 'pembelianObat:id,supplier_id,tanggal', 'pembelianObat.supplier:id,nama_supplier'])
+            ['obat:id,nama_obat', 'pembelianObat:id,supplier_id,tanggal', 'pembelianObat.supplier:id,nama_supplier']
+        )
             ->latest()
             ->paginate(5);
 

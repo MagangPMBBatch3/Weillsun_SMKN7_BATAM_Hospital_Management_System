@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\User;
-use App\Models\RawatInap\RawatInap;
 use App\Observers\UserObserver;
+use App\Models\RawatInap\RawatInap;
 use App\Observers\RawatInapObserver;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\DetailPembayaranPasienObserver;
+use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //  User::observe(UserObserver::class);
         RawatInap::observe(RawatInapObserver::class);
+        DetailPembayaranPasien::observe(DetailPembayaranPasienObserver::class);
     }
 }

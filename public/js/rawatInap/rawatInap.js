@@ -182,11 +182,11 @@ async function calculateBiayaInapCreate() {
     ).value;
     const biayaInput = document.getElementById("create-biaya-inap");
 
-    console.log("calculateBiayaInapCreate called", {
-        ruangan_id,
-        tanggal_masuk,
-        tanggal_keluar,
-    });
+    // console.log("calculateBiayaInapCreate called", {
+    //     ruangan_id,
+    //     tanggal_masuk,
+    //     tanggal_keluar,
+    // });
 
     if (!ruangan_id || !tanggal_masuk || !tanggal_keluar) {
         biayaInput.value = "0";
@@ -386,20 +386,20 @@ async function createRawatInap() {
     }
 }
 
-const statusSelect = document.getElementById('edit-status');
-const roomSelect   = document.getElementById('edit-ruangan');
+const statusSelect = document.getElementById("edit-status");
+const roomSelect = document.getElementById("edit-ruangan");
 
 function toggleRoomSelect() {
-    if (statusSelect.value === 'Pindah_Ruangan') {
+    if (statusSelect.value === "Pindah_Ruangan") {
         roomSelect.disabled = false;
-        roomSelect.classList.remove('cursor-not-allowed');
+        roomSelect.classList.remove("cursor-not-allowed");
     } else {
         roomSelect.disabled = true;
-        roomSelect.classList.add('cursor-not-allowed');
+        roomSelect.classList.add("cursor-not-allowed");
     }
 }
 
-statusSelect.addEventListener('change', toggleRoomSelect);
+statusSelect.addEventListener("change", toggleRoomSelect);
 
 function openEditModal(
     id,
@@ -412,7 +412,24 @@ function openEditModal(
 ) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
-    document.getElementById("edit-ruangan").value = ruangan_id;
+    
+    const ruanganSelect = document.getElementById("edit-ruangan");
+    ruanganSelect.innerHTML = "";
+
+    RUANGAN_ALL.forEach((r) => {
+        if (r.status === "tersedia" || r.id == ruangan_id) {
+            const option = document.createElement("option");
+            option.value = r.id;
+            option.textContent = r.nama_ruangan;
+
+            if (r.id == ruangan_id) {
+                option.selected = true;
+            }
+
+            ruanganSelect.appendChild(option);
+        }
+    });
+
     document.getElementById("edit-tanggal-masuk").value = tanggal_masuk;
     document.getElementById("edit-tanggal-keluar").value = tanggal_keluar;
     document.getElementById("edit-status").value = status;
@@ -564,10 +581,19 @@ function renderRawatInapTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin" || window.currentUserRole === "receptionist") {
+        if (
+            window.currentUserRole === "admin" ||
+            window.currentUserRole === "receptionist"
+        ) {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.pasien_id}','${item.ruangan_id}', '${item.tanggal_masuk}', '${item.tanggal_keluar}', '${item.status}', ${item.biaya_inap})"
+                <button onclick="openEditModal(${item.id}, 
+                    '${item.pasien_id}',
+                    '${item.ruangan_id}',
+                    '${item.tanggal_masuk}', 
+                    '${item.tanggal_keluar}', 
+                    '${item.status}', 
+                    ${item.biaya_inap})"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
@@ -624,7 +650,8 @@ function renderRawatInapTable(result, tableId, isActive) {
             </td>
 
             ${
-                window.currentUserRole === "admin" || window.currentUserRole === "receptionist"
+                window.currentUserRole === "admin" ||
+                window.currentUserRole === "receptionist"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }
