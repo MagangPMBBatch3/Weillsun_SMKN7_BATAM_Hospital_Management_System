@@ -16,11 +16,19 @@ class KunjunganUlangQuery
             $query->where(function ($q) use ($search) {
                 $q->where('tanggal_ulang', 'like', "%$search%")
                     ->orWhere('jam_ulang', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
                     ->orWhere('catatan', 'like', "%$search%");
             })
             ->orWhereHas('kunjungan.pasien', function ($q) use ($search) {
                     $q->where('nama', 'like', "%$search%");
-                });
+                })
+            ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
+                    $q->where('nickname', 'like', "%$search%");
+                })
+            ->orWhereHas('poli', function ($q) use ($search) {
+                    $q->where('nama_poli', 'like', "%$search%");
+                })
+            ;
         }
 
         $perPage = $args['first'] ?? 10;

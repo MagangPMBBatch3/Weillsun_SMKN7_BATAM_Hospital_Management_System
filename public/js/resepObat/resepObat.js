@@ -598,7 +598,7 @@ function renderResepObatTable(result, tableId, isActive) {
 
                 return `
                 <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 py-2 last:border-b-0">
-                    <div class="flex-1">
+                    <div class="flex-1 text-center">
                         <span class="font-semibold text-blue-600 dark:text-blue-400">${
                             obat.nama_obat
                         }</span>

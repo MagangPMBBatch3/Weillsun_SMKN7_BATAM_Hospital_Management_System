@@ -32,7 +32,6 @@
                     </x-primary-button>
                 @endif
 
-
                 <!-- Tombol Aktif / Arsip -->
                 @if (auth()->user()->role === 'admin' || auth()->user()->role === 'receptionist')
                     <div class="flex items-center gap-2 justify-center">
@@ -194,6 +193,16 @@
                         <div class="space-y-3">
 
                             <input type="hidden" id="create-kunjungan-id" />
+                            <input type="hidden" id="create-poli-ulang-id" name="poli_id"/>
+
+                            <x-input-label>Doctor Name</x-input-label>
+                                <select name="tenaga_medis_id" id="create-tenaga_medis_id"
+                                    class="border p-2 w-full rounded">
+                                    <option value="" disabled selected>Select Doctor</option>
+                                    @foreach ($dokters as $tm)
+                                        <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
+                                    @endforeach
+                                </select>
 
                             <x-input-label>Date</x-input-label>
                             <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" />

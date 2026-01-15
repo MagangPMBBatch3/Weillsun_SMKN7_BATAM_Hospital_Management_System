@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('kunjungan_ulang', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kunjungan_id')->constrained('kunjungan')->onDelete('cascade');
+            $table->foreignId('tenaga_medis_id')->nullable()->constrained('tenaga_medis')->onDelete('cascade');
+            $table->foreignId('poli_id')->constrained('poli')->onDelete('cascade');
             $table->date('tanggal_ulang');
             $table->time('jam_ulang')->nullable();
             $table->text('catatan')->nullable();
+            $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
             $table->softDeletes();
             $table->timestamps();
         });

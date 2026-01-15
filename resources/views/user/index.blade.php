@@ -96,8 +96,11 @@
 
                             <x-input-label class="italic">Choose the role</x-input-label>
                             <select id="create-role" required class="border p-2 w-full rounded">
-                                <option value="receptionist">Receptionist</option>
+                                <option value="" selected>Select Role</option>
                                 <option value="admin">Admin</option>
+                                <option value="receptionist">Receptionist</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="cashier">Cashier</option>
                             </select>
                         </div>
 
@@ -130,6 +133,8 @@
                             <select id="edit-role" class="border p-2 w-full rounded">
                                 <option value="admin">Admin</option>
                                 <option value="receptionist">Receptionist</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="cashier">Cashier</option>
                             </select>
                         </div>
 

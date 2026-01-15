@@ -56,8 +56,8 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 
     const perPage = isActive
-        ? document.getElementById("perPage")?.value || 6
-        : document.getElementById("perPageArchive")?.value || 6;
+        ? document.getElementById("perPage")?.value || 5
+        : document.getElementById("perPageArchive")?.value || 5;
     const searchValue = document.getElementById("search")?.value.trim() || "";
 
     try {
@@ -88,7 +88,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 isActive
                     ? perPage
-                    : document.getElementById("perPage")?.value || 6
+                    : document.getElementById("perPage")?.value || 5
             ),
             page: currentPageActive,
             search: searchValue,
@@ -140,7 +140,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 !isActive
                     ? perPage
-                    : document.getElementById("perPageArchive")?.value || 6
+                    : document.getElementById("perPageArchive")?.value || 5
             ),
             page: currentPageArchive,
             search: searchValue,

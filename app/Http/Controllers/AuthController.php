@@ -23,6 +23,7 @@ use App\Models\PembayaranPasien\PembayaranPasien;
 use App\Models\PembayaranSupplier\PembayaranSupplier;
 use App\Models\DetailPembelianObat\DetailPembelianObat;
 use App\Models\DetailPembayaranPasien\DetailPembayaranPasien;
+use App\Models\KunjunganUlang\KunjunganUlang;
 
 class AuthController extends Controller
 {
@@ -61,10 +62,15 @@ class AuthController extends Controller
 
         $Allpolies = Poli::select('id', 'nama_poli')->get();
 
+        $dokters = TenagaMedis::with('profile:id,nickname')
+            ->get();
+
+
         return view('kunjungan.index', compact(
             'pasiens',
             'Allpasiens',
-            'Allpolies'
+            'Allpolies',
+            'dokters'
         ));
     }
 
@@ -194,10 +200,18 @@ class AuthController extends Controller
 
     public function kunjunganUlang()
     {
-        $pasiens = Kunjungan::select('id', 'pasien_id')
-            ->with('pasien:id,nama')
+        $pasienTerpakai = KunjunganUlang::pluck('kunjungan_id');
+        $pasiens = Kunjungan::with('pasien:id,nama', 'poli:id,nama_poli')
+            ->select('id', 'pasien_id','poli_id', 'tanggal_kunjungan')
+            ->whereNull('deleted_at')
+            ->whereNotIn('id', $pasienTerpakai)
             ->get();
-        return view('kunjunganUlang.index', compact('pasiens'));
+
+        $dokters = TenagaMedis::with('profile:id,nickname')
+            ->get();
+
+        $polis = Poli::select('id', 'nama_poli')->get();
+        return view('kunjunganUlang.index', compact('pasiens', 'dokters', 'polis'));
     }
 
     public function detailPembayaranPasien()

@@ -121,7 +121,7 @@
 
                             <x-input-label>Exit Date</x-input-label>
                             <x-text-input id="create-tanggal-keluar" type="date" class="border p-2 w-full rounded"
-                                required />
+                             />
 
                             <x-input-label>Fee</x-input-label>
                             <x-text-input id="create-biaya-inap" type="text" placeholder="0" readonly

@@ -262,8 +262,9 @@ async function createKunjungan() {
     }
 }
 
-function openKunjunganUlangModal(kunjunganId) {
+function openKunjunganUlangModal(kunjunganId, poliId) {
     document.getElementById("create-kunjungan-id").value = kunjunganId;
+    document.getElementById("create-poli-ulang-id").value = poliId;
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "create-kunjunganUlang" })
@@ -272,11 +273,13 @@ function openKunjunganUlangModal(kunjunganId) {
 
 async function createKunjunganUlang() {
     const kunjungan_id = document.getElementById("create-kunjungan-id").value;
+    const poli_id = document.getElementById("create-poli-ulang-id").value;
+    const tenaga_medis_id = document.getElementById("create-tenaga_medis_id").value;
     const tanggal_ulang = document.getElementById("create-tanggal_ulang").value;
     const jam_ulang = document.getElementById("create-jam_ulang").value;
     const catatan = document.getElementById("create-catatan").value.trim();
 
-    if (!kunjungan_id || !tanggal_ulang || !jam_ulang || !catatan)
+    if (!kunjungan_id || !poli_id || !tenaga_medis_id || !tanggal_ulang || !jam_ulang || !catatan)
         return alert("Please fill in all required fields!");
 
     showLoading();
@@ -286,6 +289,8 @@ async function createKunjunganUlang() {
             createKunjunganUlang(input: $input) {
                 id
                 kunjungan_id
+                poli_id
+                tenaga_medis_id
                 tanggal_ulang
                 jam_ulang
                 catatan
@@ -296,6 +301,8 @@ async function createKunjunganUlang() {
     const variablesKunjunganUlang = {
         input: {
             kunjungan_id,
+            poli_id,
+            tenaga_medis_id,
             tanggal_ulang,
             jam_ulang,
             catatan
@@ -491,7 +498,7 @@ function renderKunjunganTable(result, tableId, isActive) {
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
 
-                <button onclick="openKunjunganUlangModal(${item.id})"
+                <button onclick="openKunjunganUlangModal(${item.id}, ${item.poli_id})"
                     class="${baseBtn} bg-amber-100 text-amber-700 hover:bg-amber-200 focus:ring-amber-300">
                     <i class='bx bx-repeat'></i> Return Visit
                 </button>

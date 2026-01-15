@@ -9,10 +9,8 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" href="{{ asset('MedicaHub-Logo.png') }}" type="image/png">
 
-    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
-
     <!-- Fonts -->
-    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <link href='https://cdn.boxicons.com/3.0.7/fonts/basic/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
@@ -108,25 +106,29 @@
 
 </head>
 
-<body
-    class="font-sans antialiased bg-gradient-to-br from-green-100 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-    <div class="min-h-screen">
+<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex">
         @include('layouts.navigation')
 
-        <!-- Page Heading -->
-        @isset($header)
-            <header>
-                <div class="max-w-8xl mx-auto pt-2 pb-4 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endisset
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Page Heading -->
+            @isset($header)
+                <header class=" dark:bg-gray-800">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-6">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
 
-        <!-- Page Content -->
-        <main>
-            {{ $slot }}
-        </main>
+            <!-- Page Content -->
+            <main class="py-2 max-w-8xl mx-auto w-full">
+                {{ $slot }}
+            </main>
+        </div>
     </div>
+
+    
 
     @stack('scripts')
 </body>

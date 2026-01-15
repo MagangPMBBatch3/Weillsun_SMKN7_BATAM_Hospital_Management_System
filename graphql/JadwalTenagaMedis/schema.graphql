@@ -1,7 +1,7 @@
 type JadwalTenagaMedis {
     id: ID!
     tenaga_medis_id: ID!
-    poli_id:ID!
+    poli_id: ID!
     hari: Int
     tanggal: Date
     jam_mulai: String
@@ -16,14 +16,14 @@ type JadwalTenagaMedis {
 
 input CreateJadwalTenagaMedisInput {
     tenaga_medis_id: ID!
-    poli_id:ID
+    poli_id: ID
     hari: Int!
     jam_mulai: String!
     jam_selesai: String!
 }
 input UpdateJadwalTenagaMedisInput {
     tenaga_medis_id: ID
-    poli_id:ID
+    poli_id: ID
     hari: Int
     jam_mulai: String
     jam_selesai: String
@@ -50,6 +50,7 @@ extend type Query {
         search: String
         page: Int
         first: Int
+        tenagaMedisId: ID
     ): JadwalTenagaMedisPaginator
         @field(
             resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@all"

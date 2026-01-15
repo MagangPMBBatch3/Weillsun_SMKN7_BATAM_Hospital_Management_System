@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Pasien\Pasien;
 use App\Models\TenagaMedis\TenagaMedis;
 use App\Models\Kunjungan\Kunjungan;
@@ -19,7 +20,7 @@ Route::get('/', function () {
 
 //  Dashboard (redirect by role)
 
-Route::get('/dashboard', [AuthController::class, 'dashboard'])
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('auth')
     ->name('dashboard');
 
@@ -32,7 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/upload-foto', [ProfileController::class, 'uploadFoto'])->name('upload.foto');
 
     Route::get('liburTenagaMedis', [AuthController::class, 'liburTenagaMedis'])->name('liburTenagaMedis');
-    
+    Route::get('jadwalTenagaMedis', [AuthController::class, 'jadwalTenagaMedis'])->name('jadwalTenagaMedis.index');
+
 });
 
 //  USER & MASTER DATA (ADMIN ONLY)
@@ -51,7 +53,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('logRuangan', [AuthController::class, 'logRuangan'])->name('logRuangan.index');
     Route::get('logStokObat', [AuthController::class, 'logStokObat'])->name('logStokObat.index');
-    
 });
 
 //  PASIEN & KUNJUNGAN
@@ -66,8 +67,6 @@ Route::middleware(['auth', 'role:admin,receptionist'])->group(function () {
 
 Route::middleware(['auth', 'role:admin,receptionist,doctor'])->group(function () {
     Route::get('pasien', [AuthController::class, 'pasien'])->name('pasien.index');
-    Route::get('jadwalTenagaMedis', [AuthController::class, 'jadwalTenagaMedis'])->name('jadwalTenagaMedis.index');
-
 });
 
 //  REKAM MEDIS & RESEP (ADMIN + DOCTOR)

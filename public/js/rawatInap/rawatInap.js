@@ -303,7 +303,7 @@ async function createRawatInap() {
         !pasien_id ||
         !ruangan_id ||
         !tanggal_masuk ||
-        !tanggal_keluar ||
+        // !tanggal_keluar ||
         !status
     )
         return alert("Please fill in all required fields!");
@@ -318,9 +318,9 @@ async function createRawatInap() {
         biaya_inap = parseFloat(numStr) || 0;
     }
 
-    if (biaya_inap === 0) {
-        return alert("Please select room and dates to calculate the fee!");
-    }
+    // if (biaya_inap === 0) {
+    //     return alert("Please select room and dates to calculate the fee!");
+    // }
 
     showLoading();
 
@@ -480,9 +480,9 @@ async function updateRawatInap() {
         biaya_inap = parseFloat(numStr) || 0;
     }
 
-    if (biaya_inap === 0) {
-        return alert("Please select room and dates to calculate the fee!");
-    }
+    // if (biaya_inap === 0) {
+    //     return alert("Please select room and dates to calculate the fee!");
+    // }
 
     showLoading();
 
@@ -628,7 +628,7 @@ function renderRawatInapTable(result, tableId, isActive) {
                 item.tanggal_masuk
             }</td>
             <td class="p-4 text-center font-semibold capitalize">
-                ${item.tanggal_keluar}
+                ${item.tanggal_keluar ?? '-'}
             </td>
             <td class="p-4 text-center capitalize">
                 <span class="font-bold px-3 py-1 rounded-full text-green-600 bg-green-100 border border-green-300">

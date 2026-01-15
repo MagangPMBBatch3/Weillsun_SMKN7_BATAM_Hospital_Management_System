@@ -50,14 +50,35 @@ async function loadDataPaginate(page = 1) {
 
     const perPage = document.getElementById("perPage")?.value || 5;
     const searchValue = document.getElementById("search")?.value.trim() || "";
+    
+    // Determine the tenaga_medis_id to filter based on user role
+    let tenagaMedisIdFilter = null;
+    if (currentUserRole !== "admin") {
+        // For non-admin users (receptionist, doctor, cashier), filter by their own tenaga_medis_id
+        tenagaMedisIdFilter = window.currentUserTenagaMedisId;
+        if (tenagaMedisIdFilter === "null" || !tenagaMedisIdFilter) {
+            // If user has no tenaga_medis_id, show empty table
+            const tbody = document.getElementById("dataJadwalTenagaMedisAktif");
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-6 italic text-orange-500">
+                        You don't have a schedule assigned yet
+                    </td>
+                </tr>
+            `;
+            hideLoading();
+            return;
+        }
+    }
 
     try {
         const query = `
-            query ($first: Int, $page: Int, $search: String) {
+            query ($first: Int, $page: Int, $search: String, $tenagaMedisId: ID) {
                 allJadwalTenagaMedisPaginate(
                     first: $first
                     page: $page
                     search: $search
+                    tenagaMedisId: $tenagaMedisId
                 ) {
                     data {
                         id
@@ -94,6 +115,7 @@ async function loadDataPaginate(page = 1) {
                     first: parseInt(perPage),
                     page: currentPageActive,
                     search: searchValue,
+                    tenagaMedisId: tenagaMedisIdFilter,
                 },
             }),
         });
@@ -326,21 +348,30 @@ function renderJadwalTenagaMedisTable(result, tableId) {
         }
 
         tbody.innerHTML += `
-            <tr>
-                <td class="font-semibold p-4">
-                    ${row.dokter}
-                    <div class="text-blue-500">Clinic: <span class="italic text-blue-600">${row.poli}</span></div>
-                    <div>
-                        <button
-                            onclick="forceDeleteDokter(${row.tenaga_medis_id})"
-                            class="text-red-500 text-sm mt-1">
-                            Delete
-                        </button>
-                    </div>
-                </td>
-                ${cells}
-            </tr>
-        `;
+    <tr>
+        <td class="font-semibold p-4">
+            ${row.dokter}
+            <div class="text-blue-500">
+                Clinic: <span class="italic text-blue-600">${row.poli}</span>
+            </div>
+
+            ${
+                currentUserRole === "admin"
+                    ? `
+                        <div>
+                            <button
+                                onclick="forceDeleteDokter(${row.tenaga_medis_id})"
+                                class="text-red-500 text-sm mt-1">
+                                Delete
+                            </button>
+                        </div>
+                    `
+                    : ``
+            }
+        </td> 
+        ${cells}
+    </tr>
+`;
     });
 
     // Pagination info

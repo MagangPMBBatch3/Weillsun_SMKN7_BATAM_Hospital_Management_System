@@ -10,6 +10,11 @@ class JadwalTenagaMedisQuery
     {
         $query = JadwalTenagaMedis::query();
 
+        // Filter by tenaga_medis_id if provided (for non-admin users)
+        if (!empty($args['tenagaMedisId'])) {
+            $query->where('tenaga_medis_id', $args['tenagaMedisId']);
+        }
+
         if (!empty($args['search'])) {
             $search = $args['search'];
 
@@ -18,12 +23,12 @@ class JadwalTenagaMedisQuery
                     ->orWhere('jam_mulai', 'like', "%$search%")
                     ->orWhere('jam_selesai', 'like', "%$search%");
             })
-            ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
+                ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
                     $q->where('nickname', 'like', "%$search%");
-            })
-            ->orWhereHas('poli', function ($q) use ($search) {
+                })
+                ->orWhereHas('poli', function ($q) use ($search) {
                     $q->where('nama_poli', 'like', "%$search%");
-            });
+                });
         }
 
         $perPage = $args['first'] ?? 10;
@@ -46,7 +51,7 @@ class JadwalTenagaMedisQuery
     public function allArchive($_, array $args)
     {
         $query = JadwalTenagaMedis::onlyTrashed();
-        
+
         if (!empty($args['search'])) {
             $search = $args['search'];
 
@@ -55,9 +60,9 @@ class JadwalTenagaMedisQuery
                     ->orWhere('jam_mulai', 'like', "%$search%")
                     ->orWhere('jam_selesai', 'like', "%$search%");
             })
-            ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
+                ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
                     $q->where('nickname', 'like', "%$search%");
-            });
+                });
         }
 
         $perPage = $args['first'] ?? 10;

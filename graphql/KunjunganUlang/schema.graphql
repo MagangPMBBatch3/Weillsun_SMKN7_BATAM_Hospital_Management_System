@@ -1,27 +1,44 @@
+enum status {
+    scheduled
+    completed
+    cancelled
+}
+
 type KunjunganUlang {
-    id: ID!
+    id: ID
     kunjungan_id: ID!
+    tenaga_medis_id: ID
+    poli_id: ID!
     tanggal_ulang: Date!
     jam_ulang: String!
     catatan: String
+    status: status!
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
 
     kunjungan: Kunjungan @belongsTo
+    tenagaMedis: TenagaMedis @belongsTo
+    poli: Poli @belongsTo
 }
 
 input CreateKunjunganUlangInput {
     kunjungan_id: ID!
+    tenaga_medis_id: ID
+    poli_id: ID!
     tanggal_ulang: Date!
     jam_ulang: String!
     catatan: String!
+    status: status
 }
 input UpdateKunjunganUlangInput {
     kunjungan_id: ID
+    tenaga_medis_id: ID
+    poli_id: ID
     tanggal_ulang: Date
     jam_ulang: String
     catatan: String
+    status: status
 }
 
 type PageInfo {

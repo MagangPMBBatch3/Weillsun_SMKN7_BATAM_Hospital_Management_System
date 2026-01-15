@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\UsersProfile\UsersProfile;
 use App\Models\LabPemeriksaan\LabPemeriksaan;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\LiburTenagaMedis\LiburTenagaMedis;
 use App\Models\JadwalTenagaMedis\JadwalTenagaMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -53,5 +54,9 @@ class TenagaMedis extends Model
     public function resepObat()
     {
         return $this->hasMany(ResepObat::class, 'tenaga_medis_id');
+    }
+
+    public function libur() {
+        return $this->hasMany(LiburTenagaMedis::class, 'tenaga_medis_id');
     }
 }

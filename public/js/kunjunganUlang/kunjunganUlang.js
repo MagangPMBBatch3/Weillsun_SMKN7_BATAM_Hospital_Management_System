@@ -62,9 +62,12 @@ async function loadDataPaginate(page = 1, isActive = true) {
                     data { 
                             id
                             kunjungan_id
+                            tenaga_medis_id
+                            poli_id
                             tanggal_ulang
                             jam_ulang
                             catatan
+                            status
                             kunjungan{
                                 id
                                 pasien_id
@@ -72,6 +75,16 @@ async function loadDataPaginate(page = 1, isActive = true) {
                                     id
                                     nama
                                 }
+                            }
+                            tenagaMedis {
+                                id
+                                profile{
+                                    nickname
+                                }
+                            }
+                            poli {
+                                id
+                                nama_poli
                             }
                         }
                             paginatorInfo { 
@@ -114,15 +127,29 @@ async function loadDataPaginate(page = 1, isActive = true) {
                     data { 
                             id
                             kunjungan_id
+                            tenaga_medis_id
+                            poli_id
                             tanggal_ulang
                             jam_ulang
                             catatan
+                            status
                             kunjungan{
                                 id
+                                pasien_id
                                 pasien{
                                     id
                                     nama
                                 }
+                            }
+                            tenagaMedis {
+                                id
+                                profile{
+                                    nickname
+                                }
+                            }
+                            poli {
+                                id
+                                nama_poli
                             }
                         }
                     paginatorInfo { 
@@ -165,14 +192,48 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
+document.addEventListener("change", function (e) {
+    if (e.target.id === "create-kunjungan_id") {
+        const option = e.target.selectedOptions[0];
+        const poliId = option?.dataset.poli;
+
+        const poliInfo = document.getElementById("poli-info");
+        const poliSelect = document.getElementById("create-poli_id");
+
+        if (poliId) {
+            poliSelect.value = poliId;
+            poliSelect.disabled = false;
+            poliSelect.dispatchEvent(new Event("change"));
+            poliInfo.classList.add("hidden");
+        } else {
+            poliSelect.value = "";
+            poliSelect.disabled = true;
+        }
+    }
+});
+
 // Create
 async function createKunjunganUlang() {
-    const kunjungan_id = document.getElementById("create-kunjungan_id").value.trim();
+    const kunjungan_id = document
+        .getElementById("create-kunjungan_id")
+        .value.trim();
+    const tenaga_medis_id = document
+        .getElementById("create-tenaga_medis_id")
+        .value.trim();
+    const poli_id = document.getElementById("create-poli_id").value.trim();
     const tanggal_ulang = document.getElementById("create-tanggal_ulang").value;
     const jam_ulang = document.getElementById("create-jam_ulang").value;
     const catatan = document.getElementById("create-catatan").value.trim();
+    const status = document.getElementById("create-status").value;
 
-    if (!kunjungan_id || !tanggal_ulang || !jam_ulang || !catatan)
+    if (
+        !kunjungan_id ||
+        !poli_id ||
+        !status ||
+        !tanggal_ulang ||
+        !jam_ulang ||
+        !catatan
+    )
         return alert("Please fill in all required fields!");
 
     showLoading();
@@ -182,14 +243,25 @@ async function createKunjunganUlang() {
             createKunjunganUlang(input: $input) {
                 id
                 kunjungan_id
+                tenaga_medis_id
+                poli_id
                 tanggal_ulang
                 jam_ulang
                 catatan
+                status
             }
         }
     `;
     const variablesKunjunganUlang = {
-        input: { kunjungan_id, tanggal_ulang, jam_ulang, catatan },
+        input: {
+            kunjungan_id,
+            tenaga_medis_id,
+            poli_id,
+            tanggal_ulang,
+            jam_ulang,
+            catatan,
+            status,
+        },
     };
 
     try {
@@ -203,11 +275,14 @@ async function createKunjunganUlang() {
         });
 
         const resultKunjunganUlang = await resKunjunganUlang.json();
-        const dataKunjunganUlang = resultKunjunganUlang?.data?.createKunjunganUlang;
+        const dataKunjunganUlang =
+            resultKunjunganUlang?.data?.createKunjunganUlang;
 
         if (dataKunjunganUlang) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-kunjunganUlang" })
+                new CustomEvent("close-modal", {
+                    detail: "create-kunjunganUlang",
+                })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
@@ -222,12 +297,24 @@ async function createKunjunganUlang() {
     }
 }
 
-function openEditModal(id, kunjungan_id, tanggal_ulang, jam_ulang, catatan) {
+function openEditModal(
+    id,
+    kunjungan_id,
+    tenaga_medis_id,
+    poli_id,
+    tanggal_ulang,
+    jam_ulang,
+    catatan,
+    status
+) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-kunjungan_id").value = kunjungan_id;
+    document.getElementById("edit-tenaga_medis_id").value = tenaga_medis_id;
+    document.getElementById("edit-poli_id").value = poli_id;
     document.getElementById("edit-tanggal_ulang").value = tanggal_ulang;
     document.getElementById("edit-jam_ulang").value = jam_ulang;
     document.getElementById("edit-catatan").value = catatan;
+    document.getElementById("edit-status").value = status;
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "edit-kunjunganUlang" })
@@ -237,12 +324,26 @@ function openEditModal(id, kunjungan_id, tanggal_ulang, jam_ulang, catatan) {
 // Update
 async function updateKunjunganUlang() {
     const id = document.getElementById("edit-id").value;
-    const kunjungan_id = document.getElementById("edit-kunjungan_id").value.trim();
+    const kunjungan_id = document
+        .getElementById("edit-kunjungan_id")
+        .value.trim();
+    const tenaga_medis_id = document
+        .getElementById("edit-tenaga_medis_id")
+        .value.trim();
+    const poli_id = document.getElementById("edit-poli_id").value.trim();
     const tanggal_ulang = document.getElementById("edit-tanggal_ulang").value;
     const jam_ulang = document.getElementById("edit-jam_ulang").value;
     const catatan = document.getElementById("edit-catatan").value.trim();
+    const status = document.getElementById("edit-status").value.trim();
 
-    if (!kunjungan_id || !tanggal_ulang || !jam_ulang || !catatan)
+    if (
+        !kunjungan_id ||
+        !poli_id ||
+        !status ||
+        !tanggal_ulang ||
+        !jam_ulang ||
+        !catatan
+    )
         return alert("Please fill in all required fields!");
     showLoading();
 
@@ -250,9 +351,12 @@ async function updateKunjunganUlang() {
                         { 
                             id 
                             kunjungan_id 
+                            tenaga_medis_id
+                            poli_id
                             tanggal_ulang
                             jam_ulang
                             catatan
+                            status
                         } 
                     }`;
     try {
@@ -261,7 +365,18 @@ async function updateKunjunganUlang() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: { id, input: { kunjungan_id, tanggal_ulang, jam_ulang, catatan } },
+                variables: {
+                    id,
+                    input: {
+                        kunjungan_id,
+                        tenaga_medis_id,
+                        poli_id,
+                        tanggal_ulang,
+                        jam_ulang,
+                        catatan,
+                        status,
+                    },
+                },
             }),
         });
         window.dispatchEvent(
@@ -285,7 +400,7 @@ function renderKunjunganUlangTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="6">No data available.</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="9">No data available.</td>
             </tr>
         `;
         const pageInfoEl = isActive
@@ -316,10 +431,13 @@ function renderKunjunganUlangTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin" || window.currentUserRole === "receptionist") {
+        if (
+            window.currentUserRole === "admin" ||
+            window.currentUserRole === "receptionist"
+        ) {
             if (isActive) {
                 actions = `
-                <button onclick="openEditModal(${item.id}, '${item.kunjungan_id}', '${item.tanggal_ulang}', '${item.jam_ulang}', '${item.catatan}')"
+                <button onclick="openEditModal(${item.id}, '${item.kunjungan_id}','${item.tenaga_medis_id}', '${item.poli_id}', '${item.tanggal_ulang}', '${item.jam_ulang}', '${item.catatan}', '${item.status}')"
                     class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                     <i class='bx bx-edit-alt'></i> Edit
                 </button>
@@ -340,32 +458,55 @@ function renderKunjunganUlangTable(result, tableId, isActive) {
             }
         }
 
+        const statusStyle = {
+            scheduled: "bg-orange-100 text-orange-700",
+            completed: "bg-green-100 text-green-700",
+            cancelled: "bg-red-100 text-red-700",
+        };
+
         tbody.innerHTML += `
         <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50">
-            <td class="p-4 text-center font-semibold">
-                <span class="rounded-full text-white bg-green-500 py-1 px-2">${
-                    item.id
-                }</span>
-            </td>
-
+            
             <td class="p-4 text-center text-base font-semibold">${
-                item.kunjungan.pasien ? item.kunjungan.pasien.nama : "-"
+                item.kunjungan.pasien ? item.kunjungan.pasien.nama : "Unknown"
             }</td>
 
-            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
+            <td class="p-4 text-center text-base font-semibold ${
+                item.tenagaMedis?.profile?.nickname
+                    ? "text-gray-900"
+                    : "text-red-500"
+            }">
+                ${item.tenagaMedis?.profile?.nickname ?? "Not Specified"}
+            </td>
+
+
+            <td class="p-4 text-center text-base font-semibold">${
+                item.poli ? item.poli.nama_poli : "-"
+            }</td>
+
+            <td class="p-4 text-center text-base font-semibold">
                 ${item.tanggal_ulang}
             </td>
 
-            <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
+            <td class="p-4 text-center text-base font-semibold">
                 ${item.jam_ulang}
             </td>
 
             <td class="p-4 text-center truncate max-w-24 text-base font-semibold">
-                 ${item.catatan}
+                ${item.catatan}
+            </td>
+
+            <td class="p-4 text-center ">
+                <span class="px-2 py-1 rounded uppercase font-semibold ${
+                    statusStyle[item.status]
+                }">
+                    ${item.status}
+                </span>
             </td>
 
             ${
-                window.currentUserRole === "admin" || window.currentUserRole === "receptionist"
+                window.currentUserRole === "admin" ||
+                window.currentUserRole === "receptionist"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

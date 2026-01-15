@@ -60,12 +60,12 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Patient', 'date', 'time', 'description']" :requireRole="['admin','receptionist']">
+            <x-table id="tableActive" :headers="['Patient', 'doctor', 'poli', 'date', 'time', 'description', 'status']" :requireRole="['admin', 'receptionist']">
                 <tbody id="dataKunjunganUlangAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient', 'date', 'time', 'description']" :requireRole="['admin','receptionist']">
+            <x-table id="tableArchive" class="hidden" :headers="['Patient', 'doctor', 'poli', 'date', 'time', 'description', 'status']" :requireRole="['admin', 'receptionist']">
                 <tbody id="dataKunjunganUlangArsip"></tbody>
             </x-table>
 
@@ -81,28 +81,67 @@
                     <form onsubmit="event.preventDefault(); createKunjunganUlang()">
                         <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New Return Visit</h2>
 
-                        <div class="space-y-3">
+                        <div class="flex justify-between gap-4 mb-4">
 
-                            <x-input-label>Patient Name</x-input-label>
-                            <select name="kunjungan_id" id="create-kunjungan_id" class="border p-2 w-full rounded" required>
-                                <option value="" disabled selected>Select Patient</option>
-                                @foreach ($pasiens as $p)
-                                    <option value="{{ $p->id }}">{{ $p->pasien->nama }}</option>
-                                @endforeach
-                            </select>
+                            <div class="space-y-2 w-full">
 
-                            <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" />
+                                <x-input-label>Patient Name</x-input-label>
+                                <select name="kunjungan_id" id="create-kunjungan_id" class="border p-2 w-full rounded"
+                                    required>
+                                    <option value="" disabled selected>Select Patient</option>
+                                    @foreach ($pasiens as $p)
+                                        <option value="{{ $p->id }}" data-poli="{{ $p->poli_id }}">
+                                            {{ $p->pasien->nama }} (
+                                            {{ $p->tanggal_kunjungan->translatedFormat('d M Y') }} )</option>
+                                    @endforeach
+                                </select>
 
-                            <x-input-label>Time</x-input-label>
-                            <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                                <x-input-label>Doctor Name</x-input-label>
+                                <select name="tenaga_medis_id" id="create-tenaga_medis_id"
+                                    class="border p-2 w-full rounded">
+                                    <option value="" disabled selected>Select Doctor</option>
+                                    @foreach ($dokters as $tm)
+                                        <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
+                                    @endforeach
+                                </select>
 
-                            <x-input-label>Note</x-input-label>
-                            <textarea id="create-catatan" placeholder="Enter Note..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                required></textarea>
+                                <x-input-label>Poli Name</x-input-label>
+                                <select name="poli_id" id="create-poli_id" disabled class="border p-2 w-full rounded" required>
+                                    <option value="" disabled selected>Select Poli</option>
+                                    @foreach ($polis as $p)
+                                        <option value="{{ $p->id }}">{{ $p->nama_poli }}</option>
+                                    @endforeach
+                                </select>
+                                <p id="poli-info" class="text-red-600 text-sm">
+                                    *select the patient first!
+                                </p>
 
+                            </div>
+
+                            <div class="space-y-2 w-full">
+
+                                <x-input-label>Date</x-input-label>
+                                <x-text-input id="create-tanggal_ulang" type="date"
+                                    class="border p-2 w-full rounded" />
+
+                                <x-input-label>Time</x-input-label>
+                                <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+
+                                <x-input-label>Status</x-input-label>
+                                <select name="status" id="create-status" class="border p-2 w-full rounded" required>
+                                    <option value="" disabled selected>Select Status</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+
+                            </div>
                         </div>
+
+                        <x-input-label>Note</x-input-label>
+                        <textarea id="create-catatan" placeholder="Enter Note..."
+                            class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            required></textarea>
 
                         <div class="flex justify-end mt-4">
                             <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
@@ -120,26 +159,62 @@
 
                         <x-text-input type="hidden" id="edit-id" />
 
-                        <div class="space-y-3">
-                            <x-input-label>New Patient Name</x-input-label>
-                            <select name="kunjungan_id" id="edit-kunjungan_id" class="border p-2 w-full rounded" required>
-                                <option value="" disabled selected>Select Patient</option>
-                                @foreach ($pasiens as $p)
-                                    <option value="{{ $p->id }}">{{ $p->pasien->nama }}</option>
-                                @endforeach
-                            </select>
+                        <div class="flex justify-between gap-4 mb-4">
 
-                            <x-input-label>New Date</x-input-label>
-                            <x-text-input id="edit-tanggal_ulang" type="date" class="border p-2 w-full rounded" />
+                            <div class="space-y-2 w-full">
 
-                            <x-input-label>New Time</x-input-label>
-                            <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                                <x-input-label>New Patient Name</x-input-label>
+                                <select name="kunjungan_id" id="edit-kunjungan_id" class="border p-2 w-full rounded"
+                                    required>
+                                    <option value="" disabled selected>Select Patient</option>
+                                    @foreach ($pasiens as $p)
+                                        <option value="{{ $p->id }}">{{ $p->pasien->nama }} (
+                                            {{ $p->tanggal_kunjungan->translatedFormat('d M Y') }} )</option>
+                                    @endforeach
+                                </select>
 
-                            <x-input-label>New Note</x-input-label>
-                            <textarea id="edit-catatan" placeholder="Enter Note..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                required></textarea>
+                                <x-input-label>New Doctor Name</x-input-label>
+                                <select name="tenaga_medis_id" id="edit-tenaga_medis_id"
+                                    class="border p-2 w-full rounded" required>
+                                    <option value="" disabled selected>Select Doctor</option>
+                                    @foreach ($dokters as $tm)
+                                        <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
+                                    @endforeach
+                                </select>
+
+                                <x-input-label>New Poli Name</x-input-label>
+                                <select name="poli_id" id="edit-poli_id" class="border p-2 w-full rounded" required>
+                                    <option value="" disabled selected>Select Poli</option>
+                                    @foreach ($polis as $p)
+                                        <option value="{{ $p->id }}">{{ $p->nama_poli }}</option>
+                                    @endforeach
+                                </select>
+
+                            </div>
+
+                            <div class="space-y-2 w-full">
+
+                                <x-input-label>New Date</x-input-label>
+                                <x-text-input id="edit-tanggal_ulang" type="date"
+                                    class="border p-2 w-full rounded" />
+
+                                <x-input-label>New Time</x-input-label>
+                                <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded" />
+
+                                <x-input-label>Status</x-input-label>
+                                <select name="status" id="edit-status" class="border p-2 w-full rounded" required>
+                                    <option value="" disabled selected>Select Status</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
                         </div>
+
+                        <x-input-label>New Note</x-input-label>
+                        <textarea id="edit-catatan" placeholder="Enter Note..."
+                            class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            required></textarea>
 
                         <div class="flex justify-end mt-4">
                             <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>

@@ -45,7 +45,7 @@
     <div class=" px-10">
         <x-loading></x-loading>
 
-        <div id="dataUsersProfile" class="mt-4 grid grid-cols-2 lg:grid-cols-6 gap-4"></div>
+        <div id="dataUsersProfile" class="mt-4 grid grid-cols-2 lg:grid-cols-5 gap-4"></div>
         <div id="dataUsersProfileArchive" class="hidden mt-4 grid grid-cols-1 lg:grid-cols-6 gap-4"></div>
 
         {{-- Pagination untuk AKTIF --}}
@@ -54,7 +54,7 @@
 
             <div class="flex items-center gap-4">
                 <select id="perPage" onchange="loadDataPaginate(1, true)" class="border py-1 px-5 rounded-full">
-                    <option value="6" selected>6</option>
+                    <option value="5" selected>5</option>
                     <option value="10">10</option>
                     <option value="50">50</option>
                     <option value="100">100</option>

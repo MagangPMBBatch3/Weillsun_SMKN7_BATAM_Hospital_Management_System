@@ -15,7 +15,7 @@ class RawatInap extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'rawat_inap';
     protected $primaryKey = 'id';
-    protected $fillable = ['pasien_id','ruangan_id','status','biaya_inap'];
+    protected $fillable = ['pasien_id','ruangan_id','status','biaya_inap', 'tanggal_masuk', 'tanggal_keluar'];
 
     protected $casts = [
         'created_at' => 'datetime',

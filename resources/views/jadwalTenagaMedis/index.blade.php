@@ -5,18 +5,13 @@
 
             <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-3">
                 <i class='bx bx-calendar text-3xl text-blue-500'></i>
-                Doctors Schedule
+                Staff Schedule
             </h2>
 
             <div class="flex gap-3 w-full lg:w-auto">
                 <div class="relative w-full sm:w-72">
-                    <input
-                        type="text"
-                        id="search"
-                        placeholder="Search doctor..."
-                        oninput="searchJadwalTenagaMedis()"
-                        class="w-full rounded-xl border px-4 py-2 pl-9 text-sm"
-                    >
+                    <input type="text" id="search" placeholder="Search doctor..." oninput="searchJadwalTenagaMedis()"
+                        class="w-full rounded-xl border px-4 py-2 pl-9 text-sm">
                     <i class='bx bx-search absolute left-3 top-3'></i>
                 </div>
 
@@ -40,20 +35,7 @@
             <x-loading />
 
             {{-- TABLE --}}
-            <x-table
-                id="tableActive"
-                :headers="[
-                    'Doctor',
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday'
-                ]"
-                requireRole=false
-            >
+            <x-table id="tableActive" :headers="['Doctor', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" requireRole=false>
                 <tbody id="dataJadwalTenagaMedisAktif"></tbody>
             </x-table>
 
@@ -66,11 +48,7 @@
                         <h2 class="text-xl font-bold mb-4">Add Doctor</h2>
 
                         <x-input-label>Doctor</x-input-label>
-                        <select
-                            id="create-dokter_id"
-                            class="border mb-2 p-2 w-full rounded"
-                            required
-                        >
+                        <select id="create-dokter_id" class="border mb-2 p-2 w-full rounded" required>
                             <option value="" disabled selected>Select Doctor</option>
                             @foreach ($dokters as $d)
                                 <option value="{{ $d->id }}">
@@ -79,11 +57,7 @@
                             @endforeach
                         </select>
                         <x-input-label>Poli</x-input-label>
-                        <select
-                            id="create-poli_id"
-                            class="border p-2 w-full rounded"
-                            required
-                        >
+                        <select id="create-poli_id" class="border p-2 w-full rounded" required>
                             <option value="" disabled selected>Select Poli</option>
                             @foreach ($poli as $p)
                                 <option value="{{ $p->id }}">
@@ -105,100 +79,82 @@
             </x-modal>
 
             @if (auth()->user()->role === 'admin')
-            {{-- ================= MODAL CREATE JAM ================= --}}
-            <x-modal name="create-jam" focusable>
-                <div class="p-6">
-                    <form onsubmit="event.preventDefault(); createJam()">
-                        <h2 class="text-xl font-bold mb-4">Add Schedule</h2>
+                {{-- ================= MODAL CREATE JAM ================= --}}
+                <x-modal name="create-jam" focusable>
+                    <div class="p-6">
+                        <form onsubmit="event.preventDefault(); createJam()">
+                            <h2 class="text-xl font-bold mb-4">Add Schedule</h2>
 
-                        {{-- Hidden --}}
-                        <input type="hidden" id="jam-tenaga_medis_id">
-                        <input type="hidden" id="jam-hari">
-                        <input type="hidden" id="poli">
+                            {{-- Hidden --}}
+                            <input type="hidden" id="jam-tenaga_medis_id">
+                            <input type="hidden" id="jam-hari">
+                            <input type="hidden" id="poli">
 
-                        <div class="space-y-3">
-                            <div>
-                                <x-input-label>Start Time</x-input-label>
-                                <x-text-input
-                                    type="time"
-                                    id="jam-mulai"
-                                    class="w-full"
-                                    required
-                                />
+                            <div class="space-y-3">
+                                <div>
+                                    <x-input-label>Start Time</x-input-label>
+                                    <x-text-input type="time" id="jam-mulai" class="w-full" required />
+                                </div>
+
+                                <div>
+                                    <x-input-label>End Time</x-input-label>
+                                    <x-text-input type="time" id="jam-selesai" class="w-full" required />
+                                </div>
                             </div>
 
-                            <div>
-                                <x-input-label>End Time</x-input-label>
-                                <x-text-input
-                                    type="time"
-                                    id="jam-selesai"
-                                    class="w-full"
-                                    required
-                                />
+                            <div class="flex justify-end mt-6 gap-2">
+                                <x-secondary-button x-on:click="$dispatch('close')">
+                                    Cancel
+                                </x-secondary-button>
+                                <x-primary-button>
+                                    Save
+                                </x-primary-button>
                             </div>
-                        </div>
+                        </form>
+                    </div>
+                </x-modal>
 
-                        <div class="flex justify-end mt-6 gap-2">
-                            <x-secondary-button x-on:click="$dispatch('close')">
-                                Cancel
-                            </x-secondary-button>
-                            <x-primary-button>
-                                Save
-                            </x-primary-button>
-                        </div>
-                    </form>
-                </div>
-            </x-modal>
+                {{-- ================= MODAL EDIT JAM ================= --}}
+                <x-modal name="edit-jadwal" focusable>
+                    <div class="p-6">
+                        <form onsubmit="event.preventDefault(); updateJadwalTenagaMedis()">
+                            <h2 class="text-xl font-bold mb-4">Edit Schedule</h2>
 
-            {{-- ================= MODAL EDIT JAM ================= --}}
-            <x-modal name="edit-jadwal" focusable>
-                <div class="p-6">
-                    <form onsubmit="event.preventDefault(); updateJadwalTenagaMedis()">
-                        <h2 class="text-xl font-bold mb-4">Edit Schedule</h2>
+                            <input type="hidden" id="edit-id">
 
-                        <input type="hidden" id="edit-id">
+                            <div class="space-y-3">
+                                <div>
+                                    <x-input-label>Start Time</x-input-label>
+                                    <x-text-input type="time" id="edit-jam_mulai" class="w-full" required />
+                                </div>
 
-                        <div class="space-y-3">
-                            <div>
-                                <x-input-label>Start Time</x-input-label>
-                                <x-text-input
-                                    type="time"
-                                    id="edit-jam_mulai"
-                                    class="w-full"
-                                    required
-                                />
+                                <div>
+                                    <x-input-label>End Time</x-input-label>
+                                    <x-text-input type="time" id="edit-jam_selesai" class="w-full" required />
+                                </div>
                             </div>
 
-                            <div>
-                                <x-input-label>End Time</x-input-label>
-                                <x-text-input
-                                    type="time"
-                                    id="edit-jam_selesai"
-                                    class="w-full"
-                                    required
-                                />
+                            <div class="flex justify-end mt-6 gap-2">
+                                <x-secondary-button x-on:click="$dispatch('close')">
+                                    Cancel
+                                </x-secondary-button>
+                                <x-primary-button>
+                                    Update
+                                </x-primary-button>
                             </div>
-                        </div>
-
-                        <div class="flex justify-end mt-6 gap-2">
-                            <x-secondary-button x-on:click="$dispatch('close')">
-                                Cancel
-                            </x-secondary-button>
-                            <x-primary-button>
-                                Update
-                            </x-primary-button>
-                        </div>
-                    </form>
-                </div>
-            </x-modal>
+                        </form>
+                    </div>
+                </x-modal>
             @endif
 
         </div>
     </div>
 
-    {{-- ROLE --}}
+    {{-- ROLE & USER DATA --}}
     <script>
         window.currentUserRole = "{{ Auth::user()->role }}";
+        window.currentUserId = "{{ Auth::user()->id }}";
+        window.currentUserTenagaMedisId = "{{ Auth::user()->profile?->tenagaMedis?->id ?? 'null' }}";
     </script>
 
     {{-- JS --}}

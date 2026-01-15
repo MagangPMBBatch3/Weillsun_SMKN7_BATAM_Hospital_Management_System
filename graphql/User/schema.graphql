@@ -1,6 +1,8 @@
 enum Role{
     admin
     receptionist
+    doctor
+    cashier
 }
 
 type User {

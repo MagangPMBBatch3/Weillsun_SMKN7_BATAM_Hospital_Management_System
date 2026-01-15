@@ -9,7 +9,7 @@ type RawatInap {
     pasien_id: ID!
     ruangan_id: ID!
     tanggal_masuk: Date!
-    tanggal_keluar: Date!
+    tanggal_keluar: Date
     biaya_inap: Float!
     status: StatusInap!
     is_paid: Int
@@ -26,7 +26,7 @@ input CreateRawatInapInput {
     pasien_id: ID!
     ruangan_id: ID!
     tanggal_masuk: Date!
-    tanggal_keluar: Date!
+    tanggal_keluar: Date
     biaya_inap: Float!
     status: StatusInap!
 }

@@ -206,7 +206,7 @@ async function createLiburTenagaMedis() {
 
         if (dataLiburTenagaMedis) {
             window.dispatchEvent(
-                new CustomEvent("close-modal", { detail: "create-libur " })
+                new CustomEvent("close-modal", { detail: "create-libur" })
             );
             loadDataPaginate(currentPageActive, true);
         } else {
@@ -235,7 +235,7 @@ function openEditModal(
     document.getElementById("edit-keterangan").value = keterangan;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-libur " })
+        new CustomEvent("open-modal", { detail: "edit-libur" })
     );
 }
 
@@ -287,7 +287,7 @@ async function updateLiburTenagaMedis() {
         });
 
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-libur " })
+            new CustomEvent("close-modal", { detail: "edit-libur" })
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
