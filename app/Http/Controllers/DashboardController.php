@@ -3,18 +3,23 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Pasien\Pasien;
-use App\Models\Kunjungan\Kunjungan;
-use App\Models\TenagaMedis\TenagaMedis;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Obat\Obat;
 use App\Models\Poli\Poli;
+use App\Models\Pasien\Pasien;
 use App\Models\Ruangan\Ruangan;
 use App\Models\Supplier\Supplier;
+use App\Models\Kunjungan\Kunjungan;
+use App\Models\Radiologi\Radiologi;
 use App\Models\RawatInap\RawatInap;
-use App\Models\JadwalTenagaMedis\JadwalTenagaMedis;
+use Illuminate\Support\Facades\Auth;
+use App\Models\RekamMedis\RekamMedis;
+use App\Models\TenagaMedis\TenagaMedis;
 use App\Models\KunjunganUlang\KunjunganUlang;
+use App\Models\LabPemeriksaan\LabPemeriksaan;
 use App\Models\PembayaranPasien\PembayaranPasien;
+use App\Models\JadwalTenagaMedis\JadwalTenagaMedis;
+use App\Models\LiburTenagaMedis\LiburTenagaMedis;
+use App\Models\ResepObat\ResepObat;
 
 class DashboardController extends Controller
 {
@@ -153,82 +158,221 @@ class DashboardController extends Controller
     }
 
     private function doctorDashboard()
-    {
-        $user = Auth::user();
-        $today = Carbon::today();
-        $firstDayMonth = Carbon::now()->startOfMonth();
+{
+    $user = Auth::user();
+    $today = Carbon::today();
+    $dayOfWeek = $today->dayOfWeek;
+    $firstDayMonth = Carbon::now()->startOfMonth();
 
-        // Get doctor profile
-        $doctorProfile = $user->profile->tenagaMedis ?? null;
+    // ================== DOCTOR ==================
+    $doctor = TenagaMedis::with([
+            'profile.user',
+            'jadwal.poli',
+            'libur'
+        ])
+        ->where('profile_id', $user->profile->id)
+        ->first();
 
-        // My Appointments Today
-        $myAppointmentsToday = 0;
-        $myScheduleToday = [];
-        $myPatientsToday = [];
-        $labTestsPending = 0;
-        $radiologyPending = 0;
-        $totalMyPatients = 0;
-        $myPatientsMonth = 0;
-        $avgConsultation = 0;
-        $pendingRecords = 0;
-        $pendingPrescriptions = 0;
-
-        if ($doctorProfile) {
-            // Get schedule for today
-            $dayName = $today->format('l');
-            $schedules = JadwalTenagaMedis::where('tenaga_medis_id', $doctorProfile->id)
-                ->where('hari', $dayName)
-                ->with('poli')
-                ->get();
-
-            $myScheduleToday = $schedules->map(function ($schedule) {
-                return [
-                    'clinic' => $schedule->poli->nama_poli ?? 'Clinic',
-                    'start_time' => $schedule->jam_mulai,
-                    'end_time' => $schedule->jam_selesai,
-                ];
-            })->toArray();
-
-            // Get visits for today
-            $visits = Kunjungan::with(['pasien', 'poli'])
-                ->whereDate('tanggal_kunjungan', $today)
-                ->whereIn('poli_id', $schedules->pluck('poli_id'))
-                ->get();
-
-            $myAppointmentsToday = $visits->count();
-
-            $myPatientsToday = $visits->map(function ($visit) {
-                return [
-                    'name' => $visit->pasien->nama ?? 'Unknown',
-                    'time' => $visit->tanggal_kunjungan->format('H:i'),
-                ];
-            })->toArray();
-
-            // Total my patients
-            $totalMyPatients = Kunjungan::whereIn('poli_id', $schedules->pluck('poli_id'))
-                ->distinct('pasien_id')
-                ->count();
-
-            $myPatientsMonth = Kunjungan::whereDate('tanggal_kunjungan', '>=', $firstDayMonth)
-                ->whereIn('poli_id', $schedules->pluck('poli_id'))
-                ->distinct('pasien_id')
-                ->count();
-        }
-
-
-        return view('dashboard', [
-            'myAppointmentsToday' => $myAppointmentsToday,
-            'myScheduleToday' => $myScheduleToday,
-            'myPatientsToday' => $myPatientsToday,
-            'pendingRecords' => $pendingRecords,
-            'pendingPrescriptions' => $pendingPrescriptions,
-            'labTestsPending' => $labTestsPending,
-            'radiologyPending' => $radiologyPending,
-            'totalMyPatients' => $totalMyPatients,
-            'myPatientsMonth' => $myPatientsMonth,
-            'avgConsultation' => $avgConsultation,
-        ]);
+    if (!$doctor) {
+        return redirect()->back()->with('error', 'Data tenaga medis tidak ditemukan');
     }
+
+    // ================== TODAY SCHEDULE ==================
+    $todaySchedule = $doctor->jadwal
+        ->where('hari', $dayOfWeek)
+        ->first();
+
+    $isOffToday = $doctor->libur
+        ->where('tanggal', $today->toDateString())
+        ->first();
+
+    $isoDay = $todaySchedule ? $today->isoFormat('dddd') : null;
+
+    // ================== DOCTOR INFO ==================
+    $doctorInfo = [
+        'name' => $doctor->profile->user->name ?? 'Unknown',
+        'specialization' => $doctor->spesialisasi ?? 'General',
+        'no_str' => $doctor->no_str ?? 'N/A',
+        'photo' => $doctor->profile->foto
+            ? asset('storage/' . $doctor->profile->foto)
+            : asset('images/default-avatar.png'),
+    ];
+
+    // ================== SCHEDULE INFO ==================
+    if ($isOffToday) {
+        $scheduleInfo = [
+            'status' => 'off',
+            'jenis' => $isOffToday->jenis ?? 'N/A',
+            'note' => $isOffToday->keterangan ?? '-',
+        ];
+    } elseif ($todaySchedule) {
+        $scheduleInfo = [
+            'status' => 'active',
+            'day' => $isoDay,
+            'poli_id' => $todaySchedule->poli->id ?? null,
+            'poli_name' => $todaySchedule->poli->nama_poli ?? 'General Clinic',
+            'start_time' => Carbon::parse($todaySchedule->jam_mulai)->format('H:i'),
+            'end_time' => Carbon::parse($todaySchedule->jam_selesai)->format('H:i'),
+        ];
+    } else {
+        $scheduleInfo = [
+            'status' => 'no_schedule',
+            'day' => $today->format('l'),
+            'message' => 'No schedule today',
+        ];
+    }
+
+    // ================== STATISTICS (OPTIMIZED) ==================
+    $stats = [
+        'total_patients' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+            ->distinct('pasien_id')
+            ->count('pasien_id'),
+
+        'today_records' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+            ->whereDate('tanggal', $today)
+            ->count(),
+
+        'today_followups' => KunjunganUlang::where('tenaga_medis_id', $doctor->id)
+            ->whereDate('tanggal_ulang', $today)
+            ->count(),
+
+        'pending_labs' => LabPemeriksaan::where('tenaga_medis_id', $doctor->id)
+            ->whereNull('hasil')
+            ->count(),
+
+        'pending_radiology' => Radiologi::where('tenaga_medis_id', $doctor->id)
+            ->whereNull('hasil')
+            ->count(),
+
+        'unpaid_prescriptions' => ResepObat::where('tenaga_medis_id', $doctor->id)
+            ->where('is_paid', 0)
+            ->count(),
+    ];
+
+    // ================== TODAY FOLLOW UPS (N+1 SAFE) ==================
+    $todayFollowUps = KunjunganUlang::with([
+            'kunjungan:id,pasien_id,keluhan',
+            'kunjungan.pasien:id,nama',
+            'poli:id,nama_poli'
+        ])
+        ->where('tenaga_medis_id', $doctor->id)
+        ->whereDate('tanggal_ulang', $today)
+        ->orderBy('jam_ulang')
+        ->get()
+        ->each(function ($f) {
+            $f->jam_ulang_format = $f->jam_ulang
+                ? Carbon::parse($f->jam_ulang)->format('H:i')
+                : '-';
+
+            $f->pasien_nama = $f->kunjungan->pasien->nama ?? 'Unknown';
+            $f->pasien_id = $f->kunjungan->pasien->id ?? null;
+            $f->nama_poli = $f->poli->nama_poli ?? 'General';
+            $f->keluhan = $f->kunjungan->keluhan ?? '-';
+        });
+
+    // ================== RECENT ACTIVITIES (LIGHT) ==================
+    $recentActivities = collect()
+
+    ->merge(
+        RekamMedis::with('pasien:id,nama')
+            ->where('tenaga_medis_id', $doctor->id)
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function ($r) {
+                return (object) [
+                    'created_at' => $r->created_at,
+                    'pasien_nama' => $r->pasien->nama ?? 'Unknown',
+                    'detail' => $r->diagnosis,
+                    'type' => 'medical_record',
+                ];
+            })
+    )
+
+    ->merge(
+        ResepObat::with('pasien:id,nama')
+            ->where('tenaga_medis_id', $doctor->id)
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function ($r) {
+                return (object) [
+                    'created_at' => $r->created_at,
+                    'pasien_nama' => $r->pasien->nama ?? 'Unknown',
+                    'detail' => 'Resep Obat',
+                    'type' => 'prescription',
+                ];
+            })
+    )
+
+    ->sortByDesc('created_at')
+    ->take(6);
+
+
+    // ================== MY INPATIENTS ==================
+    $myInpatients = RawatInap::with([
+        'pasien:id,nama',
+        'ruangan:id,nama_ruangan'
+    ])
+    ->where('status', 'Aktif')
+    ->whereIn(
+        'pasien_id',
+        RekamMedis::where('tenaga_medis_id', $doctor->id)
+            ->distinct()
+            ->pluck('pasien_id')
+    )
+    ->latest('tanggal_masuk')
+    ->limit(5)
+    ->get()
+    ->each(function ($i) {
+
+        // FIX 1: hari rawat inap (integer & manusiawi)
+        $i->days_admitted = max(
+            1,
+            Carbon::parse($i->tanggal_masuk)
+                ->startOfDay()
+                ->diffInDays(Carbon::today())
+        );
+
+        // FIX 2: properti yang dipakai Blade
+        $i->pasien_nama = $i->pasien->nama ?? 'Unknown';
+        $i->nama_ruangan = $i->ruangan->nama_ruangan ?? 'Unknown Room';
+    });
+
+
+    // ================== VISIT CHART ==================
+    $visitChart = collect(range(6, 0))
+        ->map(function ($i) use ($doctor) {
+            $date = Carbon::today()->subDays($i);
+            return [
+                'date' => $date->format('D, M j'),
+                'count' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+                    ->whereDate('tanggal', $date)
+                    ->count(),
+            ];
+        });
+
+    // ================== TOP DIAGNOSES ==================
+    $topDiagnoses = RekamMedis::where('tenaga_medis_id', $doctor->id)
+        ->whereDate('tanggal', '>=', $firstDayMonth)
+        ->selectRaw('diagnosis, COUNT(*) as total')
+        ->groupBy('diagnosis')
+        ->orderByDesc('total')
+        ->limit(5)
+        ->get();
+
+    return view('dashboard', compact(
+        'doctorInfo',
+        'scheduleInfo',
+        'stats',
+        'todayFollowUps',
+        'recentActivities',
+        'myInpatients',
+        'visitChart',
+        'topDiagnoses'
+    ));
+}
+
 
     private function cashierDashboard()
     {
@@ -344,13 +488,13 @@ class DashboardController extends Controller
             ->whereDate('tanggal_ulang', $today)
             ->orderBy('tanggal_ulang', 'asc')
             ->orderBy('jam_ulang', 'asc')
-            ->limit(10)
             ->get()
             ->map(function ($appointment) {
                 return [
-                    'patient_name' => $appointment->pasien->nama ?? 'Unknown',
+                    'patient_name' => $appointment->kunjungan->pasien->nama ?? 'Unknown',
                     'poli_name' => $appointment->poli->nama_poli ?? 'Unknown',
-                    'time' => $appointment->jam_ulang->format('H:i'),
+                    'doctor_name' => $appointment->tenagaMedis?->profile?->nickname ?? 'Unknown',
+                    'time' => Carbon::parse($appointment->jam_ulang)->format('H:i'),
                 ];
             })
             ->toArray();
@@ -382,32 +526,32 @@ class DashboardController extends Controller
             ->toArray();
 
         // Appointment Status
-        $completedAppointments = Kunjungan::whereDate('tanggal_kunjungan', $today)
-            ->whereNotNull('created_at')
+        $completedAppointments = KunjunganUlang::whereDate('tanggal_ulang', $today)
+            ->where('status', 'completed')
             ->count();
 
-        $inProgressAppointments = Kunjungan::whereDate('tanggal_kunjungan', $today)
-            ->whereNull('created_at')
+        $scheduledAppointments = KunjunganUlang::whereDate('tanggal_ulang', $today)
+            ->where('status', 'scheduled')
             ->count();
 
-        $scheduledAppointments = Kunjungan::whereDate('tanggal_kunjungan', '>', $today)->count();
-        $cancelledAppointments = 0;
+        $cancelledAppointments = KunjunganUlang::whereDate('tanggal_ulang', $today)
+            ->where('status', 'cancelled')
+            ->count();
 
 
 
-        return view('dashboard', [
-            'todayAppointments' => $todayAppointments,
-            'newPatientsToday' => $newPatientsToday,
-            'doctorsOnDutyCount' => $doctorsOnDutyCount,
-            'receptDoctorsOnDuty' => $receptDoctorsOnDuty,
-            'upcomingAppointments' => $upcomingAppointments,
-            'clinicQueue' => $clinicQueue,
-            'newPatients' => $newPatients,
-            'completedAppointments' => $completedAppointments,
-            'inProgressAppointments' => $inProgressAppointments,
-            'scheduledAppointments' => $scheduledAppointments,
-            'cancelledAppointments' => $cancelledAppointments,
-        ]);
+        return view('dashboard', compact(
+            'todayAppointments',
+            'newPatientsToday',
+            'doctorsOnDutyCount',
+            'receptDoctorsOnDuty',
+            'upcomingAppointments',
+            'clinicQueue',
+            'newPatients',
+            'completedAppointments',
+            'scheduledAppointments',
+            'cancelledAppointments',
+        ));
     }
 
     private function getDoctorsOnDutyToday(): array

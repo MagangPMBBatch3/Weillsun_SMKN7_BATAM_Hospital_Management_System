@@ -136,7 +136,7 @@
 
                 <div x-show="open" x-transition
                     class="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 dark:border-gray-600">
-                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'receptionist')
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'receptionist' || auth()->user()->role === 'doctor')
                         <a href="{{ route('kunjungan.index') }}"
                             class="flex items-center gap-3 px-4 py-2 rounded-r-lg text-sm transition-all duration-200 {{ request()->routeIs('kunjungan.index') ? 'bg-white text-blue-600' : 'text-blue-100 hover:text-white hover:bg-blue-500 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                             <span>🚶‍♂️</span>

@@ -167,7 +167,7 @@
                                 <select name="kunjungan_id" id="edit-kunjungan_id" class="border p-2 w-full rounded"
                                     required>
                                     <option value="" disabled selected>Select Patient</option>
-                                    @foreach ($pasiens as $p)
+                                    @foreach ($pasienEdit as $p)
                                         <option value="{{ $p->id }}">{{ $p->pasien->nama }} (
                                             {{ $p->tanggal_kunjungan->translatedFormat('d M Y') }} )</option>
                                     @endforeach

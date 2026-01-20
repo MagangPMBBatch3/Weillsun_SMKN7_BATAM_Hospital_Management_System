@@ -36,7 +36,7 @@ class Kunjungan extends Model
 
     public function kunjunganUlang()
     {
-        return $this->hasMany(KunjunganUlang::class, 'kunjungan_id');
+        return $this->hasOne(KunjunganUlang::class, 'kunjungan_id');
     }
 
     public function detailPasien()

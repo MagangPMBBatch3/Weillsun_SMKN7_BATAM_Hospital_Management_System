@@ -59,7 +59,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:admin,receptionist'])->group(function () {
     Route::get('kunjungan', [AuthController::class, 'kunjungan'])->name('kunjungan.index');
-    Route::get('rawatInap', [AuthController::class, 'rawatInap'])->name('rawatInap.index');
     Route::get('kunjunganUlang', [AuthController::class, 'kunjunganUlang'])->name('kunjunganUlang.index');
 });
 
@@ -67,6 +66,8 @@ Route::middleware(['auth', 'role:admin,receptionist'])->group(function () {
 
 Route::middleware(['auth', 'role:admin,receptionist,doctor'])->group(function () {
     Route::get('pasien', [AuthController::class, 'pasien'])->name('pasien.index');
+    Route::get('rawatInap', [AuthController::class, 'rawatInap'])->name('rawatInap.index');
+
 });
 
 //  REKAM MEDIS & RESEP (ADMIN + DOCTOR)

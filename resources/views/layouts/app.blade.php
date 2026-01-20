@@ -122,7 +122,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main class="py-2 max-w-8xl mx-auto w-full">
+            <main class="pt-2 pb-8 max-w-8xl mx-auto w-full">
                 {{ $slot }}
             </main>
         </div>

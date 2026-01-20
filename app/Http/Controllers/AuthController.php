@@ -206,12 +206,17 @@ class AuthController extends Controller
             ->whereNull('deleted_at')
             ->whereNotIn('id', $pasienTerpakai)
             ->get();
+    
+        $pasienEdit = Kunjungan::with('pasien:id,nama')
+            ->select('id', 'pasien_id', 'tanggal_kunjungan')
+            ->whereNull('deleted_at')
+            ->get();
 
         $dokters = TenagaMedis::with('profile:id,nickname')
             ->get();
 
         $polis = Poli::select('id', 'nama_poli')->get();
-        return view('kunjunganUlang.index', compact('pasiens', 'dokters', 'polis'));
+        return view('kunjunganUlang.index', compact('pasiens', 'dokters', 'polis', 'pasienEdit'));
     }
 
     public function detailPembayaranPasien()
