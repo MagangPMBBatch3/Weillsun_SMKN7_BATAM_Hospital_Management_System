@@ -52,11 +52,30 @@ async function loadDataPaginate(page = 1, isActive = true) {
         : document.getElementById("perPageArchive")?.value || 5;
     const searchValue = document.getElementById("search")?.value.trim() || "";
 
+    let tenagaMedisIdFilter = null;
+    if (currentUserRole !== "admin") {
+        // For non-admin users (receptionist, doctor, cashier), filter by their own tenaga_medis_id
+        tenagaMedisIdFilter = window.currentUserTenagaMedisId;
+        if (tenagaMedisIdFilter === "null" || !tenagaMedisIdFilter) {
+            // If user has no tenaga_medis_id, show empty table
+            const tbody = document.getElementById("dataLiburTenagaMedisAktif");
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-6 italic text-orange-500">
+                        No Data
+                    </td>
+                </tr>
+            `;
+            hideLoading();
+            return;
+        }
+    }
+
     try {
         // --- Query data Aktif ---
         const queryActive = `
-            query($first: Int, $page: Int, $search: String) {
-                allLiburTenagaMedisPaginate(first: $first, page: $page, search: $search){
+            query($first: Int, $page: Int, $search: String, $tenagaMedisId: ID) {
+                allLiburTenagaMedisPaginate(first: $first, page: $page, search: $search, tenagaMedisId: $tenagaMedisId){
                     data { 
                             id
                             tenaga_medis_id
@@ -88,6 +107,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             ),
             page: currentPageActive,
             search: searchValue,
+            tenagaMedisId: tenagaMedisIdFilter 
         };
         const resActive = await fetch(API_URL, {
             method: "POST",
@@ -159,12 +179,23 @@ async function loadDataPaginate(page = 1, isActive = true) {
 
 // Create
 async function createLiburTenagaMedis() {
-    const tenaga_medis_id = document.getElementById("create-doktor").value;
+    let tenaga_medis_id = document.getElementById("create-doktor").value;
+    
+    // Jika non-admin, gunakan tenaga_medis_id dari user yang login
+    if (window.currentUserRole !== "admin") {
+        tenaga_medis_id = window.currentUserTenagaMedisId;
+        
+        if (!tenaga_medis_id || tenaga_medis_id === "null") {
+            alert("You don't have personnel data associated with your account!");
+            return;
+        }
+    }
+    
     const tanggal = document.getElementById("create-tanggal").value;
     const jenis = document.getElementById("create-jenis").value.trim();
     const keterangan = document.getElementById("create-keterangan").value.trim();
 
-    if ( !tanggal || !jenis || !tenaga_medis_id || !keterangan)
+    if (!tanggal || !jenis || !tenaga_medis_id || !keterangan)
         return alert("Please fill in all required fields!");
 
     showLoading();
@@ -211,11 +242,11 @@ async function createLiburTenagaMedis() {
             loadDataPaginate(currentPageActive, true);
         } else {
             console.error("GraphQL Error:", resultLiburTenagaMedis.errors);
-            alert("Failed to create Tenaga Medis!");
+            alert("Failed to create leave data!");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred while creating the user");
+        alert("An error occurred while creating the data");
     } finally {
         hideLoading();
     }
@@ -339,7 +370,7 @@ function renderLiburTenagaMedisTable(result, tableId, isActive) {
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
     `;
 
-        if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
+        if (window.currentUserRole === "admin") {
             if (isActive) {
                 actions = `
                 <button onclick="openEditModal(${item.id},'${item.tenaga_medis_id}', '${item.tanggal}', '${item.jenis}', '${item.keterangan}')"
@@ -384,7 +415,7 @@ function renderLiburTenagaMedisTable(result, tableId, isActive) {
                 ${item.keterangan}
             </td>
             ${
-                window.currentUserRole === "admin" || window.currentUserRole === "doctor"
+                window.currentUserRole === "admin"
                     ? `<td class="flex p-4 justify-center items-center space-x-1">${actions}</td>`
                     : ""
             }

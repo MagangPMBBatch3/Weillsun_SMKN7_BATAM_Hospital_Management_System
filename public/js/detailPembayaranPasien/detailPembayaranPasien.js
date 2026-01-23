@@ -898,7 +898,7 @@ function calculateEditSubtotal() {
     const jumlah = parseInt(jumlahInput.value.replace(/\./g, "")) || 0;
     const harga = parseFloat(hargaInput.value.replace(/\./g, "")) || 0;
 
-    const subtotal = jumlah * harga;
+    const subtotal = jumlah * harga; 
     console.log("Calculated subtotal:", jumlah, "*", harga, "=", subtotal);
 
     subtotalInput.value = formatNumber(subtotal.toString());

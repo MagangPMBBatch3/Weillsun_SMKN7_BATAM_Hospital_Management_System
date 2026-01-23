@@ -48,6 +48,21 @@ class JadwalTenagaMedisQuery
         ];
     }
 
+    public function getJadwalByTenagaMedisAndHari($_, array $args)
+    {
+        $tenagaMedisId = $args['tenaga_medis_id'] ?? null;
+        $hari = $args['hari'] ?? null;
+
+        if (!$tenagaMedisId || $hari === null) {
+            return [];
+        }
+
+        return JadwalTenagaMedis::where('tenaga_medis_id', $tenagaMedisId)
+            ->where('hari', $hari)
+            ->get()
+            ->toArray();
+    }
+
     public function allArchive($_, array $args)
     {
         $query = JadwalTenagaMedis::onlyTrashed();

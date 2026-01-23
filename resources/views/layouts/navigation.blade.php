@@ -237,31 +237,31 @@
         <!-- Cashier Menu -->
         @if (auth()->user()->role === 'cashier')
             <a href="{{ route('pembayaranPasien.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranPasien.index') ? 'bg-white text-blue-600' : '' }}">
+                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranPasien.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
                 <span>💳</span>
                 <span class="font-medium">Patient Payments</span>
             </a>
 
             <a href="{{ route('detailPembayaranPasien.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembayaranPasien.index') ? 'bg-white text-blue-600' : '' }}">
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembayaranPasien.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
                 <span>📑</span>
                 <span class="font-medium">Payment Details</span>
             </a>
 
             <a href="{{ route('pembelianObat.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembelianObat.index') ? 'bg-white text-blue-600' : '' }}">
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembelianObat.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
                 <span>🧾</span>
                 <span class="font-medium">Drug Purchases</span>
             </a>
 
             <a href="{{ route('detailPembelianObat.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembelianObat.index') ? 'bg-white text-blue-600' : '' }}">
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembelianObat.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
                 <span>📦</span>
                 <span class="font-medium">Purchase Details</span>
             </a>
 
             <a href="{{ route('pembayaranSupplier.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranSupplier.index') ? 'bg-white text-blue-600' : '' }}">
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranSupplier.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
                 <span>🏦</span>
                 <span class="font-medium">Supplier Payments</span>
             </a>
@@ -399,5 +399,4 @@
 
 </nav>
 
-<!-- Spacer untuk konten agar tidak tertindih sidebar -->
 <div class="ml-64"></div>

@@ -34,6 +34,7 @@
 
                  <!-- Tombol Aktif / Arsip -->
 
+                 @if (auth()->user()->role === 'admin')
                  <div class="flex items-center gap-2 justify-center">
                      <button id="btnActive"
                          class="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 active:scale-95"
@@ -46,7 +47,7 @@
                          Archive
                      </button>
                  </div>
-
+                 @endif
 
              </div>
          </div>
@@ -59,12 +60,12 @@
              <x-loading></x-loading>
 
              {{-- Tabel Data Aktif --}}
-             <x-table id="tableActive" :headers="['ID', 'personnel', 'date', 'type', 'Leave announcement']" :requireRole="['admin', 'doctor', 'receptionist', 'cashier']">
+             <x-table id="tableActive" :headers="['ID', 'personnel', 'date', 'type', 'Leave announcement']" requireRole="admin">
                  <tbody id="dataLiburTenagaMedisAktif"></tbody>
              </x-table>
 
              {{-- Tabel Data Arsip --}}
-             <x-table id="tableArchive" class="hidden" :headers="['ID', 'personnel', 'date', 'type', 'Leave announcement']" :requireRole="['admin', 'doctor', 'receptionist', 'cashier']">
+             <x-table id="tableArchive" class="hidden" :headers="['ID', 'personnel', 'date', 'type', 'Leave announcement']" requireRole="admin">
                  <tbody id="dataLiburTenagaMedisArsip"></tbody>
              </x-table>
 
@@ -81,17 +82,23 @@
                          <h2 class="text-xl shadow-md p-4 rounded-md font-bold mb-4">Add New</h2>
 
                          <div class="space-y-3">
-                             <x-input-label>Personnel</x-input-label>
-                             <select
-                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                 name="create-doktor" id="create-doktor">
-                                 <option value="" class="text-gray-500 italic">Select Personnel</option>
-                                 @foreach ($dokters as $d)
-                                     <option value="{{ $d->id }}">
-                                         {{ $d->profile->nickname }}
-                                     </option>
-                                 @endforeach
-                             </select>
+                             @if (auth()->user()->role === 'admin')
+                                 <x-input-label>Personnel</x-input-label>
+                                 <select
+                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                     name="create-doktor" id="create-doktor">
+                                     <option value="" class="text-gray-500 italic">Select Personnel</option>
+                                     @foreach ($dokters as $d)
+                                         <option value="{{ $d->id }}">
+                                             {{ $d->profile->nickname }}
+                                         </option>
+                                     @endforeach
+                                 </select>
+                             @else
+                                 {{-- Hidden input untuk non-admin --}}
+                                 <input type="hidden" id="create-doktor"
+                                     value="{{ Auth::user()->profile?->tenagaMedis?->id }}">
+                             @endif
 
                              <x-input-label>Date</x-input-label>
                              <x-text-input id="create-tanggal" type="date" class="border p-2 w-full rounded"
@@ -99,9 +106,9 @@
 
                              <x-input-label>Type</x-input-label>
                              <select name="create-jenis" id="create-jenis"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                             >
-                                 <option value="" disabled class="text-gray-500 italic">Select Type</option>
+                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                 <option value="" disabled selected class="text-gray-500 italic">Select Type
+                                 </option>
                                  <option value="libur">Time Off</option>
                                  <option value="sakit">Sick</option>
                                  <option value="izin">Leave of Absence</option>
@@ -174,7 +181,9 @@
      </div>
 
      <script>
-         window.currentUserRole = "{{ Auth::user()->role }}";
+        window.currentUserRole = "{{ Auth::user()->role }}";
+        window.currentUserTenagaMedisId = "{{ Auth::user()->profile?->tenagaMedis?->id ?? 'null' }}";
+
 
          function showTable(isActive) {
              const tableActive = document.getElementById("tableActive");

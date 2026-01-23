@@ -106,7 +106,8 @@
                                 </select>
 
                                 <x-input-label>Poli Name</x-input-label>
-                                <select name="poli_id" id="create-poli_id" disabled class="border p-2 w-full rounded" required>
+                                <select name="poli_id" id="create-poli_id" disabled class="border p-2 w-full rounded"
+                                    required>
                                     <option value="" disabled selected>Select Poli</option>
                                     @foreach ($polis as $p)
                                         <option value="{{ $p->id }}">{{ $p->nama_poli }}</option>
@@ -121,11 +122,15 @@
                             <div class="space-y-2 w-full">
 
                                 <x-input-label>Date</x-input-label>
-                                <x-text-input id="create-tanggal_ulang" type="date"
-                                    class="border p-2 w-full rounded" />
+                                <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded"
+                                    required />
 
                                 <x-input-label>Time</x-input-label>
-                                <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                                <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded"
+                                    disabled required />
+                                <p id="jam-info-create" class="text-red-600 text-sm">
+                                    *select the doctor and date first!
+                                </p>
 
                                 <x-input-label>Status</x-input-label>
                                 <select name="status" id="create-status" class="border p-2 w-full rounded" required>
@@ -196,10 +201,12 @@
 
                                 <x-input-label>New Date</x-input-label>
                                 <x-text-input id="edit-tanggal_ulang" type="date"
-                                    class="border p-2 w-full rounded" />
+                                    class="border p-2 w-full rounded" required />
 
                                 <x-input-label>New Time</x-input-label>
-                                <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                                <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded"
+                                    required />
+                                <p id="jam-info-edit" class="text-red-600 text-sm"></p>
 
                                 <x-input-label>Status</x-input-label>
                                 <select name="status" id="edit-status" class="border p-2 w-full rounded" required>

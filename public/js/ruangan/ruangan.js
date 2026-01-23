@@ -393,6 +393,8 @@ function renderRuanganTable(result, tableId, isActive) {
             }
         }
 
+        console.log(item.status);
+
         tbody.innerHTML += `
         <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50">
             <td class="p-4 text-center font-semibold">

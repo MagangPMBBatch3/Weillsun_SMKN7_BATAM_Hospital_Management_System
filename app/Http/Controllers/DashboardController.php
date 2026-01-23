@@ -158,220 +158,220 @@ class DashboardController extends Controller
     }
 
     private function doctorDashboard()
-{
-    $user = Auth::user();
-    $today = Carbon::today();
-    $dayOfWeek = $today->dayOfWeek;
-    $firstDayMonth = Carbon::now()->startOfMonth();
+    {
+        $user = Auth::user();
+        $today = Carbon::today();
+        $dayOfWeek = $today->dayOfWeek;
+        $firstDayMonth = Carbon::now()->startOfMonth();
 
-    // ================== DOCTOR ==================
-    $doctor = TenagaMedis::with([
+        // ================== DOCTOR ==================
+        $doctor = TenagaMedis::with([
             'profile.user',
             'jadwal.poli',
             'libur'
         ])
-        ->where('profile_id', $user->profile->id)
-        ->first();
+            ->where('profile_id', $user->profile->id)
+            ->first();
 
-    if (!$doctor) {
-        return redirect()->back()->with('error', 'Data tenaga medis tidak ditemukan');
-    }
+        if (!$doctor) {
+            return redirect()->back()->with('error', 'Data tenaga medis tidak ditemukan');
+        }
 
-    // ================== TODAY SCHEDULE ==================
-    $todaySchedule = $doctor->jadwal
-        ->where('hari', $dayOfWeek)
-        ->first();
+        // ================== TODAY SCHEDULE ==================
+        $todaySchedule = $doctor->jadwal
+            ->where('hari', $dayOfWeek)
+            ->first();
 
-    $isOffToday = $doctor->libur
-        ->where('tanggal', $today->toDateString())
-        ->first();
+        $isOffToday = $doctor->libur
+            ->where('tanggal', $today->toDateString())
+            ->first();
 
-    $isoDay = $todaySchedule ? $today->isoFormat('dddd') : null;
+        $isoDay = $todaySchedule ? $today->isoFormat('dddd') : null;
 
-    // ================== DOCTOR INFO ==================
-    $doctorInfo = [
-        'name' => $doctor->profile->user->name ?? 'Unknown',
-        'specialization' => $doctor->spesialisasi ?? 'General',
-        'no_str' => $doctor->no_str ?? 'N/A',
-        'photo' => $doctor->profile->foto
-            ? asset('storage/' . $doctor->profile->foto)
-            : asset('images/default-avatar.png'),
-    ];
-
-    // ================== SCHEDULE INFO ==================
-    if ($isOffToday) {
-        $scheduleInfo = [
-            'status' => 'off',
-            'jenis' => $isOffToday->jenis ?? 'N/A',
-            'note' => $isOffToday->keterangan ?? '-',
+        // ================== DOCTOR INFO ==================
+        $doctorInfo = [
+            'name' => $doctor->profile->user->name ?? 'Unknown',
+            'specialization' => $doctor->spesialisasi ?? 'General',
+            'no_str' => $doctor->no_str ?? 'N/A',
+            'photo' => $doctor->profile->foto
+                ? asset('storage/' . $doctor->profile->foto)
+                : asset('images/default-avatar.png'),
         ];
-    } elseif ($todaySchedule) {
-        $scheduleInfo = [
-            'status' => 'active',
-            'day' => $isoDay,
-            'poli_id' => $todaySchedule->poli->id ?? null,
-            'poli_name' => $todaySchedule->poli->nama_poli ?? 'General Clinic',
-            'start_time' => Carbon::parse($todaySchedule->jam_mulai)->format('H:i'),
-            'end_time' => Carbon::parse($todaySchedule->jam_selesai)->format('H:i'),
+
+        // ================== SCHEDULE INFO ==================
+        if ($isOffToday) {
+            $scheduleInfo = [
+                'status' => 'off',
+                'jenis' => $isOffToday->jenis ?? 'N/A',
+                'note' => $isOffToday->keterangan ?? '-',
+            ];
+        } elseif ($todaySchedule) {
+            $scheduleInfo = [
+                'status' => 'active',
+                'day' => $isoDay,
+                'poli_id' => $todaySchedule->poli->id ?? null,
+                'poli_name' => $todaySchedule->poli->nama_poli ?? 'General Clinic',
+                'start_time' => Carbon::parse($todaySchedule->jam_mulai)->format('H:i'),
+                'end_time' => Carbon::parse($todaySchedule->jam_selesai)->format('H:i'),
+            ];
+        } else {
+            $scheduleInfo = [
+                'status' => 'no_schedule',
+                'day' => $today->format('l'),
+                'message' => 'No schedule today',
+            ];
+        }
+
+        // ================== STATISTICS (OPTIMIZED) ==================
+        $stats = [
+            'total_patients' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+                ->distinct('pasien_id')
+                ->count('pasien_id'),
+
+            'today_records' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+                ->whereDate('tanggal', $today)
+                ->count(),
+
+            'today_followups' => KunjunganUlang::where('tenaga_medis_id', $doctor->id)
+                ->whereDate('tanggal_ulang', $today)
+                ->count(),
+
+            'pending_labs' => LabPemeriksaan::where('tenaga_medis_id', $doctor->id)
+                ->whereNull('hasil')
+                ->count(),
+
+            'pending_radiology' => Radiologi::where('tenaga_medis_id', $doctor->id)
+                ->whereNull('hasil')
+                ->count(),
+
+            'unpaid_prescriptions' => ResepObat::where('tenaga_medis_id', $doctor->id)
+                ->where('is_paid', 0)
+                ->count(),
         ];
-    } else {
-        $scheduleInfo = [
-            'status' => 'no_schedule',
-            'day' => $today->format('l'),
-            'message' => 'No schedule today',
-        ];
-    }
 
-    // ================== STATISTICS (OPTIMIZED) ==================
-    $stats = [
-        'total_patients' => RekamMedis::where('tenaga_medis_id', $doctor->id)
-            ->distinct('pasien_id')
-            ->count('pasien_id'),
-
-        'today_records' => RekamMedis::where('tenaga_medis_id', $doctor->id)
-            ->whereDate('tanggal', $today)
-            ->count(),
-
-        'today_followups' => KunjunganUlang::where('tenaga_medis_id', $doctor->id)
-            ->whereDate('tanggal_ulang', $today)
-            ->count(),
-
-        'pending_labs' => LabPemeriksaan::where('tenaga_medis_id', $doctor->id)
-            ->whereNull('hasil')
-            ->count(),
-
-        'pending_radiology' => Radiologi::where('tenaga_medis_id', $doctor->id)
-            ->whereNull('hasil')
-            ->count(),
-
-        'unpaid_prescriptions' => ResepObat::where('tenaga_medis_id', $doctor->id)
-            ->where('is_paid', 0)
-            ->count(),
-    ];
-
-    // ================== TODAY FOLLOW UPS (N+1 SAFE) ==================
-    $todayFollowUps = KunjunganUlang::with([
+        // ================== TODAY FOLLOW UPS (N+1 SAFE) ==================
+        $todayFollowUps = KunjunganUlang::with([
             'kunjungan:id,pasien_id,keluhan',
             'kunjungan.pasien:id,nama',
             'poli:id,nama_poli'
         ])
-        ->where('tenaga_medis_id', $doctor->id)
-        ->whereDate('tanggal_ulang', $today)
-        ->orderBy('jam_ulang')
-        ->get()
-        ->each(function ($f) {
-            $f->jam_ulang_format = $f->jam_ulang
-                ? Carbon::parse($f->jam_ulang)->format('H:i')
-                : '-';
-
-            $f->pasien_nama = $f->kunjungan->pasien->nama ?? 'Unknown';
-            $f->pasien_id = $f->kunjungan->pasien->id ?? null;
-            $f->nama_poli = $f->poli->nama_poli ?? 'General';
-            $f->keluhan = $f->kunjungan->keluhan ?? '-';
-        });
-
-    // ================== RECENT ACTIVITIES (LIGHT) ==================
-    $recentActivities = collect()
-
-    ->merge(
-        RekamMedis::with('pasien:id,nama')
             ->where('tenaga_medis_id', $doctor->id)
-            ->latest()
-            ->limit(3)
+            ->whereDate('tanggal_ulang', $today)
+            ->orderBy('jam_ulang')
             ->get()
-            ->map(function ($r) {
-                return (object) [
-                    'created_at' => $r->created_at,
-                    'pasien_nama' => $r->pasien->nama ?? 'Unknown',
-                    'detail' => $r->diagnosis,
-                    'type' => 'medical_record',
-                ];
-            })
-    )
+            ->each(function ($f) {
+                $f->jam_ulang_format = $f->jam_ulang
+                    ? Carbon::parse($f->jam_ulang)->format('H:i')
+                    : '-';
 
-    ->merge(
-        ResepObat::with('pasien:id,nama')
-            ->where('tenaga_medis_id', $doctor->id)
-            ->latest()
-            ->limit(3)
+                $f->pasien_nama = $f->kunjungan->pasien->nama ?? 'Unknown';
+                $f->pasien_id = $f->kunjungan->pasien->id ?? null;
+                $f->nama_poli = $f->poli->nama_poli ?? 'General';
+                $f->keluhan = $f->kunjungan->keluhan ?? '-';
+            });
+
+        // ================== RECENT ACTIVITIES (LIGHT) ==================
+        $recentActivities = collect()
+
+            ->merge(
+                RekamMedis::with('pasien:id,nama')
+                    ->where('tenaga_medis_id', $doctor->id)
+                    ->latest()
+                    ->limit(3)
+                    ->get()
+                    ->map(function ($r) {
+                        return (object) [
+                            'created_at' => $r->created_at,
+                            'pasien_nama' => $r->pasien->nama ?? 'Unknown',
+                            'detail' => $r->diagnosis,
+                            'type' => 'medical_record',
+                        ];
+                    })
+            )
+
+            ->merge(
+                ResepObat::with('pasien:id,nama')
+                    ->where('tenaga_medis_id', $doctor->id)
+                    ->latest()
+                    ->limit(3)
+                    ->get()
+                    ->map(function ($r) {
+                        return (object) [
+                            'created_at' => $r->created_at,
+                            'pasien_nama' => $r->pasien->nama ?? 'Unknown',
+                            'detail' => 'Resep Obat',
+                            'type' => 'prescription',
+                        ];
+                    })
+            )
+
+            ->sortByDesc('created_at')
+            ->take(6);
+
+
+        // ================== MY INPATIENTS ==================
+        $myInpatients = RawatInap::with([
+            'pasien:id,nama',
+            'ruangan:id,nama_ruangan'
+        ])
+            ->where('status', 'Aktif')
+            ->whereIn(
+                'pasien_id',
+                RekamMedis::where('tenaga_medis_id', $doctor->id)
+                    ->distinct()
+                    ->pluck('pasien_id')
+            )
+            ->latest('tanggal_masuk')
+            ->limit(5)
             ->get()
-            ->map(function ($r) {
-                return (object) [
-                    'created_at' => $r->created_at,
-                    'pasien_nama' => $r->pasien->nama ?? 'Unknown',
-                    'detail' => 'Resep Obat',
-                    'type' => 'prescription',
+            ->each(function ($i) {
+
+                // FIX 1: hari rawat inap (integer & manusiawi)
+                $i->days_admitted = max(
+                    1,
+                    Carbon::parse($i->tanggal_masuk)
+                        ->startOfDay()
+                        ->diffInDays(Carbon::today())
+                );
+
+                // FIX 2: properti yang dipakai Blade
+                $i->pasien_nama = $i->pasien->nama ?? 'Unknown';
+                $i->nama_ruangan = $i->ruangan->nama_ruangan ?? 'Unknown Room';
+            });
+
+
+        // ================== VISIT CHART ==================
+        $visitChart = collect(range(6, 0))
+            ->map(function ($i) use ($doctor) {
+                $date = Carbon::today()->subDays($i);
+                return [
+                    'date' => $date->format('D, M j'),
+                    'count' => RekamMedis::where('tenaga_medis_id', $doctor->id)
+                        ->whereDate('tanggal', $date)
+                        ->count(),
                 ];
-            })
-    )
+            });
 
-    ->sortByDesc('created_at')
-    ->take(6);
+        // ================== TOP DIAGNOSES ==================
+        $topDiagnoses = RekamMedis::where('tenaga_medis_id', $doctor->id)
+            ->whereDate('tanggal', '>=', $firstDayMonth)
+            ->selectRaw('diagnosis, COUNT(*) as total')
+            ->groupBy('diagnosis')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
 
-
-    // ================== MY INPATIENTS ==================
-    $myInpatients = RawatInap::with([
-        'pasien:id,nama',
-        'ruangan:id,nama_ruangan'
-    ])
-    ->where('status', 'Aktif')
-    ->whereIn(
-        'pasien_id',
-        RekamMedis::where('tenaga_medis_id', $doctor->id)
-            ->distinct()
-            ->pluck('pasien_id')
-    )
-    ->latest('tanggal_masuk')
-    ->limit(5)
-    ->get()
-    ->each(function ($i) {
-
-        // FIX 1: hari rawat inap (integer & manusiawi)
-        $i->days_admitted = max(
-            1,
-            Carbon::parse($i->tanggal_masuk)
-                ->startOfDay()
-                ->diffInDays(Carbon::today())
-        );
-
-        // FIX 2: properti yang dipakai Blade
-        $i->pasien_nama = $i->pasien->nama ?? 'Unknown';
-        $i->nama_ruangan = $i->ruangan->nama_ruangan ?? 'Unknown Room';
-    });
-
-
-    // ================== VISIT CHART ==================
-    $visitChart = collect(range(6, 0))
-        ->map(function ($i) use ($doctor) {
-            $date = Carbon::today()->subDays($i);
-            return [
-                'date' => $date->format('D, M j'),
-                'count' => RekamMedis::where('tenaga_medis_id', $doctor->id)
-                    ->whereDate('tanggal', $date)
-                    ->count(),
-            ];
-        });
-
-    // ================== TOP DIAGNOSES ==================
-    $topDiagnoses = RekamMedis::where('tenaga_medis_id', $doctor->id)
-        ->whereDate('tanggal', '>=', $firstDayMonth)
-        ->selectRaw('diagnosis, COUNT(*) as total')
-        ->groupBy('diagnosis')
-        ->orderByDesc('total')
-        ->limit(5)
-        ->get();
-
-    return view('dashboard', compact(
-        'doctorInfo',
-        'scheduleInfo',
-        'stats',
-        'todayFollowUps',
-        'recentActivities',
-        'myInpatients',
-        'visitChart',
-        'topDiagnoses'
-    ));
-}
+        return view('dashboard', compact(
+            'doctorInfo',
+            'scheduleInfo',
+            'stats',
+            'todayFollowUps',
+            'recentActivities',
+            'myInpatients',
+            'visitChart',
+            'topDiagnoses'
+        ));
+    }
 
 
     private function cashierDashboard()
@@ -379,90 +379,76 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $firstDayMonth = Carbon::now()->startOfMonth();
 
-        try {
-            // Today's Revenue - menggunakan field yang benar
-            $todayRevenue = PembayaranPasien::whereDate('tanggal_bayar', $today)
-                ->sum('total_biaya') ?? 0;
+        // Today's Revenue - menggunakan field yang benar
+        $todayRevenue = PembayaranPasien::whereDate('tanggal_bayar', $today)
+            ->sum('total_biaya') ?? 0;
 
-            // Monthly Revenue
-            $monthlyRevenue = PembayaranPasien::whereDate('tanggal_bayar', '>=', $firstDayMonth)
-                ->sum('total_biaya') ?? 0;
+        // Monthly Revenue
+        $monthlyRevenue = PembayaranPasien::whereDate('tanggal_bayar', '>=', $firstDayMonth)
+            ->sum('total_biaya') ?? 0;
 
-            // Pending Payments
-            $pendingPayments = PembayaranPasien::count();
+        // Pending Payments
+        $patientPayments = PembayaranPasien::count();
 
-            $pendingAmount = PembayaranPasien::sum('total_biaya') ?? 0;
+        $patientAmount = PembayaranPasien::sum('total_biaya') ?? 0;
 
-            // Total Transactions
-            $totalTransactions = PembayaranPasien::whereDate('tanggal_bayar', $today)
-                ->count();
+        // Total Transactions
+        $totalTransactions = PembayaranPasien::whereDate('tanggal_bayar', $today)
+            ->count();
 
-            // Outstanding Balance
-            $outstandingBalance = PembayaranPasien::sum('total_biaya') ?? 0;
+        // Outstanding Balance
+        $outstandingBalance = PembayaranPasien::sum('total_biaya') ?? 0;
 
-            // Recent Transactions - menggunakan relasi 'detail' bukan 'detailPembayaran'
-            $recentTransactions = PembayaranPasien::with(['pasien', 'detail'])
-                ->whereDate('tanggal_bayar', $today)
-                ->latest('tanggal_bayar')
-                ->limit(10)
-                ->get()
-                ->map(function ($payment) {
-                    return [
-                        'patient_name' => $payment->pasien->nama ?? 'Unknown',
-                        'amount' => $payment->total_biaya ?? 0,
-                        'status' => 'Completed',
-                        'time' => $payment->created_at->format('H:i'),
-                    ];
-                })
-                ->toArray();
+        // Recent Transactions 
+        $recentTransactions = PembayaranPasien::with(['pasien', 'detail'])
+            ->whereDate('tanggal_bayar', $today)
+            ->latest('tanggal_bayar')
+            ->limit(10)
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'patient_name' => $payment->pasien->nama ?? 'Unknown',
+                    'amount' => $payment->total_biaya ?? 0,
+                    'status' => 'Completed',
+                    'time' => $payment->created_at->format('H:i'),
+                ];
+            })
+            ->toArray();
 
-            // Payment Methods - menggunakan field yang benar
-            $cashPayment = PembayaranPasien::whereDate('tanggal_bayar', $today)
-                ->where('metode_bayar', 'cash')
-                ->sum('total_biaya') ?? 0;
+        // Payment Methods - menggunakan field yang benar
+        $cashPayment = PembayaranPasien::whereDate('tanggal_bayar', $today)
+            ->where('metode_bayar', 'cash')
+            ->sum('total_biaya') ?? 0;
 
-            $transferPayment = PembayaranPasien::whereDate('tanggal_bayar', $today)
-                ->where('metode_bayar', 'transfer')
-                ->sum('total_biaya') ?? 0;
+        $transferPayment = PembayaranPasien::whereDate('tanggal_bayar', $today)
+            ->where('metode_bayar', 'transfer')
+            ->sum('total_biaya') ?? 0;
 
-            // Pending Verification
-            $pendingVerification = PembayaranPasien::with(['pasien'])
-                ->limit(5)
-                ->get()
-                ->map(function ($payment) {
-                    return [
-                        'patient_name' => $payment->pasien->nama ?? 'Unknown',
-                        'amount' => 'Rp ' . number_format($payment->total_biaya ?? 0, 0, ',', '.'),
-                        'time' => $payment->created_at->format('H:i'),
-                    ];
-                })
-                ->toArray();
-        } catch (\Exception $e) {
-            // Fallback values
-            $todayRevenue = 0;
-            $monthlyRevenue = 0;
-            $pendingPayments = 0;
-            $pendingAmount = 0;
-            $totalTransactions = 0;
-            $outstandingBalance = 0;
-            $recentTransactions = [];
-            $cashPayment = 0;
-            $transferPayment = 0;
-            $pendingVerification = [];
-        }
+        // Pending Verification
+        $pendingVerification = PembayaranPasien::with(['pasien'])
+            ->limit(6)
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'patient_name' => $payment->pasien->nama ?? 'Unknown',
+                    'amount' => 'Rp ' . number_format($payment->total_biaya ?? 0, 0, ',', '.'),
+                    'time' => $payment->created_at->format('H:i'),
+                ];
+            })
+            ->toArray();
 
-        return view('dashboard', [
-            'todayRevenue' => $todayRevenue,
-            'monthlyRevenue' => $monthlyRevenue,
-            'pendingPayments' => $pendingPayments,
-            'pendingAmount' => $pendingAmount,
-            'totalTransactions' => $totalTransactions,
-            'outstandingBalance' => $outstandingBalance,
-            'recentTransactions' => $recentTransactions,
-            'cashPayment' => $cashPayment,
-            'transferPayment' => $transferPayment,
-            'pendingVerification' => $pendingVerification,
-        ]);
+        return view('dashboard', compact(
+            'todayRevenue',
+            'monthlyRevenue',
+            'patientPayments',
+            'patientAmount',
+            'totalTransactions',
+            'outstandingBalance',
+            'recentTransactions',
+            'cashPayment',
+            'transferPayment',
+            'pendingVerification'
+        ));
     }
 
     private function receptionistDashboard()

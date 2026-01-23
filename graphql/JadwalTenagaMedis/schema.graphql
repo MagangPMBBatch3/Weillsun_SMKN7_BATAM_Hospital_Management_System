@@ -67,6 +67,14 @@ extend type Query {
 
     JadwalTenagaMedis(id: ID! @eq(key: "id")): JadwalTenagaMedis
         @find(model: "App\\Models\\JadwalTenagaMedis\\JadwalTenagaMedis")
+
+    getJadwalByTenagaMedisAndHari(
+        tenaga_medis_id: ID!
+        hari: Int!
+    ): [JadwalTenagaMedis!]!
+        @field(
+            resolver: "App\\GraphQL\\JadwalTenagaMedis\\Queries\\JadwalTenagaMedisQuery@getJadwalByTenagaMedisAndHari"
+        )
 }
 
 extend type Mutation {

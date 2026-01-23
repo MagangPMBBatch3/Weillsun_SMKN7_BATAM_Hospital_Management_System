@@ -48,7 +48,7 @@ async function loadDataPaginate(page = 1) {
     showLoading();
     currentPageActive = page;
 
-    const perPage = document.getElementById("perPage")?.value || 5;
+    const perPage = document.getElementById("perPage")?.value || 7;
     const searchValue = document.getElementById("search")?.value.trim() || "";
     
     // Determine the tenaga_medis_id to filter based on user role

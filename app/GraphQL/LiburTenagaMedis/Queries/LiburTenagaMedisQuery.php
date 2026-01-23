@@ -10,6 +10,11 @@ class LiburTenagaMedisQuery
     {
         $query = LiburTenagaMedis::query();
 
+        // Filter by tenaga_medis_id if provided (for non-admin users)
+        if (!empty($args['tenagaMedisId'])) {
+            $query->where('tenaga_medis_id', $args['tenagaMedisId']);
+        }
+
         if (!empty($args['search'])) {
             $search = $args['search'];
 

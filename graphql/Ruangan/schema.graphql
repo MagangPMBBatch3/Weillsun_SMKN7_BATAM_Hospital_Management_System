@@ -1,14 +1,9 @@
-enum status{
-    tersedia
-    tidak_tersedia
-}
-
 type Ruangan {
     id: ID!
     nama_ruangan: String!
     kapasitas: Int!
     tarif_per_hari: Float!
-    status: status
+    status: String
     created_at: DateTime
     updated_at: DateTime
     deleted_at: DateTime
@@ -18,13 +13,13 @@ input CreateRuanganInput {
     nama_ruangan: String!
     kapasitas: Int!
     tarif_per_hari: Float!
-    status: status
+    status: String
 }
 input UpdateRuanganInput {
     nama_ruangan: String
     kapasitas: Int
     tarif_per_hari: Float
-    status: status
+    status: String
 }
 
 type PageInfo {

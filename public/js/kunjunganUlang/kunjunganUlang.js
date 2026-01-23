@@ -100,7 +100,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 isActive
                     ? perPage
-                    : document.getElementById("perPage")?.value || 5
+                    : document.getElementById("perPage")?.value || 5,
             ),
             page: currentPageActive,
             search: searchValue,
@@ -117,7 +117,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         renderKunjunganUlangTable(
             dataActive?.data?.allKunjunganUlangPaginate || {},
             "dataKunjunganUlangAktif",
-            true
+            true,
         );
 
         // --- Query data Arsip ---
@@ -165,7 +165,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 !isActive
                     ? perPage
-                    : document.getElementById("perPageArchive")?.value || 5
+                    : document.getElementById("perPageArchive")?.value || 5,
             ),
             page: currentPageArchive,
             search: searchValue,
@@ -182,7 +182,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         renderKunjunganUlangTable(
             dataArchive?.data?.allKunjunganUlangArchive || {},
             "dataKunjunganUlangArsip",
-            false
+            false,
         );
     } catch (error) {
         console.error("Error loading data:", error);
@@ -210,7 +210,173 @@ document.addEventListener("change", function (e) {
             poliSelect.disabled = true;
         }
     }
+
+    // Handle change on tenaga_medis_id & tanggal_ulang for CREATE modal
+    if (
+        e.target.id === "create-tenaga_medis_id" ||
+        e.target.id === "create-tanggal_ulang"
+    ) {
+        loadAvailableJamForCreate();
+    }
+
+    // Handle change on tenaga_medis_id & tanggal_ulang for EDIT modal
+    if (
+        e.target.id === "edit-tenaga_medis_id" ||
+        e.target.id === "edit-tanggal_ulang"
+    ) {
+        loadAvailableJamForEdit();
+    }
 });
+
+// Fungsi untuk load jam tersedia berdasarkan jadwal dokter (CREATE)
+async function loadAvailableJamForCreate() {
+    const tenagaMedisId = document.getElementById(
+        "create-tenaga_medis_id",
+    )?.value;
+    const tanggalUlang = document.getElementById("create-tanggal_ulang")?.value;
+
+    if (!tenagaMedisId || !tanggalUlang) {
+        document.getElementById("create-jam_ulang").disabled = true;
+        document.getElementById("jam-info-create").textContent =
+            "*Select doctor and date first!";
+        return;
+    }
+
+    // Get day of week from date (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const date = new Date(tanggalUlang + "T00:00:00");
+    let hari = date.getDay(); // 0-6
+    // Convert to 1-7 (Monday = 1, Sunday = 7)
+    hari = hari === 0 ? 7 : hari;
+
+    showLoading();
+
+    const query = `
+        query($tenaga_medis_id: ID!, $hari: Int!) {
+            getJadwalByTenagaMedisAndHari(
+                tenaga_medis_id: $tenaga_medis_id
+                hari: $hari
+            ) {
+                id
+                jam_mulai
+                jam_selesai
+                hari
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query,
+                variables: { tenaga_medis_id: tenagaMedisId, hari },
+            }),
+        });
+
+        const result = await res.json();
+        const jadwalData = result?.data?.getJadwalByTenagaMedisAndHari || [];
+
+        const jamInput = document.getElementById("create-jam_ulang");
+        const jamInfo = document.getElementById("jam-info-create");
+
+        if (jadwalData.length > 0) {
+            const jadwal = jadwalData[0];
+            jamInput.disabled = false;
+            jamInput.setAttribute("min", jadwal.jam_mulai);
+            jamInput.setAttribute("max", jadwal.jam_selesai);
+            jamInfo.textContent = `Doctor schedule: ${jadwal.jam_mulai} - ${jadwal.jam_selesai}`;
+            jamInfo.classList.remove("text-red-600");
+            jamInfo.classList.add("text-green-600");
+        } else {
+            jamInput.disabled = true;
+            jamInfo.textContent = "*Doctor has no schedule on this day!";
+            jamInfo.classList.remove("text-green-600");
+            jamInfo.classList.add("text-red-600");
+        }
+    } catch (error) {
+        console.error("Error loading jadwal:", error);
+        document.getElementById("jam-info-create").textContent =
+            "Error loading schedule";
+    } finally {
+        hideLoading();
+    }
+}
+
+// Fungsi untuk load jam tersedia berdasarkan jadwal dokter (EDIT)
+async function loadAvailableJamForEdit() {
+    const tenagaMedisId = document.getElementById(
+        "edit-tenaga_medis_id",
+    )?.value;
+    const tanggalUlang = document.getElementById("edit-tanggal_ulang")?.value;
+
+    if (!tenagaMedisId || !tanggalUlang) {
+        // document.getElementById("edit-jam_ulang").disabled = false;
+        document.getElementById("jam-info-edit").textContent =
+            "*Select doctor and date first!";
+        return;
+    }
+
+    // Get day of week from date (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const date = new Date(tanggalUlang + "T00:00:00");
+    let hari = date.getDay(); // 0-6
+    // Convert to 1-7 (Monday = 1, Sunday = 7)
+    hari = hari === 0 ? 7 : hari;
+
+    showLoading();
+
+    const query = `
+        query($tenaga_medis_id: ID!, $hari: Int!) {
+            getJadwalByTenagaMedisAndHari(
+                tenaga_medis_id: $tenaga_medis_id
+                hari: $hari
+            ) {
+                id
+                jam_mulai
+                jam_selesai
+                hari
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query,
+                variables: { tenaga_medis_id: tenagaMedisId, hari },
+            }),
+        });
+
+        const result = await res.json();
+        const jadwalData = result?.data?.getJadwalByTenagaMedisAndHari || [];
+
+        const jamInput = document.getElementById("edit-jam_ulang");
+        const jamInfo = document.getElementById("jam-info-edit");
+
+        if (jadwalData.length > 0) {
+            const jadwal = jadwalData[0];
+            jamInput.disabled = false;
+            jamInput.setAttribute("min", jadwal.jam_mulai);
+            jamInput.setAttribute("max", jadwal.jam_selesai);
+            jamInfo.textContent = `Doctor schedule: ${jadwal.jam_mulai} - ${jadwal.jam_selesai}`;
+            jamInfo.classList.remove("text-red-600");
+            jamInfo.classList.add("text-green-600");
+        } else {
+            jamInput.disabled = true;
+            jamInfo.textContent = "*Doctor has no schedule on this day!";
+            jamInfo.classList.remove("text-green-600");
+            jamInfo.classList.add("text-red-600");
+        }
+    } catch (error) {
+        console.error("Error loading jadwal:", error);
+        document.getElementById("jam-info-edit").textContent =
+            "Error loading schedule";
+    } finally {
+        hideLoading();
+    }
+}
 
 // Create
 async function createKunjunganUlang() {
@@ -282,7 +448,7 @@ async function createKunjunganUlang() {
             window.dispatchEvent(
                 new CustomEvent("close-modal", {
                     detail: "create-kunjunganUlang",
-                })
+                }),
             );
             loadDataPaginate(currentPageActive, true);
         } else {
@@ -305,7 +471,7 @@ function openEditModal(
     tanggal_ulang,
     jam_ulang,
     catatan,
-    status
+    status,
 ) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-kunjungan_id").value = kunjungan_id;
@@ -317,7 +483,7 @@ function openEditModal(
     document.getElementById("edit-status").value = status;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-kunjunganUlang" })
+        new CustomEvent("open-modal", { detail: "edit-kunjunganUlang" }),
     );
 }
 
@@ -380,7 +546,7 @@ async function updateKunjunganUlang() {
             }),
         });
         window.dispatchEvent(
-            new CustomEvent("close-modal", { detail: "edit-kunjunganUlang" })
+            new CustomEvent("close-modal", { detail: "edit-kunjunganUlang" }),
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {

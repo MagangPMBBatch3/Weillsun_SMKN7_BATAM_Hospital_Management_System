@@ -970,7 +970,7 @@
                         </div>
                     </div>
 
-                   
+
                 </div>
 
                 <!-- Right Column (1/3) -->
@@ -1092,7 +1092,7 @@
                         </div>
                     </div>
 
-                     <!-- Visit Chart -->
+                    <!-- Visit Chart -->
                     <div
                         class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-300">
                         <div class="flex items-center gap-3 mb-6">
@@ -1225,89 +1225,106 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Today's Revenue -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm font-semibold uppercase">Today's
-                                Revenue</p>
-                            <p class="text-3xl font-bold text-gray-800 dark:text-white mt-2">Rp
-                                {{ number_format($todayRevenue ?? 0, 0, ',', '.') }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Rp
-                                {{ number_format($monthlyRevenue ?? 0, 0, ',', '.') }} monthly</p>
+                    class="group bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-green-200 dark:border-green-700 relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-green-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bg-green-100 dark:bg-green-900 rounded-full p-3">
-                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                </path>
-                            </svg>
-                        </div>
+                        <p class="text-sm font-medium text-green-600 dark:text-green-400 uppercase tracking-wide mb-2">
+                            Today's Revenue</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Rp
+                            {{ number_format($todayRevenue ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Rp
+                            {{ number_format($monthlyRevenue ?? 0, 0, ',', '.') }} monthly</p>
                     </div>
                 </div>
 
                 <!-- Pending Payments -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm font-semibold uppercase">Pending
-                                Payments</p>
-                            <p class="text-3xl font-bold text-gray-800 dark:text-white mt-2">
-                                {{ $pendingPayments ?? 0 }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Rp
-                                {{ number_format($pendingAmount ?? 0, 0, ',', '.') }}</p>
+                    class="group bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-800/30 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-orange-200 dark:border-orange-700 relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-orange-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bg-orange-100 dark:bg-orange-900 rounded-full p-3">
-                            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+                        <p
+                            class="text-sm font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wide mb-2">
+                            Patient Payments</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ $patientPayments ?? 0 }}
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Rp
+                            {{ number_format($patientAmount ?? 0, 0, ',', '.') }}</p>
                     </div>
                 </div>
 
                 <!-- Total Transactions -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm font-semibold uppercase">
-                                Transactions</p>
-                            <p class="text-3xl font-bold text-gray-800 dark:text-white mt-2">
-                                {{ $totalTransactions ?? 0 }}</p>
-                            <p class="text-xs text-gray-500 mt-1">today</p>
+                    class="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-blue-200 dark:border-blue-700 relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-blue-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bg-blue-100 dark:bg-blue-900 rounded-full p-3">
-                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
+                        <p class="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-2">
+                            Transactions</p>
+                        <p class="text-4xl font-bold text-gray-900 dark:text-white mb-1">{{ $totalTransactions ?? 0 }}
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">processed today</p>
                     </div>
                 </div>
 
                 <!-- Outstanding Balance -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-red-500 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm font-semibold uppercase">Outstanding
-                            </p>
-                            <p class="text-3xl font-bold text-gray-800 dark:text-white mt-2">Rp
-                                {{ number_format($outstandingBalance ?? 0, 0, ',', '.') }}</p>
-                            <p class="text-xs text-gray-500 mt-1">total balance</p>
+                    class="group bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/30 dark:to-rose-800/30 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-red-200 dark:border-red-700 relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="p-3 bg-red-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bg-red-100 dark:bg-red-900 rounded-full p-3">
-                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                </path>
-                            </svg>
-                        </div>
+                        <p class="text-sm font-medium text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">
+                            Outstanding</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Rp
+                            {{ number_format($outstandingBalance ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">total balance</p>
                     </div>
                 </div>
             </div>
@@ -1315,50 +1332,89 @@
             <!-- Main Content -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <!-- Recent Transactions Table -->
-                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Recent Transactions (Today)
-                    </h3>
-                    <div class="overflow-x-auto">
+                <div
+                    class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions (Today)</h3>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar">
                         <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th class="text-left px-4 py-3 font-semibold text-gray-800 dark:text-white">
-                                        Patient</th>
-                                    <th class="text-right px-4 py-3 font-semibold text-gray-800 dark:text-white">
-                                        Amount</th>
+                            <thead class="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
+                                <tr class="border-b-2 border-gray-300 dark:border-gray-600">
+                                    <th class="text-left px-4 py-3 font-semibold text-gray-800 dark:text-white">Patient
+                                    </th>
+                                    <th class="text-right px-4 py-3 font-semibold text-gray-800 dark:text-white">Amount
+                                    </th>
                                     <th class="text-center px-4 py-3 font-semibold text-gray-800 dark:text-white">
                                         Status</th>
-                                    <th class="text-right px-4 py-3 font-semibold text-gray-800 dark:text-white">
-                                        Time</th>
+                                    <th class="text-right px-4 py-3 font-semibold text-gray-800 dark:text-white">Time
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($recentTransactions ?? [] as $transaction)
                                     <tr
-                                        class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-4 py-3 text-gray-800 dark:text-white">
-                                            {{ $transaction['patient_name'] }}</td>
-                                        <td class="px-4 py-3 font-semibold text-gray-800 dark:text-white text-right">
-                                            Rp {{ number_format($transaction['amount'] ?? 0, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-center">
-                                            <span
-                                                class="px-2 py-1 text-xs font-semibold rounded-full {{ $transaction['status'] === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' }}">
-                                                {{ ucfirst($transaction['status'] ?? 'pending') }}
-                                            </span>
+                                        class="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                                    {{ substr($transaction['patient_name'], 0, 1) }}
+                                                </div>
+                                                <span
+                                                    class="font-medium text-gray-800 dark:text-white">{{ $transaction['patient_name'] }}</span>
+                                            </div>
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 text-right">
-                                            {{ $transaction['time'] ?? 'Today' }}</td>
+                                        <td class="px-4 py-4 font-bold text-gray-900 dark:text-white text-right">
+                                            Rp {{ number_format($transaction['amount'] ?? 0, 0, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            @if ($transaction['status'] === 'paid')
+                                                <span
+                                                    class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Paid
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-semibold rounded-full">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Pending
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400 text-right">
+                                            {{ $transaction['time'] ?? 'Today' }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4"
-                                            class="text-center px-4 py-8 text-gray-500 dark:text-gray-400">No
-                                            transactions yet</td>
+                                        <td colspan="4" class="text-center px-4 py-12">
+                                            <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                                </path>
+                                            </svg>
+                                            <p class="text-gray-500 dark:text-gray-400">No transactions yet</p>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -1367,55 +1423,149 @@
                 </div>
 
                 <!-- Payment Methods & Stats -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                        Payment Methods (Today)
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between p-2 bg-purple-50 dark:bg-purple-900 rounded">
-                            <p class="text-sm text-gray-700 dark:text-gray-300">Cash</p>
-                            <p class="text-sm font-bold text-purple-600 dark:text-purple-400">Rp
-                                {{ number_format($cashPayment ?? 0, 0, ',', '.') }}</p>
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Payment Methods</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Cash Payment -->
+                        <div
+                            class="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Cash</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Today</p>
+                                    </div>
+                                </div>
+                                <p class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                    Rp {{ number_format($cashPayment ?? 0, 0, ',', '.') }}
+                                </p>
+                            </div>
                         </div>
 
-                        <div class="flex justify-between p-2 bg-green-50 dark:bg-green-900 rounded">
-                            <p class="text-sm text-gray-700 dark:text-gray-300">Transfer</p>
-                            <p class="text-sm font-bold text-green-600 dark:text-green-400">Rp
-                                {{ number_format($transferPayment ?? 0, 0, ',', '.') }}</p>
+                        <!-- Transfer Payment -->
+                        <div
+                            class="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800 hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Transfer</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Today</p>
+                                    </div>
+                                </div>
+                                <p class="text-lg font-bold text-green-600 dark:text-green-400">
+                                    Rp {{ number_format($transferPayment ?? 0, 0, ',', '.') }}
+                                </p>
+                            </div>
                         </div>
 
+                        <!-- Total Today -->
+                        <div
+                            class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-700">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Total Today</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">All Methods</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                    Rp {{ number_format(($cashPayment ?? 0) + ($transferPayment ?? 0), 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Pending Verification -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Pending Verification
-                </h3>
-                <div class="space-y-2">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-300">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Pending Verification</h3>
+                </div>
+
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                     @forelse($pendingVerification ?? [] as $pending)
-                        <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900 rounded-lg">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-800 dark:text-white">
-                                    {{ $pending['patient_name'] }}</p>
-                                <p class="text-xs text-gray-600 dark:text-gray-400">{{ $pending['amount'] }}</p>
+                        <div
+                            class="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 hover:shadow-md transition-all duration-300">
+                            <div class="flex items-start justify-between gap-3">
+
+                                <div class="flex gap-3 items-center">
+
+                                <div
+                                    class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                                    {{ substr($pending['patient_name'], 0, 1) }}
+                                </div>
+
+                                    <div class="">
+                                        <p class="font-semibold text-gray-900 dark:text-white truncate">
+                                            {{ $pending['patient_name'] }}</p>
+                                        <p class="text-sm font-medium text-yellow-700 dark:text-yellow-400 mt-1">
+                                            {{ $pending['amount'] }}</p>
+                                    </div>
+                                </div>
+
+
+                                    <div>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                            {{ $pending['time'] }}</p>
+                                    </div>
+
                             </div>
-                            <span
-                                class="text-xs font-semibold text-yellow-600 dark:text-yellow-400">{{ $pending['time'] }}</span>
                         </div>
                     @empty
-                        <p class="text-gray-500 dark:text-gray-400 text-center py-4">All payments verified</p>
+                        <div class="col-span-full text-center py-12">
+                            <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-gray-500 dark:text-gray-400">All payments verified</p>
+                        </div>
                     @endforelse
                 </div>
             </div>

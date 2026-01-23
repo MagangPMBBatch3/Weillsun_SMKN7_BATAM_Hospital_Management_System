@@ -54,6 +54,7 @@ extend type Query {
         search: String
         page: Int
         first: Int
+        tenagaMedisId: ID
     ): LiburTenagaMedisPaginator
         @field(
             resolver: "App\\GraphQL\\LiburTenagaMedis\\Queries\\LiburTenagaMedisQuery@all"
