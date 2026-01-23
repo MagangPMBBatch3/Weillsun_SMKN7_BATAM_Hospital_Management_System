@@ -59,12 +59,12 @@
             <x-loading></x-loading>
 
             {{-- Tabel Data Aktif --}}
-            <x-table id="tableActive" :headers="['ID', 'Patient Name', 'Poli', 'date', 'complaint', 'fee']" :requireRole="['admin','receptionist']">
+            <x-table id="tableActive" :headers="['ID', 'Patient Name', 'Poli', 'date', 'complaint', 'fee']" :requireRole="['admin', 'receptionist']">
                 <tbody id="dataKunjunganAktif"></tbody>
             </x-table>
 
             {{-- Tabel Data Arsip --}}
-            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient Name', 'Poli', 'date', 'complaint', 'fee']" :requireRole="['admin','receptionist']">
+            <x-table id="tableArchive" class="hidden" :headers="['ID', 'Patient Name', 'Poli', 'date', 'complaint', 'fee']" :requireRole="['admin', 'receptionist']">
                 <tbody id="dataKunjunganArsip"></tbody>
             </x-table>
 
@@ -193,22 +193,27 @@
                         <div class="space-y-3">
 
                             <input type="hidden" id="create-kunjungan-id" />
-                            <input type="hidden" id="create-poli-ulang-id" name="poli_id"/>
+                            <input type="hidden" id="create-poli-ulang-id" name="poli_id" />
 
                             <x-input-label>Doctor Name</x-input-label>
-                                <select name="tenaga_medis_id" id="create-tenaga_medis_id"
-                                    class="border p-2 w-full rounded">
-                                    <option value="" disabled selected>Select Doctor</option>
-                                    @foreach ($dokters as $tm)
-                                        <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
-                                    @endforeach
-                                </select>
+                            <select name="tenaga_medis_id" id="create-tenaga_medis_id"
+                                class="border p-2 w-full rounded">
+                                <option value="" disabled selected>Select Doctor</option>
+                                @foreach ($dokters as $tm)
+                                    <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
+                                @endforeach
+                            </select>
 
                             <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" />
+                            <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded"
+                                required />
 
                             <x-input-label>Time</x-input-label>
-                            <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                            <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded"
+                                disabled required />
+                            <p id="jam-info-kunjungan" class="text-red-600 text-sm">
+                                *select the doctor and date first!
+                            </p>
 
                             <x-input-label>Note</x-input-label>
                             <textarea id="create-catatan" placeholder="Enter Note..."

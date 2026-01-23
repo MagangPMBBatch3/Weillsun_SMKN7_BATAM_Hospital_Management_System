@@ -265,6 +265,15 @@ async function createKunjungan() {
 function openKunjunganUlangModal(kunjunganId, poliId) {
     document.getElementById("create-kunjungan-id").value = kunjunganId;
     document.getElementById("create-poli-ulang-id").value = poliId;
+    // Reset fields
+    document.getElementById("create-tenaga_medis_id").value = "";
+    document.getElementById("create-tanggal_ulang").value = "";
+    document.getElementById("create-jam_ulang").value = "";
+    document.getElementById("create-catatan").value = "";
+    document.getElementById("create-jam_ulang").disabled = true;
+    document.getElementById("jam-info-kunjungan").textContent = "*select the doctor and date first!";
+    document.getElementById("jam-info-kunjungan").classList.remove("text-green-600");
+    document.getElementById("jam-info-kunjungan").classList.add("text-red-600");
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "create-kunjunganUlang" })
@@ -637,5 +646,85 @@ async function forceDeleteKunjungan(id) {
         hideLoading();
     }
 }
+
+// Load jadwal dokter untuk Kunjungan Ulang
+async function loadAvailableJamForKunjunganUlang() {
+    const tenagaMedisId = document.getElementById("create-tenaga_medis_id")?.value;
+    const tanggalUlang = document.getElementById("create-tanggal_ulang")?.value;
+
+    if (!tenagaMedisId || !tanggalUlang) {
+        document.getElementById("create-jam_ulang").disabled = true;
+        document.getElementById("jam-info-kunjungan").textContent =
+            "*select the doctor and date first!";
+        return;
+    }
+
+    // Get day of week from date (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const date = new Date(tanggalUlang + "T00:00:00");
+    let hari = date.getDay(); // 0-6
+    // Convert to 1-7 (Monday = 1, Sunday = 7)
+    hari = hari === 0 ? 7 : hari;
+
+    showLoading();
+
+    const query = `
+        query($tenaga_medis_id: ID!, $hari: Int!) {
+            getJadwalByTenagaMedisAndHari(
+                tenaga_medis_id: $tenaga_medis_id
+                hari: $hari
+            ) {
+                id
+                jam_mulai
+                jam_selesai
+                hari
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query,
+                variables: { tenaga_medis_id: tenagaMedisId, hari },
+            }),
+        });
+
+        const result = await res.json();
+        const jadwalData = result?.data?.getJadwalByTenagaMedisAndHari || [];
+
+        const jamInput = document.getElementById("create-jam_ulang");
+        const jamInfo = document.getElementById("jam-info-kunjungan");
+
+        if (jadwalData.length > 0) {
+            const jadwal = jadwalData[0];
+            jamInput.disabled = false;
+            jamInput.setAttribute("min", jadwal.jam_mulai);
+            jamInput.setAttribute("max", jadwal.jam_selesai);
+            jamInfo.textContent = `Doctor schedule: ${jadwal.jam_mulai} - ${jadwal.jam_selesai}`;
+            jamInfo.classList.remove("text-red-600");
+            jamInfo.classList.add("text-green-600");
+        } else {
+            jamInput.disabled = true;
+            jamInfo.textContent = "*Doctor has no schedule on this day!";
+            jamInfo.classList.remove("text-green-600");
+            jamInfo.classList.add("text-red-600");
+        }
+    } catch (error) {
+        console.error("Error loading jadwal:", error);
+        document.getElementById("jam-info-kunjungan").textContent =
+            "Error loading schedule";
+    } finally {
+        hideLoading();
+    }
+}
+
+// Event listener untuk change pada doctor & date di create-kunjunganUlang modal
+document.addEventListener("change", function (e) {
+    if (e.target.id === "create-tenaga_medis_id" || e.target.id === "create-tanggal_ulang") {
+        loadAvailableJamForKunjunganUlang();
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => loadDataPaginate(1, true));
