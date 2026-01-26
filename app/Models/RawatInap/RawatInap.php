@@ -15,7 +15,7 @@ class RawatInap extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'rawat_inap';
     protected $primaryKey = 'id';
-    protected $fillable = ['pasien_id','ruangan_id','status','biaya_inap', 'tanggal_masuk', 'tanggal_keluar'];
+    protected $fillable = ['pasien_id','ruangan_id','status','biaya_inap', 'tanggal_masuk', 'tanggal_keluar', 'is_paid'];
 
     protected $casts = [
         'created_at' => 'datetime',
@@ -37,7 +37,7 @@ class RawatInap extends Model
 
     public function detailPasien()
     {
-        return $this->hasMany(DetailPembayaranPasien::class, 'inap_id');
+        return $this->hasMany(DetailPembayaranPasien::class, 'rawat_inap_id');
     }
 
     public function logRuangan()

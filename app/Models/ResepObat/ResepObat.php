@@ -14,7 +14,7 @@ class ResepObat extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'resep_obat';
-    protected $fillable = ['pasien_id','tenaga_medis_id','obat_id','jumlah','aturan_pakai'];
+    protected $fillable = ['pasien_id','tenaga_medis_id','obat_id','jumlah','aturan_pakai', 'is_paid'];
 
     protected $casts = [
         'created_at' => 'datetime',

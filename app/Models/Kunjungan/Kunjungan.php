@@ -15,7 +15,7 @@ class Kunjungan extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'kunjungan';
     protected $primaryKey = 'id';
-    protected $fillable = ['pasien_id', 'poli_id','tanggal_kunjungan', 'keluhan', 'biaya_konsultasi'];
+    protected $fillable = ['pasien_id', 'poli_id','tanggal_kunjungan', 'keluhan', 'biaya_konsultasi', 'is_paid'];
 
     protected $casts = [
         'created_at' => 'datetime',

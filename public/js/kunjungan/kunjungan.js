@@ -6,7 +6,7 @@ function showLoading() {
     document.body.style.overflow = "hidden";
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) overlay.classList.remove("hidden");
-}
+}k
 
 function hideLoading() {
     document.body.style.overflow = "";

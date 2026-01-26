@@ -13,145 +13,94 @@ class DetailPembayaranPasienMutation
 {
     public function create($_, array $args): ?DetailPembayaranPasien
     {
-        // Ketika menggunakan @spread, input fields langsung ada di $args
-        $pembayaran_id = $args['pembayaran_id'] ?? null;
-        $tipe_biaya = $args['tipe_biaya'] ?? null;
-        $referensi_id = $args['referensi_id'] ?? null;
-        $jumlah = $args['jumlah'] ?? null;
-        $harga_satuan = $args['harga_satuan'] ?? null;
-        $subtotal = $args['subtotal'] ?? null;
+        $input = $args['input'];
 
-        if (!$pembayaran_id || !$tipe_biaya || !$jumlah || !$harga_satuan || !$subtotal) {
-            throw new \Exception('Missing required fields');
-        }
-
-        $input = [
-            'pembayaran_id' => $pembayaran_id,
-            'tipe_biaya' => $tipe_biaya,
-            'referensi_id' => $referensi_id,
-            'jumlah' => $jumlah,
-            'harga_satuan' => $harga_satuan,
-            'subtotal' => $subtotal,
+        // Tentukan field yang akan disimpan berdasarkan input
+        $data = [
+            'pembayaran_id' => $input['pembayaran_id'] ?? null,
+            'jumlah' => $input['jumlah'] ?? 1,
+            'harga_satuan' => $input['harga_satuan'] ?? 0,
+            'subtotal' => $input['subtotal'] ?? 0,
         ];
 
-        // Buat DetailPembayaranPasien
-        $detail = DetailPembayaranPasien::create($input);
-
-        // Update is_paid = 1 berdasarkan tipe_biaya
-        if ($detail) {
-            $this->updateIsPaidStatus($tipe_biaya, $referensi_id);
+        // Menentukan tipe biaya berdasarkan input
+        // Jika ada kunjungan_id, gunakan itu sebagai referensi
+        if (!empty($input['kunjungan_id'])) {
+            $data['kunjungan_id'] = $input['kunjungan_id'];
+            // Update is_paid pada kunjungan
+            Kunjungan::find($input['kunjungan_id'])?->update(['is_paid' => 1]);
         }
 
-        return $detail;
-    }
-
-    private function updateIsPaidStatus(string $tipeBiaya, $referensiId): void
-    {
-        if (!$referensiId) {
-            return;
+        if (!empty($input['rawat_inap_id'])) {
+            $data['rawat_inap_id'] = $input['rawat_inap_id'];
+            // Update is_paid pada rawat_inap
+            RawatInap::find($input['rawat_inap_id'])?->update(['is_paid' => 1]);
         }
 
-        switch ($tipeBiaya) {
-            case 'konsultasi':
-                Kunjungan::where('id', $referensiId)->update(['is_paid' => 1]);
-                break;
-            case 'obat':
-                ResepObat::where('id', $referensiId)->update(['is_paid' => 1]);
-                break;
-            case 'lab':
-                LabPemeriksaan::where('id', $referensiId)->update(['is_paid' => 1]);
-                break;
-            case 'radiologi':
-                Radiologi::where('id', $referensiId)->update(['is_paid' => 1]);
-                break;
-            case 'rawat_inap':
-                RawatInap::where('id', $referensiId)->update(['is_paid' => 1]);
-                break;
-        }
-    }
-
-    private function revertIsPaidStatus(string $tipeBiaya, $referensiId): void
-    {
-        if (!$referensiId) {
-            return;
+        if (!empty($input['resep_id'])) {
+            $data['resep_id'] = $input['resep_id'];
+            // Update is_paid pada resep_obat
+            ResepObat::find($input['resep_id'])?->update(['is_paid' => 1]);
         }
 
-        switch ($tipeBiaya) {
-            case 'konsultasi':
-                Kunjungan::where('id', $referensiId)->update(['is_paid' => 0]);
-                break;
-            case 'obat':
-                ResepObat::where('id', $referensiId)->update(['is_paid' => 0]);
-                break;
-            case 'lab':
-                LabPemeriksaan::where('id', $referensiId)->update(['is_paid' => 0]);
-                break;
-            case 'radiologi':
-                Radiologi::where('id', $referensiId)->update(['is_paid' => 0]);
-                break;
-            case 'rawat_inap':
-                RawatInap::where('id', $referensiId)->update(['is_paid' => 0]);
-                break;
+        if (!empty($input['radiologi_id'])) {
+            $data['radiologi_id'] = $input['radiologi_id'];
+            // Update is_paid pada radiologi
+            Radiologi::find($input['radiologi_id'])?->update(['is_paid' => 1]);
         }
+
+        if (!empty($input['lab_id'])) {
+            $data['lab_id'] = $input['lab_id'];
+            // Update is_paid pada lab_pemeriksaan
+            LabPemeriksaan::find($input['lab_id'])?->update(['is_paid' => 1]);
+        }
+
+        return DetailPembayaranPasien::create($data);
     }
 
     public function delete($_, array $args): ?DetailPembayaranPasien
     {
-        $id = $args['id'] ?? null;
-        if (!$id) {
-            throw new \Exception('ID is required');
+        $detailPembayaran = DetailPembayaranPasien::find($args['id']);
+
+        if ($detailPembayaran) {
+            // Update is_paid kembali ke 0 ketika detail pembayaran didelete
+            if ($detailPembayaran->kunjungan_id) {
+                Kunjungan::find($detailPembayaran->kunjungan_id)?->update(['is_paid' => 0]);
+            }
+            if ($detailPembayaran->rawat_inap_id) {
+                RawatInap::find($detailPembayaran->rawat_inap_id)?->update(['is_paid' => 0]);
+            }
+            if ($detailPembayaran->resep_id) {
+                ResepObat::find($detailPembayaran->resep_id)?->update(['is_paid' => 0]);
+            }
+            if ($detailPembayaran->radiologi_id) {
+                Radiologi::find($detailPembayaran->radiologi_id)?->update(['is_paid' => 0]);
+            }
+            if ($detailPembayaran->lab_id) {
+                LabPemeriksaan::find($detailPembayaran->lab_id)?->update(['is_paid' => 0]);
+            }
+
+            $detailPembayaran->delete();
+            return $detailPembayaran;
         }
 
-        $detail = DetailPembayaranPasien::find($id);
-
-        if ($detail) {
-            // Revert is_paid status sebelum delete
-            $this->revertIsPaidStatus($detail->tipe_biaya, $detail->referensi_id);
-
-            // Soft delete
-            $detail->delete();
-        }
-
-        return $detail;
+        return null;
     }
 
     public function restore($_, array $args): ?DetailPembayaranPasien
     {
-        $id = $args['id'] ?? null;
-        if (!$id) {
-            throw new \Exception('ID is required');
-        }
-
-        $detail = DetailPembayaranPasien::withTrashed()->find($id);
-
-        if ($detail) {
-            // Restore the record
-            $detail->restore();
-
-            // Update is_paid status kembali menjadi 1
-            $this->updateIsPaidStatus($detail->tipe_biaya, $detail->referensi_id);
-        }
-
-        return $detail ? DetailPembayaranPasien::find($id) : null;
+        return DetailPembayaranPasien::withTrashed()->find($args['id'])?->restore()
+            ? DetailPembayaranPasien::find($args['id'])
+            : null;
     }
 
     public function forceDelete($_, array $args): ?DetailPembayaranPasien
     {
-        $id = $args['id'] ?? null;
-        if (!$id) {
-            throw new \Exception('ID is required');
+        $DetailPembayaranPasien = DetailPembayaranPasien::withTrashed()->find($args['id']);
+        if ($DetailPembayaranPasien) {
+            $DetailPembayaranPasien->forceDelete();
+            return $DetailPembayaranPasien;
         }
-
-        $detail = DetailPembayaranPasien::withTrashed()->find($id);
-
-        if ($detail) {
-            // Revert is_paid status sebelum permanent delete
-            $this->revertIsPaidStatus($detail->tipe_biaya, $detail->referensi_id);
-
-            // Force delete
-            $detail->forceDelete();
-        }
-
-        return $detail;
+        return null;
     }
 }

@@ -1,7 +1,6 @@
 const API_URL = "/graphql";
 let currentPageActive = 1;
 let currentPageArchive = 1;
-let unpaidCosts = []; // Store unpaid costs for the selected pasien
 
 function showLoading() {
     document.body.style.overflow = "hidden";
@@ -62,11 +61,15 @@ async function loadDataPaginate(page = 1, isActive = true) {
                     data { 
                             id
                             pembayaran_id
-                            tipe_biaya
-                            referensi_id
+                            kunjungan_id
+                            rawat_inap_id
+                            resep_id
+                            radiologi_id
+                            lab_id
                             jumlah
                             harga_satuan
                             subtotal
+
                             pembayaranPasien{
                                 id
                                 pasien_id
@@ -77,10 +80,16 @@ async function loadDataPaginate(page = 1, isActive = true) {
                                     
                                 }
                             }
-                            obat{
+
+                            resep{
                                 id
-                                nama_obat
+                                obat_id
+                                obat{
+                                    id
+                                    nama_obat
+                                }
                             }
+
                         }
                             paginatorInfo { 
                                 currentPage 
@@ -95,7 +104,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 isActive
                     ? perPage
-                    : document.getElementById("perPage")?.value || 5
+                    : document.getElementById("perPage")?.value || 5,
             ),
             page: currentPageActive,
             search: searchValue,
@@ -112,7 +121,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         renderDetailPembayaranPasienTable(
             dataActive?.data?.allDetailPembayaranPasienPaginate || {},
             "cardActive",
-            true
+            true,
         );
 
         // --- Query data Arsip ---
@@ -122,11 +131,15 @@ async function loadDataPaginate(page = 1, isActive = true) {
                     data { 
                             id
                             pembayaran_id
-                            tipe_biaya
-                            referensi_id
+                            kunjungan_id
+                            rawat_inap_id
+                            resep_id
+                            radiologi_id
+                            lab_id
                             jumlah
                             harga_satuan
                             subtotal
+
                             pembayaranPasien{
                                 id
                                 pasien_id
@@ -134,12 +147,19 @@ async function loadDataPaginate(page = 1, isActive = true) {
                                 pasien {    
                                     id
                                     nama
+                                    
                                 }
                             }
-                            obat{
+
+                            resep{
                                 id
-                                nama_obat
+                                obat_id
+                                obat{
+                                    id
+                                    nama_obat
+                                }
                             }
+
                         }
                     paginatorInfo { currentPage lastPage total hasMorePages }
                 }
@@ -149,7 +169,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             first: parseInt(
                 !isActive
                     ? perPage
-                    : document.getElementById("perPageArchive")?.value || 5
+                    : document.getElementById("perPageArchive")?.value || 5,
             ),
             page: currentPageArchive,
             search: searchValue,
@@ -166,7 +186,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
         renderDetailPembayaranPasienTable(
             dataArchive?.data?.allDetailPembayaranPasienArchive || {},
             "cardArchive",
-            false
+            false,
         );
     } catch (error) {
         console.error("Error loading data:", error);
@@ -174,274 +194,6 @@ async function loadDataPaginate(page = 1, isActive = true) {
     } finally {
         hideLoading();
     }
-}
-
-// Fetch unpaid costs for the selected pasien
-async function loadUnpaidCosts(pasienId) {
-    showLoading();
-
-    const query = `
-        query($pasien_id: ID!) {
-            getUnpaidCostsByPasien(pasien_id: $pasien_id) {
-                type
-                referensi_id
-                jumlah
-                harga_satuan
-                subtotal
-                
-            }
-        }
-    `;
-
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: query,
-                variables: { pasien_id: pasienId },
-            }),
-        });
-
-        const data = await res.json();
-        unpaidCosts = data?.data?.getUnpaidCostsByPasien || [];
-
-        // Clear existing rows and populate with unpaid costs
-        populateUnpaidCostsToForm(unpaidCosts);
-    } catch (error) {
-        console.error("Error loading unpaid costs:", error);
-        alert("An error occurred while loading unpaid costs");
-    } finally {
-        hideLoading();
-    }
-}
-
-// Fetch obat untuk pasien (untuk edit modal)
-async function loadObatByPasien(pasienId) {
-    showLoading();
-
-    const query = `
-        query($pasien_id: ID!) {
-            resepObatByPasien(pasien_id: $pasien_id) {
-                id
-                jumlah
-                obat {
-                    id
-                    nama_obat
-                    harga_jual
-                }
-            }
-        }
-    `;
-
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: query,
-                variables: { pasien_id: pasienId },
-            }),
-        });
-
-        const data = await res.json();
-        console.log("Resep Obat Data:", data);
-
-        if (data.errors && data.errors.length > 0) {
-            console.error("GraphQL Error:", data.errors);
-            alert("Error loading obat: " + data.errors[0].message);
-            hideLoading();
-            return;
-        }
-
-        const resepObat = data?.data?.resepObatByPasien || [];
-        console.log("Populated resepObat:", resepObat);
-        populateObatDropdown(resepObat);
-    } catch (error) {
-        console.error("Error loading obat:", error);
-        alert("Error loading obat: " + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// Populate obat dropdown di edit modal
-function populateObatDropdown(resepObatList) {
-    const obatSelect = document.getElementById("edit-obat-select");
-    if (!obatSelect) {
-        console.warn("edit-obat-select not found!");
-        return;
-    }
- 
-    console.log("Populating dropdown with:", resepObatList);
-
-    // Clear existing options
-    obatSelect.innerHTML = '<option value="">Select Obat</option>';
-
-    // Store resep obat data untuk reference
-    window.resepObatData = {};
-
-    // Add options dari resep obat
-    if (!resepObatList || resepObatList.length === 0) {
-        console.warn("No resep obat data available");
-        return;
-    }
-
-    resepObatList.forEach((resepObat) => {
-        try {
-            const option = document.createElement("option");
-            option.value = resepObat.id;
-            option.textContent = resepObat.obat?.nama_obat || "Unknown Obat";
-            obatSelect.appendChild(option);
-
-            // Store data for later use
-            window.resepObatData[resepObat.id] = {
-                jumlah: resepObat.jumlah,
-                harga_jual: resepObat.obat?.harga_jual || 0,
-                obat_id: resepObat.obat?.id || null,
-                nama_obat: resepObat.obat?.nama_obat || "Unknown",
-            };
-            console.log("Added option for:", resepObat.obat?.nama_obat);
-        } catch (e) {
-            console.error("Error adding option:", e, resepObat);
-        }
-    });
-
-    console.log("Final resepObatData:", window.resepObatData);
-
-    // Auto-select obat jika referensi_id sudah ada (edit mode)
-    if (window.currentReferensiId) {
-        // Find resep obat id based on referensi_id (obat_id)
-        for (const resepObatId in window.resepObatData) {
-            if (
-                window.resepObatData[resepObatId].obat_id ==
-                window.currentReferensiId
-            ) {
-                console.log(
-                    "Auto-selecting obat with resepObat id:",
-                    resepObatId
-                );
-                obatSelect.value = resepObatId;
-                // Trigger change event untuk auto-fill jumlah dan harga
-                obatSelect.dispatchEvent(
-                    new Event("change", { bubbles: true })
-                );
-                break;
-            }
-        }
-    }
-}
-
-// Populate unpaid costs to the form
-function populateUnpaidCostsToForm(costs) {
-    const container = document.getElementById("dynamic-container");
-
-    // Clear existing rows except the first one
-    const rows = container.querySelectorAll(".dynamic-row");
-    rows.forEach((row, index) => {
-        if (index > 0) {
-            row.remove();
-        }
-    });
-
-    // Reset first row
-    const firstRow = container.querySelector(".dynamic-row");
-    if (firstRow) {
-        firstRow.querySelector('select[name="create-tipe-biaya[]"]').value = "";
-        firstRow.querySelector('input[name="create-jumlah[]"]').value = "";
-        firstRow.querySelector('input[name="create-harga-satuan[]"]').value =
-            "";
-    }
-
-    // Reset subtotal when no costs
-    if (costs.length === 0) {
-        const subtotalInput = document.querySelector(
-            'input[name="create-subtotal"]'
-        );
-        if (subtotalInput) {
-            subtotalInput.value = "0";
-        }
-        return;
-    }
-
-    // Fill first row with first cost
-    if (firstRow && costs.length > 0) {
-        const cost = costs[0];
-        firstRow.querySelector('select[name="create-tipe-biaya[]"]').value =
-            cost.type;
-        firstRow.querySelector('input[name="create-jumlah[]"]').value =
-            formatNumber(cost.jumlah.toString());
-        firstRow.querySelector('input[name="create-harga-satuan[]"]').value =
-            formatNumber(cost.harga_satuan.toString());
-        firstRow.dataset.tipeBiaya = cost.type;
-        firstRow.dataset.referensiId = cost.referensi_id;
-        firstRow.dataset.subtotal = Number(cost.subtotal);
-    }
-
-    // Add additional rows for remaining costs
-    for (let i = 1; i < costs.length; i++) {
-        const cost = costs[i];
-        const newRow = document.createElement("div");
-        newRow.className =
-            "dynamic-row bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
-            "p-4 rounded-xl shadow-sm space-y-3 transition-all";
-
-        newRow.innerHTML = `
-            <div>
-                <label class="text-sm font-medium">Cost Type</label>
-                <select name="create-tipe-biaya[]"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                        focus:border-blue-500 focus:ring-blue-500 shadow-sm">
-                    <option value="">Select Cost Type</option>
-                    <option value="konsultasi">Konsultasi</option>
-                    <option value="obat">Obat</option>
-                    <option value="lab">Lab</option>
-                    <option value="radiologi">Radiologi</option>
-                    <option value="rawat_inap">Rawat Inap</option>
-                    <option value="lainnya">Lainnya</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="text-sm font-medium">Amount</label>
-                <input type="text" name="create-jumlah[]"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                        focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                    placeholder="Enter Amount">
-            </div>
-
-            <div>
-                <label class="text-sm font-medium">Unit Price</label>
-                <input type="text" name="create-harga-satuan[]"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                        focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                    placeholder="Enter Unit Price">
-            </div>
-
-            <div>
-                    <label class="text-sm font-medium">Subtotal</label>
-                    <input type="text" name="create-subtotal[]"
-                        class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold"
-                        placeholder="0" readonly>
-                </div>
-        `;
-
-        // Populate values
-        newRow.querySelector('select[name="create-tipe-biaya[]"]').value =
-            cost.type;
-        newRow.querySelector('input[name="create-jumlah[]"]').value =
-            formatNumber(cost.jumlah.toString());
-        newRow.querySelector('input[name="create-harga-satuan[]"]').value =
-            formatNumber(cost.harga_satuan.toString());
-        newRow.dataset.tipeBiaya = cost.type;
-        newRow.dataset.referensiId = cost.referensi_id;
-        newRow.dataset.subtotal = cost.subtotal;
-
-        container.appendChild(newRow);
-    }
-
-    // Update subtotal calculation
-    updateSubtotal();
 }
 
 // Format dan unformat number
@@ -478,25 +230,34 @@ async function createDetailPembayaranPasien() {
     const detailPasien = Array.from(rows)
         .map((row) => {
             try {
+                // Try to get hidden input first, then select
+                const tipoHiddenInput = row.querySelector(
+                    'input[type="hidden"][name="create-tipe-biaya[]"]',
+                );
                 const tipoSelect = row.querySelector(
-                    'select[name="create-tipe-biaya[]"]'
-                );
-                const jumlahInput = row.querySelector(
-                    'input[name="create-jumlah[]"]'
-                );
-                const hargaInput = row.querySelector(
-                    'input[name="create-harga-satuan[]"]'
-                );
-                const subtotalInput = row.querySelector(
-                    'input[name="create-subtotal[]"]'
+                    'select[name="create-tipe-biaya[]"]',
                 );
 
-                if (!tipoSelect || !jumlahInput || !hargaInput) {
+                const jumlahInput = row.querySelector(
+                    'input[name="create-jumlah[]"]',
+                );
+                const hargaInput = row.querySelector(
+                    'input[name="create-harga-satuan[]"]',
+                );
+                const subtotalInput = row.querySelector(
+                    'input[name="create-subtotal[]"]',
+                );
+
+                if (!jumlahInput || !hargaInput) {
                     console.warn("Missing input elements in row", row);
                     return null;
                 }
 
-                const tipe_biaya = tipoSelect.value || "";
+                const tipe_biaya = tipoHiddenInput
+                    ? tipoHiddenInput.value
+                    : tipoSelect
+                      ? tipoSelect.value
+                      : "";
                 const jumlahValue = jumlahInput.value || "0";
                 const hargaValue = hargaInput.value || "0";
                 const subtotalValue = subtotalInput.value || "0";
@@ -511,14 +272,34 @@ async function createDetailPembayaranPasien() {
                     return null;
                 }
 
-                return {
-                    tipe_biaya: tipe_biaya,
+                // Map tipe_biaya to correct field
+                const mappedData = {
                     jumlah: jumlah,
                     harga_satuan: harga_satuan,
-                    referensi_id: row.dataset.referensiId,
                     subtotal:
                         Number(row.dataset.subtotal) || jumlah * harga_satuan,
                 };
+
+                // Map tipe_biaya to the correct field in database
+                switch (tipe_biaya) {
+                    case "kunjungan":
+                        mappedData.kunjungan_id = row.dataset.referensiId;
+                        break;
+                    case "rawat_inap":
+                        mappedData.rawat_inap_id = row.dataset.referensiId;
+                        break;
+                    case "resep_obat":
+                        mappedData.resep_id = row.dataset.referensiId;
+                        break;
+                    case "radiologi":
+                        mappedData.radiologi_id = row.dataset.referensiId;
+                        break;
+                    case "lab_pemeriksaan":
+                        mappedData.lab_id = row.dataset.referensiId;
+                        break;
+                }
+
+                return mappedData;
             } catch (error) {
                 console.error("Error processing row:", error);
                 return null;
@@ -537,8 +318,11 @@ async function createDetailPembayaranPasien() {
             createDetailPembayaranPasien(input: $input) {
                 id
                 pembayaran_id
-                tipe_biaya
-                referensi_id
+                kunjungan_id
+                rawat_inap_id
+                resep_id
+                radiologi_id
+                lab_id
                 jumlah
                 harga_satuan
                 subtotal
@@ -556,16 +340,15 @@ async function createDetailPembayaranPasien() {
     try {
         const results = await Promise.all(
             detailPasien.map((item) => {
+                // Tambahkan pembayaran_id ke setiap item
+                const input = {
+                    pembayaran_id,
+                    ...item,
+                };
+
                 // Buat variablesDetailPembayaranPasien untuk setiap item
                 const variablesDetailPembayaranPasien = {
-                    input: {
-                        pembayaran_id,
-                        tipe_biaya: item.tipe_biaya,
-                        referensi_id: item.referensi_id,
-                        jumlah: item.jumlah,
-                        harga_satuan: item.harga_satuan,
-                        subtotal: item.subtotal,
-                    },
+                    input: input,
                 };
 
                 return fetch(API_URL, {
@@ -576,7 +359,7 @@ async function createDetailPembayaranPasien() {
                         variables: variablesDetailPembayaranPasien,
                     }),
                 }).then((res) => res.json());
-            })
+            }),
         );
 
         // Cek apakah ada error
@@ -604,11 +387,11 @@ async function createDetailPembayaranPasien() {
 
             if (successCount > 0) {
                 alert(
-                    `${successCount} of ${detailPasien.length} items created successfully.\n\n${errors.length} failed:\n\n${errorDetailsText}`
+                    `${successCount} of ${detailPasien.length} items created successfully.\n\n${errors.length} failed:\n\n${errorDetailsText}`,
                 );
             } else {
                 alert(
-                    `Failed to create payment details:\n\n${errorDetailsText}`
+                    `Failed to create payment details:\n\n${errorDetailsText}`,
                 );
                 hideLoading();
                 return;
@@ -618,7 +401,7 @@ async function createDetailPembayaranPasien() {
         window.dispatchEvent(
             new CustomEvent("close-modal", {
                 detail: "create-detailPembayaranPasien",
-            })
+            }),
         );
         // resetCreateForm();
         loadDataPaginate(currentPageActive, true);
@@ -638,11 +421,10 @@ function openEditModal(
     harga_satuan,
     subtotal,
     referensi_id,
-    pasien_id
+    pasien_id,
 ) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pembayaran_id;
-    document.getElementById("edit-tipe-biaya").value = tipe_biaya;
     document.getElementById("edit-jumlah").value = formatNumber(jumlah);
     document.getElementById("edit-harga-satuan").value =
         formatNumber(harga_satuan);
@@ -652,51 +434,91 @@ function openEditModal(
     document.getElementById("edit-id").dataset.referensiId = referensi_id;
     document.getElementById("edit-id").dataset.pasienId = pasien_id;
 
-    // Load obat jika tipe_biaya = obat
-    if (tipe_biaya === "obat" && pasien_id) {
-        console.log("Loading obat for pasien_id:", pasien_id);
-        loadObatByPasien(pasien_id);
-        // Store referensi_id untuk auto-select setelah dropdown loaded
-        window.currentReferensiId = referensi_id;
-        document
-            .getElementById("edit-obat-container")
-            .classList.remove("hidden");
-    } else {
-        document.getElementById("edit-obat-container").classList.add("hidden");
-    }
+    // Map tipe_biaya ke label yang user-friendly
+    const tipeBiayaLabels = {
+        kunjungan: "Consultation",
+        rawat_inap: "Inpatient Care",
+        resep_obat: "Medicine",
+        radiologi: "Radiology",
+        lab_pemeriksaan: "Laboratory",
+    };
+
+    // Set displayed label (disabled input)
+    const displayLabel = tipeBiayaLabels[tipe_biaya] || tipe_biaya;
+    document.getElementById("edit-tipe-biaya-display").value = displayLabel;
+
+    // Set actual value (hidden input for update)
+    document.getElementById("edit-tipe-biaya-hidden").value = tipe_biaya;
 
     window.dispatchEvent(
-        new CustomEvent("open-modal", { detail: "edit-detailPembayaranPasien" })
+        new CustomEvent("open-modal", {
+            detail: "edit-detailPembayaranPasien",
+        }),
     );
 }
 
 // Update
+// Update function juga perlu disesuaikan
 async function updateDetailPembayaranPasien() {
     const id = document.getElementById("edit-id").value;
     const referensi_id =
         document.getElementById("edit-id").dataset.referensiId || null;
 
     const pembayaran_id = document.getElementById("edit-nama").value;
-    const tipe_biaya = document.getElementById("edit-tipe-biaya").value;
+
+    // Ambil tipe_biaya dari hidden input, bukan dari display input
+    const tipe_biaya = document.getElementById("edit-tipe-biaya-hidden").value;
+
     const jumlah = document
         .getElementById("edit-jumlah")
         .value.replace(/\./g, "");
     const harga_satuan = parseFloat(
-        document.getElementById("edit-harga-satuan").value.replace(/\./g, "")
+        document.getElementById("edit-harga-satuan").value.replace(/\./g, ""),
     );
     const subtotal = document
         .getElementById("edit-subtotal")
         .value.replace(/\./g, "")
         .trim();
+
     showLoading();
+
+    // Map tipe_biaya ke field yang sesuai
+    const input = {
+        pembayaran_id,
+        jumlah: parseInt(jumlah),
+        harga_satuan: harga_satuan,
+        subtotal: parseFloat(subtotal),
+    };
+
+    // Set field yang sesuai berdasarkan tipe_biaya
+    switch (tipe_biaya) {
+        case "kunjungan":
+            input.kunjungan_id = referensi_id;
+            break;
+        case "rawat_inap":
+            input.rawat_inap_id = referensi_id;
+            break;
+        case "resep_obat":
+            input.resep_id = referensi_id;
+            break;
+        case "radiologi":
+            input.radiologi_id = referensi_id;
+            break;
+        case "lab_pemeriksaan":
+            input.lab_id = referensi_id;
+            break;
+    }
 
     const mutation = `
         mutation($id: ID!, $input: UpdateDetailPembayaranPasienInput!) {
             updateDetailPembayaranPasien(id: $id, input: $input) {
                 id
                 pembayaran_id
-                tipe_biaya
-                referensi_id
+                kunjungan_id
+                rawat_inap_id
+                resep_id
+                radiologi_id
+                lab_id
                 jumlah
                 harga_satuan
                 subtotal
@@ -717,17 +539,7 @@ async function updateDetailPembayaranPasien() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: mutation,
-                variables: {
-                    id,
-                    input: {
-                        pembayaran_id,
-                        tipe_biaya,
-                        referensi_id,
-                        jumlah: parseInt(jumlah),
-                        harga_satuan: harga_satuan,
-                        subtotal: parseFloat(subtotal),
-                    },
-                },
+                variables: { id, input },
             }),
         });
         const data = await res.json();
@@ -742,13 +554,126 @@ async function updateDetailPembayaranPasien() {
         window.dispatchEvent(
             new CustomEvent("close-modal", {
                 detail: "edit-detailPembayaranPasien",
-            })
+            }),
         );
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
         alert("Failed to update data");
     } finally {
+        hideLoading();
+    }
+}
+
+// Function to load unpaid costs by pasien
+async function loadUnpaidCosts(pasienId) {
+    if (!pasienId) {
+        console.log("No pasien selected");
+        return;
+    }
+
+    showLoading();
+
+    const query = `
+        query($pasien_id: ID!) {
+            getUnpaidCostsByPasien(pasien_id: $pasien_id) {
+                id
+                type
+                type_label
+                description
+                jumlah
+                harga_satuan
+                subtotal
+                tanggal
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: query,
+                variables: { pasien_id: pasienId },
+            }),
+        });
+
+        const data = await res.json();
+
+        if (data.errors && data.errors.length > 0) {
+            console.error("Error loading unpaid costs:", data.errors);
+            alert("Error loading unpaid costs: " + data.errors[0].message);
+            hideLoading();
+            return;
+        }
+
+        const unpaidCosts = data.data?.getUnpaidCostsByPasien || [];
+
+        // Clear existing rows
+        const container = document.getElementById("dynamic-container");
+        container.innerHTML = "";
+
+        if (unpaidCosts.length === 0) {
+            // Show message jika tidak ada unpaid costs
+            const emptyMsg = document.createElement("div");
+            emptyMsg.className = "text-center py-4 text-gray-500 italic";
+            emptyMsg.textContent = "No unpaid costs found for this patient";
+            container.appendChild(emptyMsg);
+            hideLoading();
+            return;
+        }
+
+        // Create rows dari unpaid costs
+        unpaidCosts.forEach((cost, index) => {
+            const row = document.createElement("div");
+            row.className =
+                "dynamic-row bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 " +
+                "p-4 rounded-xl shadow-sm space-y-3 transition-all";
+            row.dataset.referensiId = cost.id;
+            row.dataset.subtotal = cost.subtotal;
+
+            const tanggalFormatted = new Date(cost.tanggal).toLocaleDateString(
+                "id-ID",
+            );
+
+            row.innerHTML = `
+                <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded">
+                    <p class="text-xs text-gray-600 dark:text-gray-300">${cost.description}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Date: ${tanggalFormatted}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium">Cost Type</label>
+                    <select name="create-tipe-biaya[]" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" disabled>
+                        <option value="${cost.type}" selected>${cost.type_label}</option>
+                    </select>
+                    <input type="hidden" name="create-tipe-biaya[]" value="${cost.type}">
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium">Amount</label>
+                    <input type="text" name="create-jumlah[]" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" value="${formatNumber(cost.jumlah.toString())}">
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium">Unit Price</label>
+                    <input type="text" name="create-harga-satuan[]" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-sm" value="${formatNumber(cost.harga_satuan.toString())}">
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium">Subtotal</label>
+                    <input type="text" name="create-subtotal[]" class="border-2 border-green-600 py-2 px-3 w-full rounded-full mb-3 bg-gray-100 font-semibold" value="${formatNumber(cost.subtotal.toString())}" readonly>
+                </div>
+            `;
+
+            container.appendChild(row);
+        });
+
+        hideLoading();
+    } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred while loading unpaid costs");
         hideLoading();
     }
 }
@@ -784,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editTipeBiayaSelect.addEventListener("change", (e) => {
             const tipeBiaya = e.target.value;
             const obatContainer = document.getElementById(
-                "edit-obat-container"
+                "edit-obat-container",
             );
 
             if (tipeBiaya === "obat") {
@@ -807,7 +732,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
                 const data = window.resepObatData[resepObatId];
                 document.getElementById("edit-jumlah").value = formatNumber(
-                    data.jumlah.toString()
+                    data.jumlah.toString(),
                 );
                 document.getElementById("edit-harga-satuan").value =
                     formatNumber(data.harga_jual.toString());
@@ -866,10 +791,10 @@ function updateSubtotal() {
     rows.forEach((row) => {
         const jumlahInput = row.querySelector('input[name="create-jumlah[]"]');
         const hargaInput = row.querySelector(
-            'input[name="create-harga-satuan[]"]'
+            'input[name="create-harga-satuan[]"]',
         );
         const subtotalInput = row.querySelector(
-            'input[name="create-subtotal[]"]'
+            'input[name="create-subtotal[]"]',
         );
 
         if (!jumlahInput || !hargaInput || !subtotalInput) return;
@@ -885,7 +810,6 @@ function updateSubtotal() {
 
 // Function to calculate edit subtotal
 function calculateEditSubtotal() {
-    console.log("calculateEditSubtotal called");
     const jumlahInput = document.getElementById("edit-jumlah");
     const hargaInput = document.getElementById("edit-harga-satuan");
     const subtotalInput = document.getElementById("edit-subtotal");
@@ -898,8 +822,7 @@ function calculateEditSubtotal() {
     const jumlah = parseInt(jumlahInput.value.replace(/\./g, "")) || 0;
     const harga = parseFloat(hargaInput.value.replace(/\./g, "")) || 0;
 
-    const subtotal = jumlah * harga; 
-    console.log("Calculated subtotal:", jumlah, "*", harga, "=", subtotal);
+    const subtotal = jumlah * harga;
 
     subtotalInput.value = formatNumber(subtotal.toString());
 }
@@ -954,12 +877,15 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
 
         acc[key].details.push({
             id: item.id,
-            tipe_biaya: item.tipe_biaya,
-            referensi_id: item.referensi_id,
+            kunjungan_id: item.kunjungan_id,
+            rawat_inap_id: item.rawat_inap_id,
+            resep_id: item.resep_id,
+            radiologi_id: item.radiologi_id,
+            lab_id: item.lab_id,
             jumlah: item.jumlah,
             harga_satuan: item.harga_satuan,
             subtotal: item.subtotal,
-            obat: item.obat,
+            resep: item.resep,
             isPaid: item.isPaid,
         });
 
@@ -975,7 +901,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
     Object.values(grouped).forEach((group) => {
         const totalSubtotal = group.details.reduce(
             (sum, d) => sum + d.subtotal,
-            0
+            0,
         );
 
         // Render rows detail dalam format grid 6 kolom
@@ -983,10 +909,34 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
             .map((detail) => {
                 let detailActions = "";
 
-                if (window.currentUserRole === "admin" || window.currentUserRole === "cashier") {
+                if (
+                    window.currentUserRole === "admin" ||
+                    window.currentUserRole === "cashier"
+                ) {
                     if (isActive) {
+                        // Determine tipe_biaya and referensi_id
+                        let tipeBiaya = "";
+                        let referensiId = "";
+
+                        if (detail.kunjungan_id) {
+                            tipeBiaya = "kunjungan";
+                            referensiId = detail.kunjungan_id;
+                        } else if (detail.rawat_inap_id) {
+                            tipeBiaya = "rawat_inap";
+                            referensiId = detail.rawat_inap_id;
+                        } else if (detail.resep_id) {
+                            tipeBiaya = "resep_obat";
+                            referensiId = detail.resep_id;
+                        } else if (detail.radiologi_id) {
+                            tipeBiaya = "radiologi";
+                            referensiId = detail.radiologi_id;
+                        } else if (detail.lab_id) {
+                            tipeBiaya = "lab_pemeriksaan";
+                            referensiId = detail.lab_id;
+                        }
+
                         detailActions = `
-                            <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${detail.tipe_biaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}', '${detail.referensi_id}', '${group.pasien_id}')"
+                            <button onclick="openEditModal(${detail.id}, '${group.pembayaran_id}', '${tipeBiaya}', '${detail.jumlah}', '${detail.harga_satuan}', '${detail.subtotal}', '${referensiId}', '${group.pasien_id}')"
                                 class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
                                 Edit
                             </button>
@@ -1009,28 +959,30 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                     }
                 }
 
-                const namaBiaya =
-                    detail.tipe_biaya === "obat"
-                        ? detail.obat?.nama_obat ?? "-"
-                        : detail.tipe_biaya.charAt(0).toUpperCase() +
-                          detail.tipe_biaya.slice(1);
+                // Determine cost type label
+                let costTypeLabel = "-";
+                if (detail.kunjungan_id) costTypeLabel = "Konsultasi";
+                else if (detail.rawat_inap_id) costTypeLabel = "Rawat Inap";
+                else if (detail.resep_id)
+                    costTypeLabel = detail.resep?.obat?.nama_obat || "Obat";
+                else if (detail.radiologi_id) costTypeLabel = "Radiologi";
+                else if (detail.lab_id) costTypeLabel = "Lab";
 
                 return `
                     <div class="grid grid-cols-6 py-2 text-sm border-dotted border-t-2 dark:text-gray-200">
                         <div class="font-semibold text-blue-600 dark:text-blue-400">
-                            ${namaBiaya}
-
+                            ${costTypeLabel}
                         </div>
                         <div class="text-cyan-500">${detail.jumlah.toLocaleString(
-                            "id-ID"
+                            "id-ID",
                         )}</div>
-                        <div class="text-gray-400">${detail.harga_satuan.toLocaleString(
-                            "id-ID"
+                        <div class="text-gray-400">Rp ${detail.harga_satuan.toLocaleString(
+                            "id-ID",
                         )}</div>
-                        <div class="text-orange-400">${detail.subtotal.toLocaleString(
-                            "id-ID"
+                        <div class="text-orange-400">Rp ${detail.subtotal.toLocaleString(
+                            "id-ID",
                         )}</div>
-                        <div class="flex gap-1 flex-wrap">${detailActions}</div>
+                        <div class="flex gap-1 flex-wrap col-span-2">${detailActions}</div>
                     </div>
                 `;
             })
@@ -1055,8 +1007,8 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Total: <span class="font-semibold text-green-600">Rp ${totalSubtotal.toLocaleString(
-                                "id-ID"
-                            )} </span>
+                                "id-ID",
+                            )}</span>
                         </p>
                     </div>
 
@@ -1073,7 +1025,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
                         <div>Qty</div>
                         <div>Unit Price</div>
                         <div>Total</div>
-                        <div>Actions</div>
+                        <div class="col-span-2">Actions</div>
                     </div>
 
                     ${detailRows}

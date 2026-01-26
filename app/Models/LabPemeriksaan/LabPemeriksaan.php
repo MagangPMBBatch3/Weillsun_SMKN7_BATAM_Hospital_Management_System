@@ -15,7 +15,7 @@ class LabPemeriksaan extends Model
 
     protected $table = 'lab_pemeriksaan';
     protected $primaryKey = 'id';
-    protected $fillable = ['pasien_id', 'tenaga_medis_id', 'jenis_pemeriksaan', 'hasil', 'tanggal', 'biaya_lab'];
+    protected $fillable = ['pasien_id', 'tenaga_medis_id', 'jenis_pemeriksaan', 'hasil', 'tanggal', 'biaya_lab', 'is_paid'];
 
     protected $casts = [
         'created_at' => 'datetime',

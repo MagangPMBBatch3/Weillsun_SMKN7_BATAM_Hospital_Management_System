@@ -15,7 +15,7 @@ class Radiologi extends Model
     protected $table = 'radiologi';
     protected $primaryKey = 'id';
 
-    protected $fillable = ['pasien_id','tenaga_medis_id','jenis_radiologi','hasil','tanggal','biaya_radiologi'];
+    protected $fillable = ['pasien_id','tenaga_medis_id','jenis_radiologi','hasil','tanggal','biaya_radiologi', 'is_paid'];
 
     protected $casts = [
         'created_at' => 'datetime',

@@ -3,6 +3,11 @@
 namespace App\Models\DetailPembayaranPasien;
 
 use App\Models\Obat\Obat;
+use App\Models\Kunjungan\Kunjungan;
+use App\Models\LabPemeriksaan\LabPemeriksaan;
+use App\Models\Radiologi\Radiologi;
+use App\Models\RawatInap\RawatInap;
+use App\Models\ResepObat\ResepObat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\PembayaranPasien\PembayaranPasien;
@@ -13,7 +18,7 @@ class DetailPembayaranPasien extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'detail_pembayaran_pasien';
     protected $primaryKey = 'id';
-    protected $fillable = ['pembayaran_id', 'tipe_biaya', 'referensi_id', 'jumlah', 'harga_satuan', 'subtotal'];
+    protected $fillable = ['pembayaran_id', 'kunjungan_id', 'rawat_inap_id', 'resep_id', 'radiologi_id', 'lab_id', 'jumlah', 'harga_satuan', 'subtotal'];
 
     protected $casts = [
         'created_at' => 'datetime',
@@ -26,8 +31,29 @@ class DetailPembayaranPasien extends Model
         return $this->belongsTo(PembayaranPasien::class, 'pembayaran_id');
     }
 
-    public function obat()
+    public function kunjungan()
     {
-        return $this->belongsTo(Obat::class, 'referensi_id');
+        return $this->belongsTo(Kunjungan::class, 'kunjungan_id');
     }
+
+    public function rawatInap()
+    {
+        return $this->belongsTo(RawatInap::class, 'rawat_inap_id');
+    }
+
+    public function resep()
+    {
+        return $this->belongsTo(ResepObat::class, 'resep_id');
+    }
+
+    public function radiologi()
+    {
+        return $this->belongsTo(Radiologi::class, 'radiologi_id');
+    }
+
+    public function lab()
+    {
+        return $this->belongsTo(LabPemeriksaan::class, 'lab_id');
+    }
+
 }

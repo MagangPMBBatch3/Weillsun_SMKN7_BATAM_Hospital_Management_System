@@ -17,16 +17,30 @@ return new class extends Migration
                   ->constrained('pembayaran_pasien')
                   ->onDelete('cascade');
 
-            $table->enum('tipe_biaya', [
-                'konsultasi', 
-                'obat', 
-                'lab', 
-                'radiologi', 
-                'rawat_inap', 
-                'lainnya'
-            ]);
+            $table->foreignId('kunjungan_id')
+            ->nullable()
+            ->constrained('kunjungan')
+            ;
 
-            $table->unsignedBigInteger('referensi_id')->nullable();
+            $table->foreignId('rawat_inap_id')
+            ->nullable()
+            ->constrained('rawat_inap')
+            ;
+
+            $table->foreignId('resep_id')
+            ->nullable()
+            ->constrained('resep_obat')
+            ;
+
+            $table->foreignId('radiologi_id')
+            ->nullable()
+            ->constrained('radiologi')
+            ;
+
+            $table->foreignId('lab_id')
+            ->nullable()
+            ->constrained('lab_pemeriksaan')
+            ;
 
             $table->integer('jumlah')->default(1);
             $table->decimal('harga_satuan', 15, 2);

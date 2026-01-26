@@ -15,12 +15,12 @@ class DetailPembayaranPasienObserver
     public function created(DetailPembayaranPasien $detail): void
     {
         // 1. Cek tipe biaya
-        if ($detail->tipe_biaya !== 'rawat_inap') {
+        if ($detail->rawat_inap_id === null) {
             return;
         }
 
         // 2. Ambil rawat inap berdasarkan referensi_id
-        $rawatInap = RawatInap::where('id', $detail->referensi_id)
+        $rawatInap = RawatInap::where('id', $detail->rawat_inap_id  )
             ->where('status', 'Aktif')
             ->first();
 

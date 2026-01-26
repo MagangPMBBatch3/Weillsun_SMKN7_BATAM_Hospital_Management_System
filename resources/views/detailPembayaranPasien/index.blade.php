@@ -188,27 +188,12 @@
                                 @endforeach
                             </select>
 
-                            <x-input-label>New Cost Type</x-input-label>
-                            <select id="edit-tipe-biaya"
-                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                    focus:border-blue-500 focus:ring-blue-500 shadow-sm">
-                                <option value="">Select Cost Type</option>
-                                <option value="konsultasi">Konsultasi</option>
-                                <option value="obat">Obat</option>
-                                <option value="lab">Lab</option>
-                                <option value="radiologi">Radiologi</option>
-                                <option value="rawat_inap">Rawat Inap</option>
-                                <option value="lainnya">Lainnya</option>
-                            </select>
+                            <div>
+                                <x-input-label>Cost Name</x-input-label>
+                                <x-text-input id="edit-tipe-biaya-display" type="text" disabled
+                                    class="border p-2 w-full rounded text-gray-500 bg-gray-100 dark:bg-gray-700 cursor-not-allowed" />
 
-                            <!-- Obat Dropdown (hanya tampil jika tipe_biaya = obat) -->
-                            <div id="edit-obat-container" class="hidden">
-                                <x-input-label>Select Obat</x-input-label>
-                                <select id="edit-obat-select"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 
-                                        focus:border-blue-500 focus:ring-blue-500 shadow-sm">
-                                    <option value="">Select Obat</option>
-                                </select>
+                                    <input type="hidden" id="edit-tipe-biaya-hidden" />
                             </div>
 
                             <x-input-label>New Amount</x-input-label>

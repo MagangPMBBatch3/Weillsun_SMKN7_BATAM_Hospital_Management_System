@@ -1,17 +1,11 @@
-enum Tipe {
-    konsultasi
-    obat
-    lab
-    radiologi
-    rawat_inap
-    lainnya
-}
-
 type DetailPembayaranPasien {
     id: ID!
     pembayaran_id: ID!
-    tipe_biaya: Tipe!
-    referensi_id: ID!
+    kunjungan_id: ID
+    rawat_inap_id: ID
+    resep_id: ID
+    radiologi_id: ID
+    lab_id: ID
     jumlah: Int!
     harga_satuan: Float!
     subtotal: Float!
@@ -20,30 +14,42 @@ type DetailPembayaranPasien {
     deleted_at: DateTime
 
     pembayaranPasien: PembayaranPasien @belongsTo
-    obat: Obat @belongsTo(relation: "obat")
+    resep: ResepObat @belongsTo
+    kunjungan: Kunjungan @belongsTo
+    rawatInap: RawatInap @belongsTo
+    radiologi: Radiologi @belongsTo
+    lab: LabPemeriksaan @belongsTo
 }
 
 type UnpaidCost {
+    id: ID!
     type: String!
-    referensi_id: ID!
+    type_label: String!
+    description: String!
     jumlah: Int!
     harga_satuan: Float!
     subtotal: Float!
-    label: String!
+    tanggal: String
 }
 
 input CreateDetailPembayaranPasienInput {
     pembayaran_id: ID!
-    tipe_biaya: Tipe!
-    referensi_id: ID
+    kunjungan_id: ID
+    rawat_inap_id: ID
+    resep_id: ID
+    radiologi_id: ID
+    lab_id: ID
     jumlah: Int!
     harga_satuan: Float!
     subtotal: Float!
 }
 input UpdateDetailPembayaranPasienInput {
     pembayaran_id: ID!
-    tipe_biaya: Tipe
-    referensi_id: ID
+    kunjungan_id: ID
+    rawat_inap_id: ID
+    resep_id: ID
+    radiologi_id: ID
+    lab_id: ID
     jumlah: Int
     harga_satuan: Float
     subtotal: Float
@@ -91,11 +97,6 @@ extend type Query {
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@getUnpaidCostsByPasien"
         )
 
-    resepObatByPasien(pasien_id: ID!): [ResepObat!]!
-        @field(
-            resolver: "App\\GraphQL\\DetailPembayaranPasien\\Queries\\DetailPembayaranPasienQuery@resepObatByPasien"
-        )
-
     DetailPembayaranPasien(id: ID! @eq(key: "id")): DetailPembayaranPasien
         @find(
             model: "App\\Models\\DetailPembayaranPasien\\DetailPembayaranPasien"
@@ -104,7 +105,7 @@ extend type Query {
 
 extend type Mutation {
     createDetailPembayaranPasien(
-        input: CreateDetailPembayaranPasienInput! @spread
+        input: CreateDetailPembayaranPasienInput!
     ): DetailPembayaranPasien
         @field(
             resolver: "App\\GraphQL\\DetailPembayaranPasien\\Mutations\\DetailPembayaranPasienMutation@create"
