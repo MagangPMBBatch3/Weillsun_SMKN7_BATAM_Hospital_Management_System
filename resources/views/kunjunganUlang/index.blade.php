@@ -204,9 +204,8 @@
                                     class="border p-2 w-full rounded" required />
 
                                 <x-input-label>New Time</x-input-label>
-                                <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded"
-                                    required />
-                                <p id="jam-info-edit" class="text-red-600 text-sm"></p>
+                                <x-text-input id="edit-jam_ulang" type="time" class="border p-2 w-full rounded"required />
+                                    <p id="jam-info-edit" class="text-red-600 text-sm"></p>
 
                                 <x-input-label>Status</x-input-label>
                                 <select name="status" id="edit-status" class="border p-2 w-full rounded" required>

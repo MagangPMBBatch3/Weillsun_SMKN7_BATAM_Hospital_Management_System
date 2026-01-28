@@ -60,8 +60,18 @@ class KunjunganUlang extends Model
 
         // Check if jam_ulang is within the doctor's schedule
         $jamUlang = $model->jam_ulang;
-        if ($jamUlang < $jadwal->jam_mulai || $jamUlang > $jadwal->jam_selesai) {
-            throw new \Exception("Follow-up time must be between {$jadwal->jam_mulai} and {$jadwal->jam_selesai}");
+        $jamMulai = $jadwal->jam_mulai;
+        $jamSelesai = $jadwal->jam_selesai;
+        
+        if ($jamMulai <= $jamSelesai) {
+           
+            if ($jamUlang < $jamMulai || $jamUlang > $jamSelesai) {
+                throw new \Exception("Follow-up time must be between {$jamMulai} and {$jamSelesai}");
+            }
+        } else {
+            if ($jamUlang < $jamMulai && $jamUlang > $jamSelesai) {
+                throw new \Exception("Follow-up time must be between {$jamMulai} and {$jamSelesai} (overnight shift)");
+            }
         }
     }
 

@@ -195,25 +195,35 @@
                             <input type="hidden" id="create-kunjungan-id" />
                             <input type="hidden" id="create-poli-ulang-id" name="poli_id"/>
 
-                            <x-input-label>Doctor Name</x-input-label>
+                            <div>
+                                <x-input-label>Doctor Name</x-input-label>
                                 <select name="tenaga_medis_id" id="create-tenaga_medis_id"
-                                    class="border p-2 w-full rounded">
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    required>
                                     <option value="" disabled selected>Select Doctor</option>
                                     @foreach ($dokters as $tm)
                                         <option value="{{ $tm->id }}">{{ $tm->profile->nickname }}</option>
                                     @endforeach
                                 </select>
+                            </div>
 
-                            <x-input-label>Date</x-input-label>
-                            <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" />
+                            <div>
+                                <x-input-label>Date</x-input-label>
+                                <x-text-input id="create-tanggal_ulang" type="date" class="border p-2 w-full rounded" required />
+                            </div>
 
-                            <x-input-label>Time</x-input-label>
-                            <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" />
+                            <div>
+                                <x-input-label>Time</x-input-label>
+                                <x-text-input id="create-jam_ulang" type="time" class="border p-2 w-full rounded" disabled required />
+                                <!-- Info jadwal dokter akan ditambahkan di sini oleh JavaScript -->
+                            </div>
 
-                            <x-input-label>Note</x-input-label>
-                            <textarea id="create-catatan" placeholder="Enter Note..."
-                                class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                required></textarea>
+                            <div>
+                                <x-input-label>Note</x-input-label>
+                                <textarea id="create-catatan" placeholder="Enter Note..."
+                                    class="border p-2 mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    required></textarea>
+                            </div>
 
                         </div>
 

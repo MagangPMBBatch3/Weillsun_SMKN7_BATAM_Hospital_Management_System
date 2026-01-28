@@ -198,7 +198,7 @@
 
                             <x-input-label>New Amount</x-input-label>
                             <x-text-input id="edit-jumlah" type="text" placeholder="Enter Amount..."
-                                class="border p-2 w-full rounded" />
+                                class="border p-2 w-full rounded" />  
 
                             <x-input-label>New Unit Price</x-input-label>
                             <x-text-input id="edit-harga-satuan" type="text" placeholder="Enter Unit Price..."

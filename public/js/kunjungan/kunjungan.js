@@ -6,7 +6,7 @@ function showLoading() {
     document.body.style.overflow = "hidden";
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) overlay.classList.remove("hidden");
-}k
+}
 
 function hideLoading() {
     document.body.style.overflow = "";
@@ -37,6 +37,123 @@ function searchKunjungan() {
         loadDataPaginate(1, true);
         loadDataPaginate(1, false);
     }, 500);
+}
+
+// ============================================
+// Event Listener untuk Validasi Jadwal Dokter
+// ============================================
+document.addEventListener("change", function (e) {
+    // Handle change pada tenaga_medis_id & tanggal_ulang untuk modal kunjungan ulang
+    if (
+        e.target.id === "create-tenaga_medis_id" ||
+        e.target.id === "create-tanggal_ulang"
+    ) {
+        loadAvailableJamForKunjunganUlang();
+    }
+});
+
+// ============================================
+// Fungsi untuk load jam tersedia berdasarkan jadwal dokter
+// ============================================
+async function loadAvailableJamForKunjunganUlang() {
+    const tenagaMedisId = document.getElementById("create-tenaga_medis_id")?.value;
+    const tanggalUlang = document.getElementById("create-tanggal_ulang")?.value;
+
+    if (!tenagaMedisId || !tanggalUlang) {
+        document.getElementById("create-jam_ulang").disabled = true;
+        
+        // Tambahkan info text jika belum ada
+        let jamInfo = document.getElementById("jam-info-create-kunjungan");
+        if (!jamInfo) {
+            jamInfo = document.createElement("p");
+            jamInfo.id = "jam-info-create-kunjungan";
+            jamInfo.className = "text-red-600 text-sm mt-1";
+            document.getElementById("create-jam_ulang").parentNode.appendChild(jamInfo);
+        }
+        jamInfo.textContent = "*Select doctor and date first!";
+        jamInfo.classList.remove("text-green-600");
+        jamInfo.classList.add("text-red-600");
+        return;
+    }
+
+    // Get day of week from date (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const date = new Date(tanggalUlang + "T00:00:00");
+    let hari = date.getDay(); // 0-6
+    // Convert to 1-7 (Monday = 1, Sunday = 7)
+    hari = hari === 0 ? 7 : hari;
+
+    showLoading();
+
+    const query = `
+        query($tenaga_medis_id: ID!, $hari: Int!) {
+            getJadwalByTenagaMedisAndHari(
+                tenaga_medis_id: $tenaga_medis_id
+                hari: $hari
+            ) {
+                id
+                jam_mulai
+                jam_selesai
+                hari
+            }
+        }
+    `;
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query,
+                variables: { tenaga_medis_id: tenagaMedisId, hari },
+            }),
+        });
+
+        const result = await res.json();
+        
+        // Better error handling
+        if (result.errors) {
+            throw new Error(result.errors[0].message);
+        }
+        
+        const jadwalData = result?.data?.getJadwalByTenagaMedisAndHari || [];
+
+        const jamInput = document.getElementById("create-jam_ulang");
+        
+        // Tambahkan info text jika belum ada
+        let jamInfo = document.getElementById("jam-info-create-kunjungan");
+        if (!jamInfo) {
+            jamInfo = document.createElement("p");
+            jamInfo.id = "jam-info-create-kunjungan";
+            jamInfo.className = "text-sm mt-1";
+            jamInput.parentNode.appendChild(jamInfo);
+        }
+
+        if (jadwalData.length > 0) {
+            const jadwal = jadwalData[0];
+            jamInput.disabled = false;
+            jamInput.setAttribute("min", jadwal.jam_mulai);
+            jamInput.setAttribute("max", jadwal.jam_selesai);
+            jamInfo.textContent = `Doctor schedule: ${jadwal.jam_mulai} - ${jadwal.jam_selesai}`;
+            jamInfo.classList.remove("text-red-600");
+            jamInfo.classList.add("text-green-600");
+        } else {
+            jamInput.disabled = true;
+            jamInput.value = ""; // Clear the input
+            jamInfo.textContent = "*Doctor has no schedule on this day!";
+            jamInfo.classList.remove("text-green-600");
+            jamInfo.classList.add("text-red-600");
+        }
+    } catch (error) {
+        console.error("Error loading jadwal:", error);
+        const jamInfo = document.getElementById("jam-info-create-kunjungan");
+        if (jamInfo) {
+            jamInfo.textContent = `Error: ${error.message || "Failed to load schedule"}`;
+            jamInfo.classList.remove("text-green-600");
+            jamInfo.classList.add("text-red-600");
+        }
+    } finally {
+        hideLoading();
+    }
 }
 
 // Load data User (Aktif & Arsip sekaligus)
@@ -265,6 +382,19 @@ async function createKunjungan() {
 function openKunjunganUlangModal(kunjunganId, poliId) {
     document.getElementById("create-kunjungan-id").value = kunjunganId;
     document.getElementById("create-poli-ulang-id").value = poliId;
+    
+    // Reset form fields
+    document.getElementById("create-tenaga_medis_id").value = "";
+    document.getElementById("create-tanggal_ulang").value = "";
+    document.getElementById("create-jam_ulang").value = "";
+    document.getElementById("create-jam_ulang").disabled = true;
+    document.getElementById("create-catatan").value = "";
+    
+    // Remove info text if exists
+    const jamInfo = document.getElementById("jam-info-create-kunjungan");
+    if (jamInfo) {
+        jamInfo.remove();
+    }
 
     window.dispatchEvent(
         new CustomEvent("open-modal", { detail: "create-kunjunganUlang" })
@@ -294,6 +424,7 @@ async function createKunjunganUlang() {
                 tanggal_ulang
                 jam_ulang
                 catatan
+                status
             }
         }
     `;
@@ -305,7 +436,8 @@ async function createKunjunganUlang() {
             tenaga_medis_id,
             tanggal_ulang,
             jam_ulang,
-            catatan
+            catatan,
+            status: "scheduled" // Default status
         },
     };
 
@@ -326,9 +458,12 @@ async function createKunjunganUlang() {
                 new CustomEvent("close-modal", { detail: "create-kunjunganUlang" })
             );
             loadDataPaginate(currentPageActive, true);
+            alert("Return visit created successfully!");
         } else {
             console.error(result.errors);
-            alert("Failed to create return visit!");
+            // Show more specific error message
+            const errorMsg = result.errors?.[0]?.message || "Failed to create return visit!";
+            alert(errorMsg);
         }
     } catch (error) {
         console.error(error);
@@ -447,6 +582,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (value) e.target.value = formatNumber(value);
         else e.target.value = "";
     });
+    
+    // Set minimum date untuk tanggal_ulang
+    const createTanggalUlang = document.getElementById("create-tanggal_ulang");
+    if (createTanggalUlang) {
+        const today = new Date().toISOString().split('T')[0];
+        createTanggalUlang.setAttribute("min", today);
+    }
+    
+    // Set minimum date untuk tanggal_kunjungan
+    const createTanggalKunjungan = document.getElementById("create-tanggal-kunjungan");
+    if (createTanggalKunjungan) {
+        const today = new Date().toISOString().split('T')[0];
+        createTanggalKunjungan.setAttribute("min", today);
+    }
+    
+    const editTanggalKunjungan = document.getElementById("edit-tanggal-kunjungan");
+    if (editTanggalKunjungan) {
+        const today = new Date().toISOString().split('T')[0];
+        editTanggalKunjungan.setAttribute("min", today);
+    }
+    
+    loadDataPaginate(1, true);
 });
 
 function renderKunjunganTable(result, tableId, isActive) {
@@ -637,5 +794,3 @@ async function forceDeleteKunjungan(id) {
         hideLoading();
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => loadDataPaginate(1, true));
