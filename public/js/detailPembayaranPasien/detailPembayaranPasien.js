@@ -338,29 +338,86 @@ async function createDetailPembayaranPasien() {
     `;
 
     try {
-        const results = await Promise.all(
-            detailPasien.map((item) => {
-                // Tambahkan pembayaran_id ke setiap item
-                const input = {
-                    pembayaran_id,
-                    ...item,
-                };
+        // Helper function untuk retry dengan exponential backoff
+        const fetchWithRetry = async (url, options, maxRetries = 3) => {
+            let lastError;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    const data = await response.json();
 
-                // Buat variablesDetailPembayaranPasien untuk setiap item
-                const variablesDetailPembayaranPasien = {
-                    input: input,
-                };
+                    // Jika ada deadlock error, retry
+                    if (
+                        data.errors &&
+                        data.errors[0]?.extensions?.debugMessage?.includes(
+                            "Deadlock",
+                        )
+                    ) {
+                        lastError = data;
+                        const waitTime = Math.pow(2, attempt) * 100; // Exponential backoff: 100ms, 200ms, 400ms
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, waitTime),
+                        );
+                        continue;
+                    }
 
-                return fetch(API_URL, {
+                    return data;
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < maxRetries - 1) {
+                        const waitTime = Math.pow(2, attempt) * 100;
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, waitTime),
+                        );
+                    }
+                }
+            }
+            throw lastError;
+        };
+
+        // Process mutations secara sequential dengan delay untuk mengurangi lock contention
+        const results = [];
+        for (let i = 0; i < detailPasien.length; i++) {
+            const item = detailPasien[i];
+
+            // Tambahkan pembayaran_id ke setiap item
+            const input = {
+                pembayaran_id,
+                ...item,
+            };
+
+            // Buat variablesDetailPembayaranPasien untuk setiap item
+            const variablesDetailPembayaranPasien = {
+                input: input,
+            };
+
+            try {
+                const result = await fetchWithRetry(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         query: mutationDetailPembayaranPasien,
                         variables: variablesDetailPembayaranPasien,
                     }),
-                }).then((res) => res.json());
-            }),
-        );
+                });
+                results.push(result);
+            } catch (error) {
+                console.error(`Failed to create item ${i + 1}:`, error);
+                results.push({
+                    errors: [
+                        {
+                            message: `Failed after retries: ${error.message || "Unknown error"}`,
+                        },
+                    ],
+                    data: { createDetailPembayaranPasien: null },
+                });
+            }
+
+            // Jika bukan item terakhir, tunggu sedikit sebelum mengirim request berikutnya
+            if (i < detailPasien.length - 1) {
+                await new Promise((resolve) => setTimeout(resolve, 50));
+            }
+        }
 
         // Cek apakah ada error
         const errors = results.filter((r) => r.errors && r.errors.length > 0);

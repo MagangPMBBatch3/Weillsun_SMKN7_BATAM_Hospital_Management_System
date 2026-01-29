@@ -2,6 +2,10 @@ const API_URL = "/graphql";
 let currentPageActive = 1;
 let currentPageArchive = 1;
 
+// ============================================================================
+// LOADING FUNCTIONS
+// ============================================================================
+
 function showLoading() {
     document.body.style.overflow = "hidden";
     const overlay = document.getElementById("loadingOverlay");
@@ -14,9 +18,14 @@ function hideLoading() {
     if (overlay) overlay.classList.add("hidden");
 }
 
+// ============================================================================
+// PAGINATION FUNCTIONS
+// ============================================================================
+
 function prevPage() {
     if (currentPageActive > 1) loadDataPaginate(currentPageActive - 1, true);
 }
+
 function nextPage() {
     loadDataPaginate(currentPageActive + 1, true);
 }
@@ -24,12 +33,17 @@ function nextPage() {
 function prevPageArchive() {
     if (currentPageArchive > 1) loadDataPaginate(currentPageArchive - 1, false);
 }
+
 function nextPageArchive() {
     loadDataPaginate(currentPageArchive + 1, false);
 }
 
-// ----------------------------------------------------------------------------------- \\
+// ============================================================================
+// SEARCH FUNCTION
+// ============================================================================
+
 let searchTimeout = null;
+
 function searchResepObat() {
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -38,7 +52,69 @@ function searchResepObat() {
     }, 500);
 }
 
-// Load data (Aktif & Arsip sekaligus)
+// ============================================================================
+// NUMBER FORMATTING FUNCTIONS
+// ============================================================================
+
+function formatNumber(value) {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function unformatNumber(value) {
+    return value.replace(/\./g, "");
+}
+
+function filterAngka(str) {
+    return str.replace(/[^0-9.]/g, "");
+}
+
+// ============================================================================
+// STOCK HELPER FUNCTION
+// ============================================================================
+
+function getSelectedStok(selectEl) {
+    if (!selectEl) return 0;
+    const option = selectEl.options[selectEl.selectedIndex];
+    return parseInt(option?.dataset?.stok || 0);
+}
+
+// ============================================================================
+// OBAT OPTIONS UPDATE
+// ============================================================================
+
+function updateObatOptions() {
+    const selects = document.querySelectorAll('#dynamic-container select[name="create-nama-obat[]"]');
+    const selectedValues = Array.from(selects)
+        .map((s) => s.value)
+        .filter((v) => v !== "");
+
+    selects.forEach((select) => {
+        const currentValue = select.value;
+
+        Array.from(select.options).forEach((option) => {
+            if (!option.value) return;
+
+            if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                option.disabled = true;
+                option.hidden = true;
+            } else {
+                option.disabled = false;
+                option.hidden = false;
+            }
+        });
+    });
+}
+
+document.addEventListener("change", (e) => {
+    if (e.target.name === "create-nama-obat[]") {
+        updateObatOptions();
+    }
+});
+
+// ============================================================================
+// LOAD DATA FUNCTION
+// ============================================================================
+
 async function loadDataPaginate(page = 1, isActive = true) {
     showLoading();
 
@@ -54,50 +130,48 @@ async function loadDataPaginate(page = 1, isActive = true) {
     const searchValue = document.getElementById("search")?.value.trim() || "";
 
     try {
-        // --- Query data Aktif ---
+        // Query for Active Data
         const queryActive = `
             query($first: Int, $page: Int, $search: String) {
                 allResepObatPaginate(first: $first, page: $page, search: $search){
                     data { 
+                        id
+                        pasien_id
+                        tenaga_medis_id
+                        obat_id
+                        jumlah
+                        aturan_pakai
+                        pasien {
                             id
-                            pasien_id
-                            tenaga_medis_id
-                            obat_id
-                            jumlah
-                            aturan_pakai
-                            pasien {
-                                id
-                                nama
-                            }
-                            obat {
-                                id
-                                nama_obat
-                            }
-                            tenagaMedis {
-                                id
-                                profile {
-                                    nickname
-                                }
+                            nama
+                        }
+                        obat {
+                            id
+                            nama_obat
+                        }
+                        tenagaMedis {
+                            id
+                            profile {
+                                nickname
                             }
                         }
-                            paginatorInfo { 
-                                currentPage 
-                                lastPage 
-                                total 
-                                hasMorePages 
-                        }
+                    }
+                    paginatorInfo { 
+                        currentPage 
+                        lastPage 
+                        total 
+                        hasMorePages 
+                    }
                 }
             }
         `;
+
         const variablesActive = {
-            first: parseInt(
-                isActive
-                    ? perPage
-                    : document.getElementById("perPage")?.value || 5
-            ),
+            first: parseInt(isActive ? perPage : document.getElementById("perPage")?.value || 5),
             page: currentPageActive,
             search: searchValue,
         };
+
         const resActive = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -106,6 +180,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                 variables: variablesActive,
             }),
         });
+
         const dataActive = await resActive.json();
         renderResepObatTable(
             dataActive?.data?.allResepObatPaginate || {},
@@ -113,45 +188,43 @@ async function loadDataPaginate(page = 1, isActive = true) {
             true
         );
 
-        // --- Query data Arsip ---
+        // Query for Archive Data
         const queryArchive = `
             query($first: Int, $page: Int, $search: String) {
                 allResepObatArchive(first: $first, page: $page, search: $search){
                     data { 
+                        id
+                        pasien_id
+                        tenaga_medis_id
+                        obat_id
+                        jumlah
+                        aturan_pakai
+                        pasien {
                             id
-                            pasien_id
-                            tenaga_medis_id
-                            obat_id
-                            jumlah
-                            aturan_pakai
-                            pasien {
-                                id
-                                nama
-                            }
-                            obat {
-                                id
-                                nama_obat
-                            }
-                            tenagaMedis {
-                                id
-                                profile {
-                                    nickname
-                                }
+                            nama
+                        }
+                        obat {
+                            id
+                            nama_obat
+                        }
+                        tenagaMedis {
+                            id
+                            profile {
+                                nickname
                             }
                         }
+                    }
                     paginatorInfo { currentPage lastPage total hasMorePages }
                 }
             }
         `;
+
         const variablesArchive = {
-            first: parseInt(
-                !isActive
-                    ? perPage
-                    : document.getElementById("perPageArchive")?.value || 5
-            ),
+            first: parseInt(!isActive ? perPage : document.getElementById("perPageArchive")?.value || 5),
             page: currentPageArchive,
             search: searchValue,
         };
+
         const resArchive = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -160,6 +233,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
                 variables: variablesArchive,
             }),
         });
+
         const dataArchive = await resArchive.json();
         renderResepObatTable(
             dataArchive?.data?.allResepObatArchive || {},
@@ -174,66 +248,10 @@ async function loadDataPaginate(page = 1, isActive = true) {
     }
 }
 
-// Format dan unformat number
+// ============================================================================
+// CREATE FUNCTION
+// ============================================================================
 
-function formatNumber(value) {
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
-function unformatNumber(value) {
-    return value.replace(/\./g, "");
-}
-
-function filterAngka(str) {
-    // hapus semua karakter selain angka dan titik
-    return str.replace(/[^0-9.]/g, "");
-}
-
-function getSelectedStok(selectEl) {
-    if (!selectEl) return 0;
-    const option = selectEl.options[selectEl.selectedIndex];
-    return parseInt(option?.dataset?.stok || 0);
-}
-
-function updateObatOptions() {
-    const selects = document.querySelectorAll(
-        '#dynamic-container select[name="create-nama-obat[]"]'
-    );
-
-    // Ambil semua obat yang sedang dipilih
-    const selectedValues = Array.from(selects)
-        .map((s) => s.value)
-        .filter((v) => v !== "");
-
-    selects.forEach((select) => {
-        const currentValue = select.value;
-
-        Array.from(select.options).forEach((option) => {
-            if (!option.value) return;
-
-            // Disable jika dipilih di select lain
-            if (
-                selectedValues.includes(option.value) &&
-                option.value !== currentValue
-            ) {
-                option.disabled = true;
-                option.hidden = true; // optional (lebih rapi)
-            } else {
-                option.disabled = false;
-                option.hidden = false;
-            }
-        });
-    });
-}
-
-document.addEventListener("change", (e) => {
-    if (e.target.name === "create-nama-obat[]") {
-        updateObatOptions();
-    }
-});
-
-
-// Create
 async function createResepObat() {
     const tenaga_medis_id = document.getElementById("create-nickname").value;
     const pasien_id = document.getElementById("create-nama").value;
@@ -243,17 +261,12 @@ async function createResepObat() {
     }
 
     const rows = document.querySelectorAll("#dynamic-container .dynamic-row");
-
     const prescriptions = [];
 
     for (const row of rows) {
-        const selectObat = row.querySelector(
-            'select[name="create-nama-obat[]"]'
-        );
+        const selectObat = row.querySelector('select[name="create-nama-obat[]"]');
         const inputJumlah = row.querySelector('input[name="create-jumlah[]"]');
-        const aturan = row
-            .querySelector('textarea[name="create-aturan-pakai[]"]')
-            .value.trim();
+        const aturan = row.querySelector('textarea[name="create-aturan-pakai[]"]').value.trim();
 
         const obat_id = selectObat.value;
         const stok = getSelectedStok(selectObat);
@@ -264,7 +277,7 @@ async function createResepObat() {
         if (jumlah > stok) {
             alert(`Jumlah melebihi stok tersedia (${stok})`);
             inputJumlah.focus();
-            return; // STOP submit
+            return;
         }
 
         prescriptions.push({
@@ -291,7 +304,7 @@ async function createResepObat() {
                 aturan_pakai
                 pasien {
                     id
-                     nama
+                    nama
                 }
                 obat {
                     id
@@ -306,19 +319,10 @@ async function createResepObat() {
             }
         }
     `;
-    // const variablesResepObat = {
-    //     input: {
-    //         pasien_id,
-    //         tenaga_medis_id,
-    //         obat_id,
-    //         jumlah:parseInt(jumlah),
-    //         aturan_pakai},
-    // };
 
     try {
         const results = await Promise.all(
             prescriptions.map((item) => {
-                // Buat variablesResepObat untuk setiap item
                 const variablesResepObat = {
                     input: {
                         pasien_id,
@@ -340,21 +344,17 @@ async function createResepObat() {
             })
         );
 
-        // Cek apakah ada error
         const errors = results.filter((r) => r.errors);
         if (errors.length > 0) {
             console.error("Some mutations failed:", errors);
             alert(
-                `${prescriptions.length - errors.length} of ${
-                    prescriptions.length
-                } prescriptions created`
+                `${prescriptions.length - errors.length} of ${prescriptions.length} prescriptions created`
             );
         }
 
         window.dispatchEvent(
             new CustomEvent("close-modal", { detail: "create-resepObat" })
         );
-        // resetCreateForm();
         loadDataPaginate(currentPageActive, true);
     } catch (error) {
         console.error("Error:", error);
@@ -364,14 +364,11 @@ async function createResepObat() {
     }
 }
 
-function openEditModal(
-    id,
-    pasien_id,
-    tenaga_medis_id,
-    obat_id,
-    jumlah,
-    aturan_pakai
-) {
+// ============================================================================
+// EDIT FUNCTIONS
+// ============================================================================
+
+function openEditModal(id, pasien_id, tenaga_medis_id, obat_id, jumlah, aturan_pakai) {
     document.getElementById("edit-id").value = id;
     document.getElementById("edit-nama").value = pasien_id;
     document.getElementById("edit-nickname").value = tenaga_medis_id;
@@ -384,19 +381,14 @@ function openEditModal(
     );
 }
 
-// Update
 async function updateResepObat() {
     const id = document.getElementById("edit-id").value;
-
     const tenaga_medis_id = document.getElementById("edit-nickname").value;
     const pasien_id = document.getElementById("edit-nama").value;
     const obat_id = document.getElementById("edit-nama-obat").value;
-    const jumlah = document
-        .getElementById("edit-jumlah")
-        .value.replace(/\./g, "");
-    const aturan_pakai = document
-        .getElementById("edit-aturan-pakai")
-        .value.trim();
+    const jumlah = document.getElementById("edit-jumlah").value.replace(/\./g, "");
+    const aturan_pakai = document.getElementById("edit-aturan-pakai").value.trim();
+
     showLoading();
 
     const selectObat = document.getElementById("edit-nama-obat");
@@ -466,35 +458,41 @@ async function updateResepObat() {
     }
 }
 
+// ============================================================================
+// INPUT FORMATTING EVENT LISTENERS
+// ============================================================================
+
 document.addEventListener("DOMContentLoaded", () => {
     const editJumlahInput = document.getElementById("edit-jumlah");
-
-    // Event delegation untuk semua input jumlah di dynamic-container
     const dynamicContainer = document.getElementById("dynamic-container");
 
+    // Event delegation for dynamic inputs
     dynamicContainer.addEventListener("input", (e) => {
-    if (e.target.name === "create-jumlah[]") {
-        let value = unformatNumber(filterAngka(e.target.value));
-        e.target.value = value ? formatNumber(value) : "";
+        if (e.target.name === "create-jumlah[]") {
+            let value = unformatNumber(filterAngka(e.target.value));
+            e.target.value = value ? formatNumber(value) : "";
 
-        const row = e.target.closest(".dynamic-row");
-        const selectObat = row.querySelector('select[name="create-nama-obat[]"]');
-        const stok = getSelectedStok(selectObat);
+            const row = e.target.closest(".dynamic-row");
+            const selectObat = row.querySelector('select[name="create-nama-obat[]"]');
+            const stok = getSelectedStok(selectObat);
 
-        if (parseInt(value || 0) > stok) {
-            alert(`Stok maksimal: ${stok}`);
-            e.target.value = formatNumber(stok);
+            if (parseInt(value || 0) > stok) {
+                alert(`Stok maksimal: ${stok}`);
+                e.target.value = formatNumber(stok);
+            }
         }
-    }
-});
-;
+    });
 
-    // Untuk edit modal (tetap pakai cara lama karena hanya 1 input)
+    // For edit modal input
     editJumlahInput.addEventListener("input", (e) => {
         let value = unformatNumber(filterAngka(e.target.value));
         e.target.value = value ? formatNumber(value) : "";
     });
 });
+
+// ============================================================================
+// RENDER TABLE FUNCTION
+// ============================================================================
 
 function renderResepObatTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
@@ -506,30 +504,16 @@ function renderResepObatTable(result, tableId, isActive) {
     if (!items.length) {
         tbody.innerHTML = `
             <tr class="text-center">
-                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="5">No data available.</td>
+                <td class="px-6 py-4 font-semibold text-lg italic text-red-500 capitalize" colspan="4">
+                    No data available.
+                </td>
             </tr>
         `;
-        const pageInfoEl = isActive
-            ? document.getElementById("pageInfo")
-            : document.getElementById("pageInfoArchive");
-        const prevBtn = isActive
-            ? document.getElementById("prevBtn")
-            : document.getElementById("prevBtnArchive");
-        const nextBtn = isActive
-            ? document.getElementById("nextBtn")
-            : document.getElementById("nextBtnArchive");
-
-        if (pageInfoEl) {
-            pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
-                pageInfo.lastPage || 1
-            } (Total: 0)`;
-        }
-        if (prevBtn) prevBtn.disabled = true;
-        if (nextBtn) nextBtn.disabled = true;
+        updatePaginationInfo(isActive, pageInfo, true);
         return;
     }
 
-    // Kelompokkan data berdasarkan pasien_id dan tenaga_medis_id
+    // Group data by patient and medical staff
     const grouped = items.reduce((acc, item) => {
         const key = `${item.pasien_id}-${item.tenaga_medis_id}`;
 
@@ -555,21 +539,20 @@ function renderResepObatTable(result, tableId, isActive) {
     }, {});
 
     const baseBtn = `
-        inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold
-        transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
+        inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold
+        transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 
+        focus:ring-offset-1 active:scale-95
     `;
 
     // Render grouped data
     Object.values(grouped).forEach((group) => {
-        // Render obat list dengan actions per baris obat
-        const obatRows = group.obats
-            .map((obat) => {
-                let obatActions = "";
+        const obatRows = group.obats.map((obat) => {
+            let obatActions = "";
 
-                if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
-                    if (isActive) {
-                        obatActions = `
-                        <div class="flex gap-1 flex-wrap">
+            if (window.currentUserRole === "admin" || window.currentUserRole === "doctor") {
+                if (isActive) {
+                    obatActions = `
+                        <div class="flex gap-2 flex-wrap justify-end">
                             <button onclick="openEditModal(${obat.id}, '${group.pasien.id}', '${group.tenagaMedis.id}', '${obat.obat_id}', '${obat.jumlah}', '${obat.aturan_pakai}')"
                                 class="${baseBtn} bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-indigo-300">
                                 <i class='bx bx-edit-alt'></i> Edit
@@ -580,9 +563,9 @@ function renderResepObatTable(result, tableId, isActive) {
                             </button>
                         </div>
                     `;
-                    } else {
-                        obatActions = `
-                        <div class="flex gap-1 flex-wrap">
+                } else {
+                    obatActions = `
+                        <div class="flex gap-2 flex-wrap justify-end">
                             <button onclick="restoreResepObat(${obat.id})"
                                 class="${baseBtn} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 focus:ring-emerald-300">
                                 <i class='bx bx-refresh'></i> Restore
@@ -593,54 +576,62 @@ function renderResepObatTable(result, tableId, isActive) {
                             </button>
                         </div>
                     `;
-                    }
                 }
+            }
 
-                return `
-                <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 py-2 last:border-b-0">
-                    <div class="flex-1 text-center">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400">${
-                            obat.nama_obat
-                        }</span>
-                        <span class="text-sm ml-2">Jumlah: <strong>${obat.jumlah.toLocaleString(
-                            "id-ID"
-                        )}</strong></span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-2">| ${
-                            obat.aturan_pakai
-                        }</span>
+            return `
+                <div class="flex items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-600 
+                            py-3 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 px-2 rounded transition-colors">
+                    <div class="flex-1">
+                        <div class="font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                            ${obat.nama_obat}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-medium">Qty:</span> 
+                            <span class="font-bold text-gray-800 dark:text-gray-200">${obat.jumlah.toLocaleString("id-ID")}</span>
+                            <span class="mx-2">•</span>
+                            <span class="italic">${obat.aturan_pakai}</span>
+                        </div>
                     </div>
                     ${window.currentUserRole === "admin" || window.currentUserRole === "doctor" ? obatActions : ""}
                 </div>
             `;
-            })
-            .join("");
+        }).join("");
 
         tbody.innerHTML += `
-            <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800/50 dark:even:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600/50 align-top">
+            <tr class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700/50 
+                       hover:bg-blue-50 dark:hover:bg-gray-600/50 transition-colors">
                 <td class="p-4 text-center font-semibold align-middle">
-                    <div class="flex flex-col gap-1 items-center">
-                        ${group.ids
-                            .map(
-                                (id) =>
-                                    `<span class="rounded-full font-bold text-green-500 py-1 px-2 ">${id}</span>`
-                            )
-                            .join("")}
+                    <div class="flex flex-col gap-1.5 items-center">
+                        ${group.ids.map(id => 
+                            `<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 
+                                         font-bold py-1 px-3 rounded-full text-sm">${id}</span>`
+                        ).join("")}
                     </div>
                 </td>
-                <td class="p-4 text-center text-base border-x font-semibold align-middle">${
-                    group.pasien?.nama
-                }</td>
-                <td class="p-4 text-center text-base border-x font-semibold align-middle">${
-                    group.tenagaMedis?.profile?.nickname
-                }</td>
+                <td class="p-4 text-center border-x border-gray-200 dark:border-gray-600 align-middle">
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">${group.pasien?.nama}</span>
+                </td>
+                <td class="p-4 text-center border-x border-gray-200 dark:border-gray-600 align-middle">
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">${group.tenagaMedis?.profile?.nickname}</span>
+                </td>
                 <td class="p-4">
-                    ${obatRows}
+                    <div class="space-y-0">
+                        ${obatRows}
+                    </div>
                 </td>
             </tr>
         `;
     });
 
-    // Update pagination info
+    updatePaginationInfo(isActive, pageInfo, false);
+}
+
+// ============================================================================
+// UPDATE PAGINATION INFO
+// ============================================================================
+
+function updatePaginationInfo(isActive, pageInfo, isEmpty) {
     const pageInfoEl = isActive
         ? document.getElementById("pageInfo")
         : document.getElementById("pageInfoArchive");
@@ -651,20 +642,25 @@ function renderResepObatTable(result, tableId, isActive) {
         ? document.getElementById("nextBtn")
         : document.getElementById("nextBtnArchive");
 
-    if (pageInfoEl)
+    if (pageInfoEl) {
         pageInfoEl.innerText = `Halaman ${pageInfo.currentPage || 1} dari ${
             pageInfo.lastPage || 1
-        } (Total: ${pageInfo.total || 0})`;
+        } (Total: ${isEmpty ? 0 : pageInfo.total || 0})`;
+    }
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
 
-// Hapus
+// ============================================================================
+// DELETE FUNCTIONS
+// ============================================================================
+
 async function hapusResepObat(id) {
-    if (!confirm("Are you sure you want to add to the archive??")) return;
+    if (!confirm("Are you sure you want to add to the archive?")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ deleteResepObat(id: $id){ id } }`;
+    
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -679,12 +675,12 @@ async function hapusResepObat(id) {
     }
 }
 
-// restore
 async function restoreResepObat(id) {
     if (!confirm("Are you sure you want to restore this data?")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ restoreResepObat(id: $id){ id } }`;
+    
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -699,12 +695,12 @@ async function restoreResepObat(id) {
     }
 }
 
-// force delete
 async function forceDeleteResepObat(id) {
-    if (!confirm("Are you sure you want to delete this data??")) return;
+    if (!confirm("Are you sure you want to delete this data permanently?")) return;
 
     showLoading();
     const mutation = `mutation($id: ID!){ forceDeleteResepObat(id: $id){ id } }`;
+    
     try {
         await fetch(API_URL, {
             method: "POST",
@@ -718,5 +714,9 @@ async function forceDeleteResepObat(id) {
         hideLoading();
     }
 }
+
+// ============================================================================
+// INITIALIZE ON PAGE LOAD
+// ============================================================================
 
 document.addEventListener("DOMContentLoaded", () => loadDataPaginate(1, true));
