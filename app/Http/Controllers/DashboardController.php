@@ -195,7 +195,7 @@ class DashboardController extends Controller
             'no_str' => $doctor->no_str ?? 'N/A',
             'photo' => $doctor->profile->foto
                 ? asset('storage/' . $doctor->profile->foto)
-                : asset('images/default-avatar.png'),
+                : asset('default_pp.jpg'),
         ];
 
         // ================== SCHEDULE INFO ==================
