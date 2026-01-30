@@ -4,56 +4,111 @@
     }
 </style>
 
-<nav x-data="{ sidebarOpen: true, expandedMenu: null }"
-    class="fixed flex flex-col no-scrollbar left-0 top-0 overflow-y-auto h-screen w-64 bg-gradient-to-b from-blue-600 to-blue-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl z-50">
-    <!-- Logo Section -->
-    <div class="sticky top-0 bg-white p-4 flex items-center gap-3 border-b-[10px] border-blue-600 border-dashed">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
-            <div
-                class="w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors duration-200">
-                <img src="{{ asset('MedicaHub-Logo.png') }}" alt="">
+<nav x-data="{
+    sidebarOpen: window.innerWidth >= 768,
+    isMobile: window.innerWidth < 768,
+    init() {
+        this.updateView();
+        window.addEventListener('resize', () => {
+            this.updateView();
+        });
+        // Store reference globally for overlay access
+        window.sidebarState = this;
+    },
+    updateView() {
+        this.isMobile = window.innerWidth < 768;
+        if (this.isMobile) {
+            this.sidebarOpen = false;
+        }
+    }
+}" :class="sidebarOpen ? 'w-64' : ' w-20'"
+    class="fixed flex flex-col no-scrollbar overflow-x-hidden left-0 top-0 overflow-y-auto h-screen bg-gradient-to-b from-blue-600 to-blue-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl z-50 transition-all duration-300">
+
+
+
+    <!-- Logo Section with Hamburger -->
+    <div
+        class="sticky top-0 bg-white p-4 border-b-[10px] border-blue-600 border-dashed flex items-center justify-between gap-2">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group min-w-0 flex-1">
+            <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                x-transition:enter-end="opacity-100 transform translate-x-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 transform translate-x-0"
+                x-transition:leave-end="opacity-0 transform -translate-x-2"
+                class="w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors duration-200 flex-shrink-0">
+                <img src="{{ asset('MedicaHub-Logo.png') }}" alt="MedicaHub" class="w-full h-full object-contain">
             </div>
-            <span
-                class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent font-bold text-lg sm:inline">MedicaHub</span>
+            <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                x-transition:enter-end="opacity-100 transform translate-x-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 transform translate-x-0"
+                x-transition:leave-end="opacity-0 transform -translate-x-2"
+                class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent font-bold text-lg whitespace-nowrap">
+                MedicaHub
+            </span>
         </a>
+
+        <!-- Hamburger Button -->
+        <button @click="sidebarOpen = !sidebarOpen"
+            class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
     </div>
 
     <!-- Navigation Menu -->
-    <div class="p-4 space-y-2">
+    <div class="p-4 space-y-2 flex-1">
         <!-- Dashboard Link -->
-        <a href="{{ route('dashboard') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-white text-blue-600 shadow-md' : 'text-white hover:bg-blue-500 dark:hover:bg-gray-700' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-            </svg>
-            <span class="font-medium">Dashboard</span>
+        <a href="{{ route('dashboard') }}" :title="!sidebarOpen ? 'Dashboard' : ''"
+            class="flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group {{ request()->routeIs('dashboard') ? 'bg-white text-blue-600 shadow-md' : 'text-white hover:bg-blue-500 dark:hover:bg-gray-700' }}">
+            <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+            </div>
+            <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                Dashboard
+            </span>
         </a>
 
         <!-- Master Data Menu -->
         @if (auth()->user()->role !== 'cashier')
             <div x-data="{ open: {{ request()->routeIs('user.index', 'usersProfile.index', 'tenagaMedis.index', 'pasien.index', 'obat.index', 'poli.index', 'ruangan.index', 'supplier.index') ? 'true' : 'false' }} }">
-                <button @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 group">
-                    <div class="flex items-center gap-3">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
-                        </svg>
-
-                        <span class="font-medium">Master Data</span>
+                <button @click="if (!sidebarOpen) { sidebarOpen = true; open = true; } else { open = !open; }"
+                    :title="!sidebarOpen ? 'Master Data' : ''"
+                    class="w-full flex items-center justify-between p-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 group">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
+                            </svg>
+                        </div>
+                        <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                            Master Data
+                        </span>
                     </div>
-                    <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': open }"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform duration-300 flex-shrink-0"
+                        :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                     </svg>
                 </button>
 
-                <div x-show="open" x-transition
+                <div x-show="open && sidebarOpen" x-transition
                     class="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 dark:border-gray-600">
                     @if (auth()->user()->role === 'admin')
                         <a href="{{ route('user.index') }}"
@@ -117,24 +172,33 @@
         <!-- Medical Services Menu -->
         @if (auth()->user()->role !== 'cashier')
             <div x-data="{ open: {{ request()->routeIs('kunjungan.index', 'rawatInap.index', 'rekamMedis.index', 'resepObat.index', 'radiologi.index', 'labPemeriksaan.index') ? 'true' : 'false' }} }">
-                <button @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
-                    <div class="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        <span class="font-medium">Medical Services</span>
+                <button @click="if (!sidebarOpen) { sidebarOpen = true; open = true; } else { open = !open; }"
+                    :title="!sidebarOpen ? 'Medical Services' : ''"
+                    class="w-full flex items-center justify-between p-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                        </div>
+                        <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                            class="font-medium whitespace-nowrap">
+                            Medical Services
+                        </span>
                     </div>
-                    <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': open }"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform duration-300 flex-shrink-0"
+                        :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                     </svg>
                 </button>
 
-                <div x-show="open" x-transition
+                <div x-show="open && sidebarOpen" x-transition
                     class="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 dark:border-gray-600">
                     @if (auth()->user()->role === 'admin' || auth()->user()->role === 'receptionist' || auth()->user()->role === 'doctor')
                         <a href="{{ route('kunjungan.index') }}"
@@ -182,24 +246,33 @@
         <!-- Transaction Menu -->
         @if (auth()->user()->role === 'admin')
             <div x-data="{ open: {{ request()->routeIs('pembayaranPasien.index', 'detailPembayaranPasien.index', 'pembelianObat.index', 'detailPembelianObat.index', 'pembayaranSupplier.index') ? 'true' : 'false' }} }">
-                <button @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Transaction</span>
+                <button @click="if (!sidebarOpen) { sidebarOpen = true; open = true; } else { open = !open; }"
+                    :title="!sidebarOpen ? 'Transaction' : ''"
+                    class="w-full flex items-center justify-between p-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                            class="font-medium whitespace-nowrap">
+                            Transaction
+                        </span>
                     </div>
-                    <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': open }"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform duration-300 flex-shrink-0"
+                        :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                     </svg>
                 </button>
 
-                <div x-show="open" x-transition
+                <div x-show="open && sidebarOpen" x-transition
                     class="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 dark:border-gray-600">
                     <a href="{{ route('pembayaranPasien.index') }}"
                         class="flex items-center gap-3 px-4 py-2 rounded-r-lg text-sm transition-all duration-200 {{ request()->routeIs('pembayaranPasien.index') ? 'bg-white text-blue-600' : 'text-blue-100 hover:text-white hover:bg-blue-500 dark:text-gray-300 dark:hover:bg-gray-700' }}">
@@ -236,57 +309,90 @@
 
         <!-- Cashier Menu -->
         @if (auth()->user()->role === 'cashier')
-            <a href="{{ route('pembayaranPasien.index') }}"
-                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranPasien.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
-                <span>💳</span>
-                <span class="font-medium">Patient Payments</span>
+            <a href="{{ route('pembayaranPasien.index') }}" :title="!sidebarOpen ? 'Patient Payments' : ''"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranPasien.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
+                <span class="flex-shrink-0">💳</span>
+                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                    Patient Payments
+                </span>
             </a>
 
-            <a href="{{ route('detailPembayaranPasien.index') }}"
+            <a href="{{ route('detailPembayaranPasien.index') }}" :title="!sidebarOpen ? 'Payment Details' : ''"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembayaranPasien.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
-                <span>📑</span>
-                <span class="font-medium">Payment Details</span>
+                <span class="flex-shrink-0">📑</span>
+                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                    Payment Details
+                </span>
             </a>
 
-            <a href="{{ route('pembelianObat.index') }}"
+            <a href="{{ route('pembelianObat.index') }}" :title="!sidebarOpen ? 'Drug Purchases' : ''"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembelianObat.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
-                <span>🧾</span>
-                <span class="font-medium">Drug Purchases</span>
+                <span class="flex-shrink-0">🧾</span>
+                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                    Drug Purchases
+                </span>
             </a>
 
-            <a href="{{ route('detailPembelianObat.index') }}"
+            <a href="{{ route('detailPembelianObat.index') }}" :title="!sidebarOpen ? 'Purchase Details' : ''"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('detailPembelianObat.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
-                <span>📦</span>
-                <span class="font-medium">Purchase Details</span>
+                <span class="flex-shrink-0">📦</span>
+                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                    Purchase Details
+                </span>
             </a>
 
-            <a href="{{ route('pembayaranSupplier.index') }}"
+            <a href="{{ route('pembayaranSupplier.index') }}" :title="!sidebarOpen ? 'Supplier Payments' : ''"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200 {{ request()->routeIs('pembayaranSupplier.index') ? 'bg-white text-blue-600 hover:text-white' : 'text-white' }}">
-                <span>🏦</span>
-                <span class="font-medium">Supplier Payments</span>
+                <span class="flex-shrink-0">🏦</span>
+                <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                    Supplier Payments
+                </span>
             </a>
         @endif
 
         <!-- Schedule Menu -->
         <div x-data="{ open: {{ request()->routeIs('kunjunganUlang.index', 'jadwalTenagaMedis.index', 'liburTenagaMedis') ? 'true' : 'false' }} }">
-            <button @click="open = !open"
-                class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    <span class="font-medium">Schedule</span>
+            <button @click="if (!sidebarOpen) { sidebarOpen = true; open = true; } else { open = !open; }"
+                :title="!sidebarOpen ? 'Schedule' : ''"
+                class="w-full flex items-center justify-between p-3 rounded-lg text-white hover:bg-blue-500 dark:hover:bg-gray-700 transition-all duration-200">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0" class="font-medium whitespace-nowrap">
+                        Schedule
+                    </span>
                 </div>
-                <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': open }" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
+                <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform duration-300 flex-shrink-0"
+                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                 </svg>
             </button>
 
-            <div x-show="open" x-transition
+            <div x-show="open && sidebarOpen" x-transition
                 class="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 dark:border-gray-600">
                 @if (auth()->user()->role === 'admin' || auth()->user()->role === 'receptionist')
                     <a href="{{ route('kunjunganUlang.index') }}"
@@ -320,11 +426,11 @@
             <!-- Profile Info -->
             <div class="flex items-center gap-3 mb-3">
                 <!-- Avatar -->
-                <div class="relative">
+                <div class="relative flex-shrink-0">
                     <div
-                        class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-centershadow-lg ring-2 ring-white/50">
-                        <img class=" w-full h-full object-cover"
-                        src="{{ Auth::user()->profile?->foto ? asset('storage/' . Auth::user()->profile->foto) : asset('default_pp.jpg') }}">
+                        class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shadow-lg ring-2 ring-white/50">
+                        <img class="w-full h-full object-cover"
+                            src="{{ Auth::user()->profile?->foto ? asset('storage/' . Auth::user()->profile->foto) : asset('default_pp.jpg') }}">
                     </div>
                     <div
                         class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-blue-600 dark:border-gray-800 rounded-full">
@@ -332,13 +438,16 @@
                 </div>
 
                 <!-- User Info -->
-                <div class="flex-1 min-w-0">
+                <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0" class="flex-1 min-w-0">
                     <p class="text-white font-semibold text-sm truncate">{{ Auth::user()->name }}</p>
                     <p class="text-blue-100 dark:text-gray-400 text-xs truncate">{{ Auth::user()->email }}</p>
                 </div>
 
                 <!-- Settings Button -->
-                <button @click="profileOpen = !profileOpen"
+                <button @click="profileOpen = !profileOpen" :title="!sidebarOpen ? 'Settings' : ''"
                     class="flex-shrink-0 w-9 h-9 flex items-center justify-center text-white hover:bg-white/20 rounded-lg transition-all duration-200 hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
@@ -396,7 +505,20 @@
             </div>
         </div>
     </div>
-
 </nav>
 
-<div class="ml-64"></div>
+<!-- Spacer that adjusts based on sidebar state -->
+<div :class="sidebarOpen ? 'ml-64' : 'ml-20'" class="transition-all duration-300"></div>
+
+<!-- Mobile Overlay - Only covers content area to the right of sidebar -->
+<div x-data="{
+    get showOverlay() {
+        return window.sidebarState && window.sidebarState.sidebarOpen && window.sidebarState.isMobile;
+    }
+}" x-show="showOverlay"
+    @click="if (window.sidebarState) window.sidebarState.sidebarOpen = false"
+    x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100" x-transition:leave="ease-linear"
+    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+    class="fixed top-0 right-0 bottom-0 left-64 bg-black bg-opacity-50 z-40 md:hidden" style="display: none;">
+</div>

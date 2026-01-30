@@ -18,9 +18,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
         .loader {
             --cloud-color: #4387f4;
-            /* --arrows-color: #2563EB; */
             --time-animation: 1s;
             transform: scale(1.2);
         }
@@ -107,28 +110,34 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900">
-    <div class="min-h-screen flex">
+    <div class="min-h-screen">
         @include('layouts.navigation')
 
-        <!-- Main Content -->
-        <div class="flex-1">
+        <!-- Main Content Wrapper with Dynamic Margin -->
+        <div x-data="{
+            get contentMargin() {
+                return window.sidebarState ? (window.sidebarState.sidebarOpen ? 'ml-64' : 'ml-20') : 'ml-64';
+            }
+        }" :class="contentMargin" class="transition-all duration-300">
+            
             <!-- Page Heading -->
             @isset($header)
-                <header class=" dark:bg-gray-800">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-6">
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
             <!-- Page Content -->
-            <main class="pt-2 pb-8 max-w-8xl mx-auto w-full">
-                {{ $slot }}
+            <main class="pt-6 pb-8 px-2 sm:px-2 lg:px-2 w-full">
+
+                <div class="max-w-7xl mx-auto">
+                    {{ $slot }}
+                </div>
             </main>
         </div>
     </div>
-
-    
 
     @stack('scripts')
 </body>
