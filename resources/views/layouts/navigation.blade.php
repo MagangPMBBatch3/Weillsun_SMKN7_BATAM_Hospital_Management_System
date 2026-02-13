@@ -60,7 +60,7 @@
         </button>
     </div>
 
-    <!-- Navigation Menu -->
+    <!-- Navigation Menu --> 
     <div class="p-4 space-y-2 flex-1">
         <!-- Dashboard Link -->
         <a href="{{ route('dashboard') }}" :title="!sidebarOpen ? 'Dashboard' : ''"

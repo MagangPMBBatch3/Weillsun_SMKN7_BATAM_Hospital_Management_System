@@ -21,7 +21,7 @@ Route::get('/', function () {
 //  Dashboard (redirect by role)
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware('auth')
+    ->middleware('auth', 'verified')
     ->name('dashboard');
 
 //  PROFILE (SEMUA ROLE LOGIN)
