@@ -34,16 +34,62 @@ class JadwalTenagaMedisQuery
         $perPage = $args['first'] ?? 10;
         $page = $args['page'] ?? 1;
 
-        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+        // Get distinct tenaga_medis_id for pagination counting
+        $distinctDoctorsQuery = JadwalTenagaMedis::query();
+
+        if (!empty($args['tenagaMedisId'])) {
+            $distinctDoctorsQuery->where('tenaga_medis_id', $args['tenagaMedisId']);
+        }
+
+        if (!empty($args['search'])) {
+            $search = $args['search'];
+            $distinctDoctorsQuery->where(function ($q) use ($search) {
+                $q->where('tanggal', 'like', "%$search%")
+                    ->orWhere('jam_mulai', 'like', "%$search%")
+                    ->orWhere('jam_selesai', 'like', "%$search%");
+            })
+                ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
+                    $q->where('nickname', 'like', "%$search%");
+                })
+                ->orWhereHas('poli', function ($q) use ($search) {
+                    $q->where('nama_poli', 'like', "%$search%");
+                });
+        }
+
+        // Get paginated distinct doctors
+        $distinctDoctorsIds = $distinctDoctorsQuery
+            ->distinct('tenaga_medis_id')
+            ->pluck('tenaga_medis_id')
+            ->toArray();
+
+        $totalDoctors = count($distinctDoctorsIds);
+        $offset = ($page - 1) * $perPage;
+        $pagedDoctorIds = array_slice($distinctDoctorsIds, $offset, $perPage);
+
+        // Get all schedules for the paginated doctors
+        $data = JadwalTenagaMedis::query();
+
+        if (!empty($args['tenagaMedisId'])) {
+            $data->where('tenaga_medis_id', $args['tenagaMedisId']);
+        }
+
+        if (!empty($pagedDoctorIds)) {
+            $data->whereIn('tenaga_medis_id', $pagedDoctorIds);
+        }
+
+        $schedules = $data->get();
+
+        // Calculate pagination info based on doctors count
+        $lastPage = ceil($totalDoctors / $perPage);
 
         return [
-            'data' => $paginator->items(),
+            'data' => $schedules,
             'paginatorInfo' => [
-                'hasMorePages' => $paginator->hasMorePages(),
-                'currentPage' => $paginator->currentPage(),
-                'lastPage' => $paginator->lastPage(),
-                'perPage' => $paginator->perPage(),
-                'total' => $paginator->total(),
+                'hasMorePages' => $page < $lastPage,
+                'currentPage' => $page,
+                'lastPage' => $lastPage,
+                'perPage' => $perPage,
+                'total' => $totalDoctors,
             ],
         ];
     }
@@ -63,37 +109,5 @@ class JadwalTenagaMedisQuery
             ->toArray();
     }
 
-    public function allArchive($_, array $args)
-    {
-        $query = JadwalTenagaMedis::onlyTrashed();
-
-        if (!empty($args['search'])) {
-            $search = $args['search'];
-
-            $query->where(function ($q) use ($search) {
-                $q->where('tanggal', 'like', "%$search%")
-                    ->orWhere('jam_mulai', 'like', "%$search%")
-                    ->orWhere('jam_selesai', 'like', "%$search%");
-            })
-                ->orWhereHas('tenagaMedis.profile', function ($q) use ($search) {
-                    $q->where('nickname', 'like', "%$search%");
-                });
-        }
-
-        $perPage = $args['first'] ?? 10;
-        $page = $args['page'] ?? 1;
-
-        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
-
-        return [
-            'data' => $paginator->items(),
-            'paginatorInfo' => [
-                'hasMorePages' => $paginator->hasMorePages(),
-                'currentPage' => $paginator->currentPage(),
-                'lastPage' => $paginator->lastPage(),
-                'perPage' => $paginator->perPage(),
-                'total' => $paginator->total(),
-            ],
-        ];
-    }
+    //  
 }

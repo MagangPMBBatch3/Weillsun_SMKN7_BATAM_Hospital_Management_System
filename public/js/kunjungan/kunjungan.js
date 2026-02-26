@@ -597,11 +597,11 @@ document.addEventListener("DOMContentLoaded", () => {
         createTanggalKunjungan.setAttribute("min", today);
     }
     
-    const editTanggalKunjungan = document.getElementById("edit-tanggal-kunjungan");
-    if (editTanggalKunjungan) {
-        const today = new Date().toISOString().split('T')[0];
-        editTanggalKunjungan.setAttribute("min", today);
-    }
+    // const editTanggalKunjungan = document.getElementById("edit-tanggal-kunjungan");
+    // if (editTanggalKunjungan) {
+    //     const today = new Date().toISOString().split('T')[0];
+    //     editTanggalKunjungan.setAttribute("min", today);
+    // }
     
     loadDataPaginate(1, true);
 });
@@ -657,7 +657,7 @@ function renderKunjunganTable(result, tableId, isActive) {
 
                 <button onclick="openKunjunganUlangModal(${item.id}, ${item.poli_id})"
                     class="${baseBtn} bg-amber-100 text-amber-700 hover:bg-amber-200 focus:ring-amber-300">
-                    <i class='bx bx-repeat'></i> Return Visit
+                    <i class='bx bx-repeat'></i> Return
                 </button>
 
                 <button onclick="hapusKunjungan(${item.id})"

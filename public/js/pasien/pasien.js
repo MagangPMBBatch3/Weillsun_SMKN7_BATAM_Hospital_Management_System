@@ -87,6 +87,7 @@ async function loadDataPaginate(page = 1, isActive = true) {
             }),
         });
         const dataActive = await resActive.json();
+        // data akan di tampung di dataActive dan di render ke tabel
         renderPasienTable(
             dataActive?.data?.allPasienPaginate || {},
             "dataPasienAktif",
@@ -126,7 +127,9 @@ async function loadDataPaginate(page = 1, isActive = true) {
                 variables: variablesArchive,
             }),
         });
+
         const dataArchive = await resArchive.json();
+        // data akan di tampung di dataArchive dan di render ke tabel
         renderPasienTable(
             dataArchive?.data?.allPasienArchive || {},
             "dataPasienArsip",

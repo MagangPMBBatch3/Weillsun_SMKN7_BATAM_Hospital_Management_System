@@ -226,11 +226,10 @@ async function createDetailPembayaranPasien() {
         return alert("No rows found! Please add at least one item.");
     }
 
-    // Map rows ke array of prescription objects, lalu filter yang valid
+    // Map rows ke array prescription objects, lalu filter yang valid
     const detailPasien = Array.from(rows)
         .map((row) => {
             try {
-                // Try to get hidden input first, then select
                 const tipoHiddenInput = row.querySelector(
                     'input[type="hidden"][name="create-tipe-biaya[]"]',
                 );
@@ -383,6 +382,7 @@ async function createDetailPembayaranPasien() {
             // Tambahkan pembayaran_id ke setiap item
             const input = {
                 pembayaran_id,
+                // Spread operator (...)
                 ...item,
             };
 
@@ -1111,7 +1111,7 @@ function renderDetailPembayaranPasienTable(result, containerId, isActive) {
     if (prevBtn) prevBtn.disabled = (pageInfo.currentPage || 1) <= 1;
     if (nextBtn) nextBtn.disabled = !pageInfo.hasMorePages;
 }
-
+ 
 // Hapus
 async function hapusDetailPembayaranPasien(id) {
     if (!confirm("Are you sure you want to add to the archive??")) return;

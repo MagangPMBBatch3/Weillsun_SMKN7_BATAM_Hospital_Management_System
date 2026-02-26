@@ -74,23 +74,31 @@ function filterAngka(str) {
 
 function getSelectedStok(selectEl) {
     if (!selectEl) return 0;
+    // Ambil pilihan yang lagi dipilih
     const option = selectEl.options[selectEl.selectedIndex];
     return parseInt(option?.dataset?.stok || 0);
 }
 
 // ============================================================================
-// OBAT OPTIONS UPDATE
+// Biar obat yang sudah dipilih tidak bisa dipilih lagi di dropdown lain
 // ============================================================================
 
 function updateObatOptions() {
     const selects = document.querySelectorAll('#dynamic-container select[name="create-nama-obat[]"]');
+    // Ubah daftar dropdown jadi array (biar bisa diproses)
     const selectedValues = Array.from(selects)
+        // Ambil nilai obat dari tiap dropdown (termasuk yang kosong)
         .map((s) => s.value)
+        // buang yang kosong (belum dipilih)
         .filter((v) => v !== "");
 
     selects.forEach((select) => {
+
+        // Obat yang dipilih tetap boleh tampil
+        // Tapi tidak boleh muncul di dropdown lain
         const currentValue = select.value;
 
+        // Sekarang cek semua pilihan (option) di dropdown ini
         Array.from(select.options).forEach((option) => {
             if (!option.value) return;
 
@@ -280,6 +288,7 @@ async function createResepObat() {
             return;
         }
 
+        // Masukkan obat ini ke daftar resep
         prescriptions.push({
             obat_id,
             jumlah,
@@ -466,7 +475,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const editJumlahInput = document.getElementById("edit-jumlah");
     const dynamicContainer = document.getElementById("dynamic-container");
 
-    // Event delegation for dynamic inputs
     dynamicContainer.addEventListener("input", (e) => {
         if (e.target.name === "create-jumlah[]") {
             let value = unformatNumber(filterAngka(e.target.value));
@@ -496,6 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function renderResepObatTable(result, tableId, isActive) {
     const tbody = document.getElementById(tableId);
+    // Kosongkan isi tabel dulu, biar tidak double render
     tbody.innerHTML = "";
 
     const items = result.data || [];
@@ -517,6 +526,7 @@ function renderResepObatTable(result, tableId, isActive) {
     const grouped = items.reduce((acc, item) => {
         const key = `${item.pasien_id}-${item.tenaga_medis_id}`;
 
+        // kalo tak ada grupnya, buat baru..
         if (!acc[key]) {
             acc[key] = {
                 ids: [],
